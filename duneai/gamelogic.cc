@@ -8,7 +8,7 @@
 #include "gamelogic.h"
 
 #include <algorithm>
-#include <thread>
+#include "arrakis.h"
 
 std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 {
@@ -307,17 +307,14 @@ GameLogic::getPlayerState(GameState& game, Faction faction)
 int main()
 {
 	GameLogic game(4004030159);
-	for (int i = 0; i < 3; ++i)
-	{
-		game.tick();
-		game.post(std::make_unique<ActionPrediction>(Faction::beneGesserit(), Faction::atreides(), 5));
-		game.post(std::make_unique<ActionTraitorSelection>(Faction::beneGesserit(), Leader::Piter));
-		game.post(std::make_unique<ActionTraitorSelection>(Faction::atreides(), Leader::Esmar));
-		game.post(std::make_unique<ActionTraitorSelection>(Faction::spacingGuild(), Leader::Stilgar));
-		game.post(std::make_unique<ActionTraitorSelection>(Faction::emperor(), Leader::Alia));
-		game.post(std::make_unique<ActionTraitorSelection>(Faction::fremen(), Leader::Yueh));
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
+	game.post(std::make_unique<ActionPrediction>(Faction::beneGesserit(), Faction::atreides(), 5));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::beneGesserit(), Leader::Piter));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::atreides(), Leader::Esmar));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::spacingGuild(), Leader::Stilgar));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::emperor(), Leader::Alia));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::fremen(), Leader::Yueh));
+
+	game.tick();
 	return 0;
 }
 
