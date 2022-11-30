@@ -99,6 +99,7 @@ public:
 
     static void reachable(AreaId from, int storm, int movement, std::vector<AreaId>& result);
     static bool insideStorm(AreaId id, int storm);
+    static bool fremenInitArea(AreaId id);
 
     static const char* areaName(AreaId id);
 private:

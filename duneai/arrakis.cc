@@ -652,6 +652,22 @@ bool Arrakis::insideStorm(AreaId id, int storm)
 	return p_area->sector == storm;
 }
 
+bool Arrakis::fremenInitArea(AreaId id)
+{
+	switch (id)
+	{
+	case SietchTabr:
+	case FalseWallSouth_4:
+	case FalseWallSouth_5:
+	case FalseWallWest_16:
+	case FalseWallWest_17:
+	case FalseWallWest_18:
+		return true;
+	default:
+		return false;
+	}
+}
+
 const Arrakis::Area* Arrakis::getArea(AreaId id)
 {
 	auto it = std::find_if(areas.cbegin(), areas.cend(),

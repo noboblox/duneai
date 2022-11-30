@@ -50,6 +50,7 @@ public:
 		PHASE_INIT_PREDICTION = PHASE_INIT_begin,
 		PHASE_INIT_TRAITOR_SELECTION,
 		PHASE_INIT_FREMEN_PLACEMENT,
+		PHASE_INIT_BG_PLACEMENT,
 		PHASE_INIT_end    = 1000,
 
 		PHASE_STORM_begin = PHASE_INIT_end,
@@ -122,6 +123,7 @@ private:
 
 		TraitorDeck traitors;
 		std::vector<PlayerState> players;
+		std::vector<ForcesFrom> forces;
 	};
 
 	struct AllowedAction
@@ -141,6 +143,7 @@ private:
 	bool expected(GameState& game, Faction faction);
 	bool phaseInitPrediction(GameState& game, const Action& action);
 	bool phaseInitTraitorSelect(GameState& game, const Action& action);
+	bool phaseInitFremenPlacement(GameState& game, const Action& action);
 
 	void advance(GameState& game, GamePhase next);
 	void drawTraitors(GameState& game);

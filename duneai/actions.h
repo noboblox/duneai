@@ -4,14 +4,17 @@
 #include <vector>
 #include <utility>
 
+#include "arrakis.h"
 #include "enumlabels.h"
 #include "gameconstants.h"
+#include "gamedata.h"
 
 enum ActionType
 {
 	ACTION_PREDICT,
 	ACTION_TRAITOR_SELECTION,
 	ACTION_FREMEN_PLACEMENT,
+	ACTION_BENE_GESSERIT_PLACEMENT,
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
 
@@ -66,15 +69,13 @@ public:
 class ActionFremenPlacement : public Action
 {
 public:
-	using Placement = std::vector<std::pair<int, int>>;
-
-	explicit ActionFremenPlacement(Faction aFrom, const Placement& aPlacement)
+	explicit ActionFremenPlacement(Faction aFrom, const std::vector<Placement>& aPlacements)
 	: Action(aFrom, ACTION_FREMEN_PLACEMENT),
-	  placement(aPlacement)
+	  placements(aPlacements)
 	{
 	}
 
-	const Placement placement;
+	const std::vector<Placement> placements;
 };
 
 #endif /* ACTIONS_H_ */

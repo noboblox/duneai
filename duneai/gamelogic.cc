@@ -8,13 +8,16 @@
 #include "gamelogic.h"
 
 #include <algorithm>
+#include <map>
 #include "arrakis.h"
+#include "gamedata.h"
 
 std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 {
 	{PHASE_INIT_PREDICTION,        true, Faction::beneGesserit(),                  ACTION_PREDICT},
 	{PHASE_INIT_TRAITOR_SELECTION, true, Faction::anyExcept(Faction::harkonnen()), ACTION_TRAITOR_SELECTION},
-	{PHASE_INIT_FREMEN_PLACEMENT,  true, Faction::fremen(),                        ACTION_FREMEN_PLACEMENT}
+	{PHASE_INIT_FREMEN_PLACEMENT,  true, Faction::fremen(),                        ACTION_FREMEN_PLACEMENT},
+	{PHASE_INIT_BG_PLACEMENT,      true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_PLACEMENT}
 };
 
 template<>
@@ -22,7 +25,8 @@ std::unordered_map<GameLogic::GamePhase, const char*> GameLogic::GamePhaseLabels
 {
 	{GameLogic::PHASE_INIT_PREDICTION,        "init.prediction"},
 	{GameLogic::PHASE_INIT_TRAITOR_SELECTION, "init.traitorSelection"},
-	{GameLogic::PHASE_INIT_FREMEN_PLACEMENT,  "init.fremenPlacement"}
+	{GameLogic::PHASE_INIT_FREMEN_PLACEMENT,  "init.fremenPlacement"},
+	{GameLogic::PHASE_INIT_BG_PLACEMENT,      "init.beneGesseritPlacement"}
 };
 
 GameLogic::GameLogic(Faction factionsInGame)
@@ -76,6 +80,8 @@ void GameLogic::advance(GameState& game, GamePhase next)
 
 	if (it != msAllowedActions.end())
 		mGame.expectingInputFrom = it->who;
+	else
+		mGame.expectingInputFrom = Faction::none();
 
 	mGame.phase = next;
 	log->info("advance game -> %s | input required from %s", GamePhaseLabels::label(game.phase), mGame.expectingInputFrom.label().c_str());
@@ -183,14 +189,81 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 	if (game.expectingInputFrom == Faction::none())
 	{
 		if (factionAvailable(game, Faction::fremen()))
-		{
 			advance(game, PHASE_INIT_FREMEN_PLACEMENT);
-		}
+		else if (factionAvailable(game, Faction::beneGesserit()))
+			advance(game, PHASE_INIT_BG_PLACEMENT);
 		else
-		{
-			game.phase = PHASE_INIT_end;
-		}
+			advance(game, PHASE_INIT_end);
 	}
+
+	return true;
+}
+
+bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
+{
+	if (action.type() != ACTION_FREMEN_PLACEMENT)
+		return false;
+	if (!expected(game, action.from()))
+		return false;
+
+	auto* state = getPlayerState(game, action.from());
+	if (state == nullptr)
+		return false;
+
+	const auto& ac = static_cast<const ActionFremenPlacement&> (action);
+
+	int sum_normals = 0;
+	int sum_specials = 0;
+
+	for (const auto& p : ac.placements)
+	{
+		if (!Arrakis::fremenInitArea(p.where))
+		{
+			log->warn("area %s is not a fremen init area", Arrakis::areaName(p.where));
+			return false;
+		}
+
+		sum_normals += p.normal;
+		sum_specials += p.special;
+	}
+
+	if (sum_normals + sum_specials != 10)
+	{
+		log->warn("sum of tokens to place %u != 10", sum_normals + sum_specials);
+		return false;
+	}
+
+	if (sum_specials > state->specialForcesReserve)
+	{
+		log->warn("sum of fedaykin tokens to place %u > %u", sum_specials, state->specialForcesReserve);
+		return false;
+	}
+
+	std::map<Arrakis::AreaId, ForcesFrom> toPlace;
+
+	for (const auto& p : ac.placements)
+	{
+		auto& value = toPlace[p.where];
+		value.from = ac.from();
+		value.forces.where = p.where;
+
+		value.forces.normal += p.normal;
+		value.forces.special += p.special;
+	}
+
+	for (const auto& p : toPlace)
+	{
+		game.forces.push_back(p.second);
+		state->reserve -= p.second.forces.normal;
+		state->specialForcesReserve -= p.second.forces.special;
+		log->info("add %u normals and %u fedaykin to area %s", p.second.forces.normal, p.second.forces.special, Arrakis::areaName(p.second.forces.where));
+		log->info("fremen now has %u normals and %u fedaykin in reserve", state->reserve, state->specialForcesReserve);
+	}
+
+	if (factionAvailable(game, Faction::beneGesserit()))
+		advance(game, PHASE_INIT_BG_PLACEMENT);
+	else
+		advance(game, PHASE_INIT_end);
 
 	return true;
 }
@@ -250,6 +323,8 @@ bool GameLogic::gameAction(GameState& game, const Action& action)
 		return phaseInitPrediction(game, action);
 	case PHASE_INIT_TRAITOR_SELECTION:
 		return phaseInitTraitorSelect(game, action);
+	case PHASE_INIT_FREMEN_PLACEMENT:
+		return phaseInitFremenPlacement(game, action);
 	default:
 		return false;
 	}
@@ -349,6 +424,22 @@ int main()
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::atreides(),     Leader::ID_Feyd));
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::beneGesserit(), Leader::ID_Duncan));
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::tleilaxu(),     Leader::ID_Wanna));
+
+	// fail
+//	game.post(std::make_unique<ActionFremenPlacement>(Faction::fremen(), std::vector<Placement>{Placement{Arrakis::FalseWallSouth_5,105, 3},
+//			                                                                                    Placement{Arrakis::FalseWallWest_18, 1, 6}}));
+
+	// fail
+//	game.post(std::make_unique<ActionFremenPlacement>(Faction::fremen(), std::vector<Placement>{Placement{Arrakis::FalseWallSouth_5, 1, 2},
+//			                                                                                    Placement{Arrakis::FalseWallWest_18, 1, 6}}));
+	// fail
+//	game.post(std::make_unique<ActionFremenPlacement>(Faction::fremen(), std::vector<Placement>{Placement{Arrakis::FalseWallSouth_5,105, 3},
+//			                                                                                    Placement{Arrakis::TheGreatFlat, 1, 6}}));
+
+	// success
+	game.post(std::make_unique<ActionFremenPlacement>(Faction::fremen(), std::vector<Placement>{Placement{Arrakis::FalseWallSouth_5, 5, 3},
+			                                                                                    Placement{Arrakis::FalseWallWest_18, 1, 1}}));
+
 
 	game.tick();
 	return 0;
