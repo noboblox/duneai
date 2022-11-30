@@ -2,13 +2,33 @@
 #define GAMECONSTANTS_H_
 
 #include <string>
+#include <vector>
 
-static constexpr int SEAT_A = 2;
-static constexpr int SEAT_B = 5;
-static constexpr int SEAT_C = 8;
-static constexpr int SEAT_D = 11;
-static constexpr int SEAT_E = 14;
-static constexpr int SEAT_F = 17;
+class SeatConfig
+{
+public:
+	static const std::vector<int>& getConfig(int players)
+	{
+		if (players < 2 || players > 10)
+			return INVALID;
+		else
+			return *(configs[players]);
+	}
+
+private:
+	static const std::vector<int> INVALID     ;
+	static const std::vector<int> twoPlayers  ;
+	static const std::vector<int> threePlayers;
+	static const std::vector<int> fourPlayers ;
+	static const std::vector<int> fivePlayers ;
+	static const std::vector<int> sixPlayers  ;
+	static const std::vector<int> sevenPlayers;
+	static const std::vector<int> eightPlayers;
+	static const std::vector<int> ninePlayers ;
+	static const std::vector<int> tenPlayers  ;
+
+	static const std::vector<int>* const configs[];
+};
 
 class Faction
 {
@@ -19,10 +39,12 @@ public:
 	static constexpr Faction atreides()                  { return Faction(CODE_ATREIDES); }
 	static constexpr Faction harkonnen()                 { return Faction(CODE_HARKONNEN); }
 	static constexpr Faction beneGesserit()              { return Faction(CODE_BENE_GESSERIT); }
+	static constexpr Faction tleilaxu()                  { return Faction(CODE_TLEILAXU); }
 
 	static constexpr Faction none()                      { return Faction(CODE_NONE); }
 	static constexpr Faction any()                       { return Faction(CODE_ANY); }
 	static constexpr Faction anyExcept(Faction excluded) { return Faction(any().mValue & (~excluded.mValue)); }
+	static std::vector<Faction> expand(Faction mask);
 
 	std::string label() const
 	{
@@ -51,7 +73,7 @@ public:
 		return o;
 	}
 
-	Faction(const Faction& other)
+	constexpr Faction(const Faction& other)
 	: mValue(other.mValue)
 	{
 	}
@@ -84,7 +106,7 @@ public:
 	}
 
 private:
-	static constexpr int CODE_ANY           = 0x003F;
+	static constexpr int CODE_ANY           = 0x007F;
 	static constexpr int CODE_NONE          = 0;
 
 	static constexpr int CODE_EMPEROR       = 0x0001;
@@ -93,6 +115,7 @@ private:
 	static constexpr int CODE_ATREIDES      = 0x0008;
 	static constexpr int CODE_HARKONNEN     = 0x0010;
 	static constexpr int CODE_BENE_GESSERIT = 0x0020;
+	static constexpr int CODE_TLEILAXU      = 0x0040;
 
 	static const char* codeLabel(Faction value)
 	{
@@ -106,6 +129,7 @@ private:
 		case CODE_ATREIDES     : return "atreides";
 		case CODE_HARKONNEN    : return "harkonnen";
 		case CODE_BENE_GESSERIT: return "beneGesserit";
+		case CODE_TLEILAXU     : return "tleilaxu";
 		default:                 return "UNDEFINED";
 		}
 	}
@@ -115,49 +139,82 @@ private:
 };
 
 
-enum Leader
+class Leader
 {
-	LEADERS_begin,
+public:
+	enum Id
+	{
+		LEADERS_begin = 0,
 
-	Yueh   = LEADERS_begin, //ATREIDES
-	Duncan , //ATREIDES
-	Gurney , //ATREIDES
-	Thufir , //ATREIDES
-	Jessica, //ATREIDES
+		ID_Yueh   = LEADERS_begin, //ATREIDES
+		ID_Duncan , //ATREIDES
+		ID_Gurney , //ATREIDES
+		ID_Thufir , //ATREIDES
+		ID_Jessica, //ATREIDES
 
-	Alia   , //BENE_GESSERIT
-	Wanna  , //BENE_GESSERIT
-	Irulan , //BENE_GESSERIT
-	Margot , //BENE_GESSERIT
-	Ramallo, //BENE_GESSERIT
+		ID_Alia   , //BENE_GESSERIT
+		ID_Wanna  , //BENE_GESSERIT
+		ID_Irulan , //BENE_GESSERIT
+		ID_Margot , //BENE_GESSERIT
+		ID_Ramallo, //BENE_GESSERIT
 
-	Kudu   , //HARKONNEN
-	Nefud  , //HARKONNEN
-	Piter  , //HARKONNEN
-	Rabban , //HARKONNEN
-	Feyd   , //HARKONNEN
+		ID_Kudu   , //HARKONNEN
+		ID_Nefud  , //HARKONNEN
+		ID_Piter  , //HARKONNEN
+		ID_Rabban , //HARKONNEN
+		ID_Feyd   , //HARKONNEN
 
-	Bashar , //EMPEROR
-	Burseg , //EMPEROR
-	Caid   , //EMPEROR
-	Aramsha, //EMPEROR
-	Fenring, //EMPEROR
+		ID_Bashar , //EMPEROR
+		ID_Burseg , //EMPEROR
+		ID_Caid   , //EMPEROR
+		ID_Aramsha, //EMPEROR
+		ID_Fenring, //EMPEROR
 
-	Repr   , //SPACING_GUILD
-	Sook   , //SPACING_GUILD
-	Esmar  , //SPACING_GUILD
-	Bewt   , //SPACING_GUILD
-	Staban , //SPACING_GUILD
+		ID_Repr   , //SPACING_GUILD
+		ID_Sook   , //SPACING_GUILD
+		ID_Esmar  , //SPACING_GUILD
+		ID_Bewt   , //SPACING_GUILD
+		ID_Staban , //SPACING_GUILD
 
-	Jamis  , //FREMEN
-	Mapes  , //FREMEN
-	Otheym , //FREMEN
-	Chani  , //FREMEN
-	Stilgar, //FREMEN
+		ID_Jamis  , //FREMEN
+		ID_Mapes  , //FREMEN
+		ID_Otheym , //FREMEN
+		ID_Chani  , //FREMEN
+		ID_Stilgar, //FREMEN
 
-	LEADERS_end
+		ID_Zoal   , //TLEILAXU
+		ID_Hidar  , //TLEILAXU
+		ID_Zaaf   , //TLEILAXU
+		ID_Wykk   , //TLEILAXU
+		ID_Blin   , //TLEILAXU
+
+		LEADERS_end
+	};
+
+	static const Leader INVALID;
+
+	static const Leader& leader(Leader::Id id)
+	{
+		if (id < LEADERS_end)
+			return leaders[id];
+		else
+			return INVALID;
+	}
+
+	Id id() const noexcept { return mId; }
+	Faction faction() const noexcept { return mFaction; }
+
+private:
+	static const Leader leaders[];
+
+	constexpr Leader(Id id, Faction faction)
+	: mId(id), mFaction(faction)
+	{
+	}
+
+	const Id mId;
+	const Faction mFaction;
 };
-
 
 enum TreacheryCard
 {

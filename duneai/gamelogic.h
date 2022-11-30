@@ -20,8 +20,8 @@
 class GameLogic
 {
 public:
-	explicit GameLogic();
-	explicit GameLogic(unsigned aSeed);
+	explicit GameLogic(Faction factionsInGame);
+	explicit GameLogic(Faction factionsInGame, unsigned aSeed);
 
 	/**
 	 * @brief update the game including evaluation of posted action
@@ -44,7 +44,9 @@ public:
 	/// enum containing all stages of the game
 	enum GamePhase
 	{
-		PHASE_INIT_begin = 0,
+		PHASE_invalid    = 0,
+
+		PHASE_INIT_begin = 1,
 		PHASE_INIT_PREDICTION = PHASE_INIT_begin,
 		PHASE_INIT_TRAITOR_SELECTION,
 		PHASE_INIT_FREMEN_PLACEMENT,
@@ -64,22 +66,29 @@ private:
 	{
 	public:
 		explicit TraitorDeck() : mpRandom(nullptr) {}
-		explicit TraitorDeck(std::mt19937& random);
+		explicit TraitorDeck(Faction factionsInGame, std::mt19937& random);
 
-		Leader draw();
-		Leader peek() const noexcept;
-		void discard(Leader card);
+		Leader::Id draw();
+		Leader::Id peek() const noexcept;
+		void discard(Leader::Id card);
 		void reshuffle();
 
 	private:
 		std::mt19937* mpRandom;
-		std::vector<Leader> drawPile;
-		std::vector<Leader> discardPile;
-		std::vector<Leader> drawn;
+		std::vector<Leader::Id> drawPile;
+		std::vector<Leader::Id> discardPile;
+		std::vector<Leader::Id> drawn;
 	};
 
 	struct PlayerState
 	{
+		static PlayerState create(int aSeat, Faction aFaction);
+
+		PlayerState()
+		: seat(0), faction(Faction::none()), spice(0), reserve(0), specialForcesReserve(0)
+		{
+		}
+
 		PlayerState(int aSeat, Faction aFaction, int aSpice, int aReserve, int aSpecialForces)
 		: seat(aSeat), faction(aFaction), spice(aSpice), reserve(aReserve), specialForcesReserve(aSpecialForces)
 		{
@@ -92,10 +101,11 @@ private:
 		int reserve;
 		int specialForcesReserve;
 
-		std::vector<Leader> alive;
-		std::vector<Leader> selectedTraitors;
-		std::vector<Leader> discardedTraitors;
+		std::vector<Leader::Id> alive;
+		std::vector<Leader::Id> selectedTraitors;
+		std::vector<Leader::Id> discardedTraitors;
 		std::vector<TreacheryCard> hand;
+
 	};
 
 	struct GameState
@@ -104,7 +114,7 @@ private:
 		unsigned int seed = 0;
 		std::mt19937 random;
 
-		GamePhase phase = PHASE_INIT_begin;
+		GamePhase phase = PHASE_invalid;
 		Faction expectingInputFrom = Faction::none();
 
 		int predictedTurn = 0;
@@ -123,7 +133,7 @@ private:
 	};
 
 private:
-	void Init(GameState& game, unsigned aSeed);
+	void Init(GameState& game, Faction factionsInGame, unsigned aSeed);
 
 	bool gameAction(GameState& game, const Action& action);
 

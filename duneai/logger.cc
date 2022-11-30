@@ -8,7 +8,7 @@
 #include "logger.h"
 #include <cstdarg>
 #include <cstdio>
-#include <iostream>
+
 void StdoutLogger::crit(const char* format, ...) const
 {
 	va_list args;

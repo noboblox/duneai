@@ -25,20 +25,18 @@ std::unordered_map<GameLogic::GamePhase, const char*> GameLogic::GamePhaseLabels
 	{GameLogic::PHASE_INIT_FREMEN_PLACEMENT,  "init.fremenPlacement"}
 };
 
-GameLogic::GameLogic()
+GameLogic::GameLogic(Faction factionsInGame)
 : log(new StdoutLogger())
 {
 	std::random_device rd;
-	Init(mGame, rd());
+	Init(mGame, factionsInGame, rd());
 }
 
-GameLogic::GameLogic(unsigned aSeed)
+GameLogic::GameLogic(Faction factionsInGame, unsigned aSeed)
 : log(new StdoutLogger())
 {
-	Init(mGame, aSeed);
+	Init(mGame, factionsInGame, aSeed);
 }
-
-#include <cstdio>
 
 void GameLogic::tick()
 {
@@ -88,7 +86,7 @@ void GameLogic::drawTraitors(GameState& game)
 	auto& deck = game.traitors;
 	for (auto& player : game.players)
 	{
-		Leader drawn[4] = {
+		Leader::Id drawn[4] = {
 			deck.draw(),
 			deck.draw(),
 			deck.draw(),
@@ -202,21 +200,36 @@ bool GameLogic::expected(GameState& game, Faction faction)
 	return game.expectingInputFrom.contains(faction);
 }
 
-void GameLogic::Init(GameState& game, unsigned aSeed)
+void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 {
-	// Phase 0: INIT
-	mGame.players.push_back(PlayerState(SEAT_A, Faction::spacingGuild(),  10, 20, 0));
-	mGame.players.push_back(PlayerState(SEAT_B, Faction::emperor(),       10, 15, 5));
-	mGame.players.push_back(PlayerState(SEAT_C, Faction::atreides(),      10, 20, 0));
-	mGame.players.push_back(PlayerState(SEAT_D, Faction::harkonnen(),     10, 20, 0));
-	mGame.players.push_back(PlayerState(SEAT_E, Faction::fremen(),        10, 15, 5));
-	mGame.players.push_back(PlayerState(SEAT_F, Faction::beneGesserit(),  10, 20, 0));
+	const auto factions = Faction::expand(factionsInGame);
+
+	if (factions.size() < 2)
+	{
+		log->crit("cannot instantiate games with less than 2 players");
+		return;
+	}
+	if (factions.size() > 10)
+	{
+		log->crit("cannot instantiate games with more than 10 players");
+		return;
+	}
 
 	mGame.seed = aSeed;
 	mGame.random = std::mt19937(mGame.seed);
-	mGame.traitors = TraitorDeck(mGame.random);
-
 	log->info("set up game with seed %u", mGame.seed);
+
+	std::vector<int> seats = SeatConfig::getConfig(factions.size());
+	std::shuffle(seats.begin(), seats.end(), mGame.random);
+
+	for (size_t i = 0; i < factions.size(); ++i)
+	{
+		mGame.players.push_back(PlayerState::create(seats[i], factions[i]));
+		log->info("player %s at position %u", mGame.players.back().faction.label().c_str(), mGame.players.back().seat);
+	}
+
+	mGame.traitors = TraitorDeck(Faction::anyExcept(Faction::tleilaxu()), mGame.random);
+
 
 	drawTraitors(mGame);
 
@@ -247,18 +260,18 @@ void GameLogic::record(std::unique_ptr<const Action>&& action)
 	mRecorded.push_back(std::move(action));
 }
 
-GameLogic::TraitorDeck::TraitorDeck(std::mt19937& random)
+GameLogic::TraitorDeck::TraitorDeck(Faction factionsInGame, std::mt19937& random)
 : mpRandom(&random)
 {
-	for (int i = static_cast<int> (LEADERS_begin); i < LEADERS_end; ++i)
+	for (int i = static_cast<int> (Leader::LEADERS_begin); i < Leader::LEADERS_end; ++i)
 	{
-		drawPile.push_back(static_cast<Leader> (i));
+		drawPile.push_back(static_cast<Leader::Id> (i));
 	}
 
     std::shuffle(drawPile.begin(), drawPile.end(), random);
 }
 
-Leader GameLogic::TraitorDeck::draw()
+Leader::Id GameLogic::TraitorDeck::draw()
 {
 	if (drawPile.empty())
 		reshuffle();
@@ -268,12 +281,12 @@ Leader GameLogic::TraitorDeck::draw()
 	return drawn.back();
 }
 
-Leader GameLogic::TraitorDeck::peek() const noexcept
+Leader::Id GameLogic::TraitorDeck::peek() const noexcept
 {
 	return drawPile.back();
 }
 
-void GameLogic::TraitorDeck::discard(Leader card)
+void GameLogic::TraitorDeck::discard(Leader::Id card)
 {
 	for (auto it = drawn.begin(); it < drawn.end(); ++it)
 	{
@@ -304,15 +317,38 @@ GameLogic::getPlayerState(GameState& game, Faction faction)
 		return nullptr;
 }
 
+GameLogic::PlayerState GameLogic::PlayerState::create(int aSeat, Faction aFaction)
+{
+	if (aFaction == Faction::emperor())
+		return PlayerState(aSeat, Faction::emperor(),       10, 15, 5);
+	if (aFaction == Faction::spacingGuild())
+		return PlayerState(aSeat, Faction::spacingGuild(),  5,  20, 0);
+	if (aFaction == Faction::atreides())
+		return PlayerState(aSeat, Faction::atreides(),      10, 20, 0);
+	if (aFaction == Faction::harkonnen())
+		return PlayerState(aSeat, Faction::harkonnen(),     10, 20, 0);
+	if (aFaction == Faction::fremen())
+		return PlayerState(aSeat, Faction::fremen(),        3,  15, 5);
+	if (aFaction == Faction::beneGesserit())
+		return PlayerState(aSeat, Faction::beneGesserit(),  5,  20, 0);
+	if (aFaction == Faction::tleilaxu())
+		return PlayerState(aSeat, Faction::tleilaxu(),      5,  20, 0);
+	else
+		return PlayerState();
+}
+
+
 int main()
 {
-	GameLogic game(4004030159);
+	GameLogic game(Faction::any(), 4004030159);
 	game.post(std::make_unique<ActionPrediction>(Faction::beneGesserit(), Faction::atreides(), 5));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::beneGesserit(), Leader::Piter));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::atreides(), Leader::Esmar));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::spacingGuild(), Leader::Stilgar));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::emperor(), Leader::Alia));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::fremen(), Leader::Yueh));
+
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::emperor(),      Leader::ID_Irulan));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::spacingGuild(), Leader::ID_Burseg));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::fremen(),       Leader::ID_Alia));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::atreides(),     Leader::ID_Feyd));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::beneGesserit(), Leader::ID_Duncan));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::tleilaxu(),     Leader::ID_Wanna));
 
 	game.tick();
 	return 0;

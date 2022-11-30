@@ -54,13 +54,13 @@ public:
 class ActionTraitorSelection : public Action
 {
 public:
-	explicit ActionTraitorSelection(Faction aFrom, Leader aSelection)
+	explicit ActionTraitorSelection(Faction aFrom, Leader::Id aSelection)
 	: Action(aFrom, ACTION_TRAITOR_SELECTION),
 	  selection(aSelection)
 	{
 	}
 
-	const Leader selection;
+	const Leader::Id selection;
 };
 
 class ActionFremenPlacement : public Action
