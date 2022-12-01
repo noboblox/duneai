@@ -44,15 +44,14 @@ public:
 private:
 	void Init(GameState& game, Faction factionsInGame, unsigned aSeed);
 
-	bool isAllowedAction(GameState& game, const Action& action);
-	bool expected(GameState& game, Faction faction);
-
 	bool gameAction(GameState& game, const Action& action);
 	bool phaseInitPrediction(GameState& game, const Action& action);
 	bool phaseInitHarkonnenRedraw(GameState& game, const Action& action);
 	bool phaseInitTraitorSelect(GameState& game, const Action& action);
 	bool phaseInitFremenPlacement(GameState& game, const Action& action);
 
+	bool isAllowedAction(GameState& game, const Action& action);
+	bool expected(GameState& game, Faction faction);
 	void advance(GameState& game, GamePhase next);
 	void drawTraitors(GameState& game, PlayerState& player);
     bool factionAvailable(GameState& game, Faction faction);
