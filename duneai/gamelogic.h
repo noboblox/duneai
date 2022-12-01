@@ -57,6 +57,7 @@ private:
 	void drawTraitors(GameState& game, PlayerState& player);
     bool factionAvailable(GameState& game, Faction faction);
     bool harkonnenMayRedraw(GameState& game);
+    void placeStaticStartForces(GameState& game);
     void record(std::unique_ptr<const Action>&& action);
     PlayerState* getPlayerState(GameState& game, Faction faction);
     template <typename A> const A* expectedAction(GameState& game, const Action& action, ActionType type);

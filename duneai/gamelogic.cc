@@ -160,8 +160,14 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 	if (game.expectingInputFrom == Faction::none())
 	{
 		if (factionAvailable(game, Faction::fremen()))
+		{
 			advance(game, PHASE_INIT_FREMEN_PLACEMENT);
-		else if (factionAvailable(game, Faction::beneGesserit()))
+			return true;
+		}
+
+		placeStaticStartForces(game);
+
+		if (factionAvailable(game, Faction::beneGesserit()))
 			advance(game, PHASE_INIT_BG_PLACEMENT);
 		else
 			advance(game, PHASE_INIT_end);
@@ -213,6 +219,8 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 		log->info("add %u normals and %u fedaykin to area %s", p.normal, p.special, Arrakis::areaName(p.where));
 		log->info("fremen now has %u normals and %u fedaykin in reserve", state->reserve, state->specialForcesReserve);
 	}
+
+	placeStaticStartForces(game);
 
 	if (factionAvailable(game, Faction::beneGesserit()))
 		advance(game, PHASE_INIT_BG_PLACEMENT);
@@ -358,6 +366,28 @@ bool GameLogic::harkonnenMayRedraw(GameState& game)
 	}
 
 	return own > 1;
+}
+
+void GameLogic::placeStaticStartForces(GameState& game)
+{
+	auto& board = game.board;
+	PlayerState* player = nullptr;
+
+	if ((player = getPlayerState(game, Faction::harkonnen())) != nullptr)
+	{
+		board.placeHostile(player->faction, Placement{Carthag, 10, 0});
+		player->reserve -= 10;
+	}
+	if ((player = getPlayerState(game, Faction::atreides())) != nullptr)
+	{
+		board.placeHostile(player->faction, Placement{Arrakeen, 10, 0});
+		player->reserve -= 10;
+	}
+	if ((player = getPlayerState(game, Faction::spacingGuild())) != nullptr)
+	{
+		board.placeHostile(player->faction, Placement{TueksSietch, 5, 0});
+		player->reserve -= 5;
+	}
 }
 
 bool GameLogic::isAllowedAction(GameState& game, const Action& action)
