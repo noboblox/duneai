@@ -12,12 +12,12 @@
 enum ActionType
 {
 	ACTION_PREDICT,
+	ACTION_HARKONNEN_REDRAW,
 	ACTION_TRAITOR_SELECTION,
 	ACTION_FREMEN_PLACEMENT,
 	ACTION_BENE_GESSERIT_PLACEMENT,
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
-
 
 class Action
 {
@@ -76,6 +76,18 @@ public:
 	}
 
 	const std::vector<Placement> placements;
+};
+
+class ActionHarkonnenRedraw : public Action
+{
+public:
+	explicit ActionHarkonnenRedraw(Faction aFrom, bool aValue)
+	: Action(aFrom, ACTION_HARKONNEN_REDRAW),
+	  redraw(aValue)
+	{
+	}
+
+	const bool redraw;
 };
 
 #endif /* ACTIONS_H_ */

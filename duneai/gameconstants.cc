@@ -37,6 +37,8 @@ const Leader Leader::leaders[] = {
 	Leader(ID_Wykk   , Faction::tleilaxu()),
 	Leader(ID_Blin   , Faction::tleilaxu())};
 
+const Leader Leader::INVALID = Leader(Leader::LEADERS_end, Faction::none());
+
 const std::vector<int> SeatConfig::INVALID      = {};
 const std::vector<int> SeatConfig::twoPlayers   = {2, 11};
 const std::vector<int> SeatConfig::threePlayers = {2, 8, 14};
@@ -60,6 +62,16 @@ const std::vector<int>* const SeatConfig::configs[] = {
 		&eightPlayers,
 		&ninePlayers ,
 		&tenPlayers};
+
+template<>
+std::unordered_map<GamePhase, const char*> GamePhaseLabels::labels =
+{
+	{PHASE_INIT_PREDICTION,        "init.prediction"},
+	{PHASE_INIT_HARKONNEN_REDRAW,  "init.harkonnenRedraw"},
+	{PHASE_INIT_TRAITOR_SELECTION, "init.traitorSelection"},
+	{PHASE_INIT_FREMEN_PLACEMENT,  "init.fremenPlacement"},
+	{PHASE_INIT_BG_PLACEMENT,      "init.beneGesseritPlacement"}
+};
 
 std::vector<Faction> Faction::expand(Faction mask)
 {

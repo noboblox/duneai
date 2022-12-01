@@ -15,18 +15,10 @@
 std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 {
 	{PHASE_INIT_PREDICTION,        true, Faction::beneGesserit(),                  ACTION_PREDICT},
+	{PHASE_INIT_HARKONNEN_REDRAW,  true, Faction::harkonnen(),                     ACTION_HARKONNEN_REDRAW},
 	{PHASE_INIT_TRAITOR_SELECTION, true, Faction::anyExcept(Faction::harkonnen()), ACTION_TRAITOR_SELECTION},
 	{PHASE_INIT_FREMEN_PLACEMENT,  true, Faction::fremen(),                        ACTION_FREMEN_PLACEMENT},
 	{PHASE_INIT_BG_PLACEMENT,      true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_PLACEMENT}
-};
-
-template<>
-std::unordered_map<GameLogic::GamePhase, const char*> GameLogic::GamePhaseLabels::labels =
-{
-	{GameLogic::PHASE_INIT_PREDICTION,        "init.prediction"},
-	{GameLogic::PHASE_INIT_TRAITOR_SELECTION, "init.traitorSelection"},
-	{GameLogic::PHASE_INIT_FREMEN_PLACEMENT,  "init.fremenPlacement"},
-	{GameLogic::PHASE_INIT_BG_PLACEMENT,      "init.beneGesseritPlacement"}
 };
 
 GameLogic::GameLogic(Faction factionsInGame)
@@ -87,35 +79,44 @@ void GameLogic::advance(GameState& game, GamePhase next)
 	log->info("advance game -> %s | input required from %s", GamePhaseLabels::label(game.phase), mGame.expectingInputFrom.label().c_str());
 }
 
-void GameLogic::drawTraitors(GameState& game)
+void GameLogic::drawTraitors(GameState& game, PlayerState& player)
 {
 	auto& deck = game.traitors;
-	for (auto& player : game.players)
-	{
-		Leader::Id drawn[4] = {
-			deck.draw(),
-			deck.draw(),
-			deck.draw(),
-			deck.draw()
-		};
+	Leader::Id drawn[4] = {
+		deck.draw(),
+		deck.draw(),
+		deck.draw(),
+		deck.draw()
+	};
 
-		player.selectedTraitors.push_back(drawn[0]);
-		player.selectedTraitors.push_back(drawn[1]);
-		player.selectedTraitors.push_back(drawn[2]);
-		player.selectedTraitors.push_back(drawn[3]);
-		log->info("traitors drawn for %s: {%u,%u,%u,%u}", player.faction.label().c_str(),
-				                                          drawn[0], drawn[1], drawn[2], drawn[3]);
-	}
+	player.selectedTraitors.push_back(drawn[0]);
+	player.selectedTraitors.push_back(drawn[1]);
+	player.selectedTraitors.push_back(drawn[2]);
+	player.selectedTraitors.push_back(drawn[3]);
+	log->info("traitors drawn for %s: {%u,%u,%u,%u}", player.faction.label().c_str(),
+													  drawn[0], drawn[1], drawn[2], drawn[3]);
 }
 
 bool GameLogic::factionAvailable(GameState& game, Faction faction)
 {
-	for (const auto& player: game.players)
+	return getPlayerState(game, faction) != nullptr;
+}
+
+bool GameLogic::harkonnenMayRedraw(GameState& game)
+{
+	auto* state = getPlayerState(game, Faction::harkonnen());
+
+	if (state == nullptr)
+		return false;
+
+	int own = 0;
+	for (const auto id : state->selectedTraitors)
 	{
-		if (player.faction == faction)
-			return true;
+		if (Leader::leader(id).faction() == Faction::harkonnen())
+			++own;
 	}
-	return false;
+
+	return own > 1;
 }
 
 bool GameLogic::isAllowedAction(GameState& game, const Action& action)
@@ -133,8 +134,6 @@ bool GameLogic::isAllowedAction(GameState& game, const Action& action)
 	return false;
 }
 
-
-
 bool GameLogic::phaseInitPrediction(GameState& game, const Action& action)
 {
 	if (action.type() != ACTION_PREDICT)
@@ -146,7 +145,39 @@ bool GameLogic::phaseInitPrediction(GameState& game, const Action& action)
 	game.predictedTurn = prediction.round;
 	log->info("set prediction to %s in turn %d", game.predictedFaction.label().c_str(), game.predictedTurn);
 
-	advance(game, PHASE_INIT_TRAITOR_SELECTION);
+	if (harkonnenMayRedraw(game))
+		advance(game, PHASE_INIT_HARKONNEN_REDRAW);
+	else
+		advance(game, PHASE_INIT_TRAITOR_SELECTION);
+	return true;
+}
+
+bool GameLogic::phaseInitHarkonnenRedraw(GameState& game, const Action& action)
+{
+	if (action.type() != ACTION_HARKONNEN_REDRAW)
+		return false;
+
+	const auto& request = static_cast<const ActionHarkonnenRedraw&> (action);
+
+	if (request.redraw == true)
+	{
+		auto* player = getPlayerState(game, Faction::harkonnen());
+
+		for (const auto& traitor : player->selectedTraitors)
+		{
+			game.traitors.discard(traitor);
+		}
+
+		player->selectedTraitors.clear();
+		game.traitors.reshuffle();
+		drawTraitors(game, *player);
+	}
+
+	if (harkonnenMayRedraw(game))
+		advance(game, PHASE_INIT_HARKONNEN_REDRAW);
+	else
+		advance(game, PHASE_INIT_TRAITOR_SELECTION);
+
 	return true;
 }
 
@@ -202,8 +233,6 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 {
 	if (action.type() != ACTION_FREMEN_PLACEMENT)
-		return false;
-	if (!expected(game, action.from()))
 		return false;
 
 	auto* state = getPlayerState(game, action.from());
@@ -303,11 +332,15 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 
 	mGame.traitors = TraitorDeck(Faction::anyExcept(Faction::tleilaxu()), mGame.random);
 
-
-	drawTraitors(mGame);
+	for (auto& player : mGame.players)
+	{
+		drawTraitors(mGame, player);
+	}
 
 	if (factionAvailable(mGame, Faction::beneGesserit()))
 		advance(mGame, PHASE_INIT_PREDICTION);
+	else if (harkonnenMayRedraw(mGame))
+		advance(mGame, PHASE_INIT_HARKONNEN_REDRAW);
 	else
 		advance(mGame, PHASE_INIT_TRAITOR_SELECTION);
 }
@@ -321,6 +354,8 @@ bool GameLogic::gameAction(GameState& game, const Action& action)
 	{
 	case PHASE_INIT_PREDICTION:
 		return phaseInitPrediction(game, action);
+	case PHASE_INIT_HARKONNEN_REDRAW:
+		return phaseInitHarkonnenRedraw(game, action);
 	case PHASE_INIT_TRAITOR_SELECTION:
 		return phaseInitTraitorSelect(game, action);
 	case PHASE_INIT_FREMEN_PLACEMENT:
@@ -335,53 +370,7 @@ void GameLogic::record(std::unique_ptr<const Action>&& action)
 	mRecorded.push_back(std::move(action));
 }
 
-GameLogic::TraitorDeck::TraitorDeck(Faction factionsInGame, std::mt19937& random)
-: mpRandom(&random)
-{
-	for (int i = static_cast<int> (Leader::LEADERS_begin); i < Leader::LEADERS_end; ++i)
-	{
-		drawPile.push_back(static_cast<Leader::Id> (i));
-	}
-
-    std::shuffle(drawPile.begin(), drawPile.end(), random);
-}
-
-Leader::Id GameLogic::TraitorDeck::draw()
-{
-	if (drawPile.empty())
-		reshuffle();
-
-	drawn.push_back(peek());
-	drawPile.pop_back();
-	return drawn.back();
-}
-
-Leader::Id GameLogic::TraitorDeck::peek() const noexcept
-{
-	return drawPile.back();
-}
-
-void GameLogic::TraitorDeck::discard(Leader::Id card)
-{
-	for (auto it = drawn.begin(); it < drawn.end(); ++it)
-	{
-		if (*it == card)
-		{
-			discardPile.push_back(card);
-			drawn.erase(it);
-		}
-	}
-}
-
-void GameLogic::TraitorDeck::reshuffle()
-{
-	drawPile.insert(drawPile.end(), discardPile.begin(), discardPile.end());
-	discardPile.clear();
-
-    std::shuffle(drawPile.begin(), drawPile.end(), *mpRandom);
-}
-
-GameLogic::PlayerState*
+PlayerState*
 GameLogic::getPlayerState(GameState& game, Faction faction)
 {
 	auto it = std::find_if(game.players.begin(), game.players.end(),
@@ -392,32 +381,13 @@ GameLogic::getPlayerState(GameState& game, Faction faction)
 		return nullptr;
 }
 
-GameLogic::PlayerState GameLogic::PlayerState::create(int aSeat, Faction aFaction)
-{
-	if (aFaction == Faction::emperor())
-		return PlayerState(aSeat, Faction::emperor(),       10, 15, 5);
-	if (aFaction == Faction::spacingGuild())
-		return PlayerState(aSeat, Faction::spacingGuild(),  5,  20, 0);
-	if (aFaction == Faction::atreides())
-		return PlayerState(aSeat, Faction::atreides(),      10, 20, 0);
-	if (aFaction == Faction::harkonnen())
-		return PlayerState(aSeat, Faction::harkonnen(),     10, 20, 0);
-	if (aFaction == Faction::fremen())
-		return PlayerState(aSeat, Faction::fremen(),        3,  15, 5);
-	if (aFaction == Faction::beneGesserit())
-		return PlayerState(aSeat, Faction::beneGesserit(),  5,  20, 0);
-	if (aFaction == Faction::tleilaxu())
-		return PlayerState(aSeat, Faction::tleilaxu(),      5,  20, 0);
-	else
-		return PlayerState();
-}
-
 
 int main()
 {
 	GameLogic game(Faction::any(), 4004030159);
 	game.post(std::make_unique<ActionPrediction>(Faction::beneGesserit(), Faction::atreides(), 5));
 
+	game.post(std::make_unique<ActionHarkonnenRedraw> (Faction::harkonnen(),    true));
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::emperor(),      Leader::ID_Irulan));
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::spacingGuild(), Leader::ID_Burseg));
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::fremen(),       Leader::ID_Alia));
