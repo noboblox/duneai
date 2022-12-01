@@ -1,4 +1,5 @@
 #include "gamelogic.h"
+#include "forces.h"
 
 int main()
 {
@@ -25,8 +26,8 @@ int main()
 //			                                                                                    Placement{Arrakis::TheGreatFlat, 1, 6}}));
 
 	// success
-	game.post(std::make_unique<ActionFremenPlacement>(Faction::fremen(), std::vector<Placement>{Placement{Arrakis::FalseWallSouth_5, 5, 3},
-			                                                                                    Placement{Arrakis::FalseWallWest_18, 1, 1}}));
+	game.post(std::make_unique<ActionFremenPlacement>(Faction::fremen(), std::vector<Placement>{Placement{FalseWallSouth_5, 5, 3},
+			                                                                                    Placement{FalseWallWest_18, 1, 1}}));
 
 	game.tick();
 	return 0;

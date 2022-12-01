@@ -205,24 +205,12 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 		return false;
 	}
 
-	std::map<Arrakis::AreaId, ForcesFrom> toPlace;
-
 	for (const auto& p : ac->placements)
 	{
-		auto& value = toPlace[p.where];
-		value.from = ac->from();
-		value.forces.where = p.where;
-
-		value.forces.normal += p.normal;
-		value.forces.special += p.special;
-	}
-
-	for (const auto& p : toPlace)
-	{
-		game.forces.push_back(p.second);
-		state->reserve -= p.second.forces.normal;
-		state->specialForcesReserve -= p.second.forces.special;
-		log->info("add %u normals and %u fedaykin to area %s", p.second.forces.normal, p.second.forces.special, Arrakis::areaName(p.second.forces.where));
+		game.board.placeHostile(ac->from(), p);
+		state->reserve -= p.normal;
+		state->specialForcesReserve -= p.special;
+		log->info("add %u normals and %u fedaykin to area %s", p.normal, p.special, Arrakis::areaName(p.where));
 		log->info("fremen now has %u normals and %u fedaykin in reserve", state->reserve, state->specialForcesReserve);
 	}
 

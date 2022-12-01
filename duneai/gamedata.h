@@ -7,19 +7,6 @@
 #include "arrakis.h"
 #include "gameconstants.h"
 
-struct Placement
-{
-	Arrakis::AreaId where = Arrakis::PolarSink;
-	int normal = 0;
-	int special = 0;
-};
-
-struct ForcesFrom
-{
-	Faction from = Faction::none();
-	Placement forces;
-};
-
 class TraitorDeck
 {
 public:
@@ -72,7 +59,7 @@ struct PublicGameState
 	GamePhase phase = PHASE_invalid;
 
 	Faction expectingInputFrom = Faction::none();
-	std::vector<ForcesFrom> forces;
+	Arrakis board;
 };
 
 

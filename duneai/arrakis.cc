@@ -679,4 +679,64 @@ const Arrakis::Area* Arrakis::getArea(AreaId id)
 		return &(*it);
 }
 
+void Arrakis::placeHostile(Faction from, Placement source)
+{
+	place(ForcesFrom{from, source, true});
+}
+
+void Arrakis::placeNeutral(Faction from, Placement source)
+{
+	place(ForcesFrom{from, source, false});
+}
+
+void Arrakis::place(ForcesFrom&& source)
+{
+	auto it = std::find_if(mForces.begin(), mForces.end(),
+			[&source](const ForcesFrom& f) -> bool
+			{ return f.from == source.from && f.where == source.where; });
+
+	if (it == mForces.end())
+	{
+		mForces.push_back(source);
+	}
+	else
+	{
+		it->normal += source.normal;
+		it->special += source.special;
+	}
+}
+
+std::vector<ForcesFrom*>
+Arrakis::collectFromSameTerritory(AreaId childArea, const Faction* filterFaction, const bool* filterHostile)
+{
+	std::vector<ForcesFrom*> result;
+	result.reserve(10);
+
+	for (auto& forces : mForces)
+	{
+		if (!sameTerritory(childArea, forces.where))
+			continue;
+		if (filterFaction && !(filterFaction->contains(forces.from)))
+			continue;
+		if (filterHostile && ((*filterHostile) != forces.hostile))
+			continue;
+
+		result.push_back(&forces);
+	}
+
+	return result;
+}
+
+int Arrakis::hostileFactionsInTerritory(AreaId childArea)
+{
+	static constexpr bool HOSTILITY = true;
+	return (int) collectFromSameTerritory(childArea, nullptr, &HOSTILITY).size();
+}
+
+int Arrakis::neutralFactionsInTerritory(AreaId childArea)
+{
+	static constexpr bool HOSTILITY = false;
+	return (int) collectFromSameTerritory(childArea, nullptr, &HOSTILITY).size();
+}
+
 
