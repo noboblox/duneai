@@ -76,6 +76,8 @@ bool GameLogic::gameAction(GameState& game, const Action& action)
 		return phaseInitTraitorSelect(game, action);
 	case PHASE_INIT_FREMEN_PLACEMENT:
 		return phaseInitFremenPlacement(game, action);
+	case PHASE_INIT_BG_PLACEMENT:
+		return phaseInitBeneGesseritPlacement(game, action);
 	default:
 		return false;
 	}
@@ -83,13 +85,11 @@ bool GameLogic::gameAction(GameState& game, const Action& action)
 
 bool GameLogic::phaseInitPrediction(GameState& game, const Action& action)
 {
-	if (action.type() != ACTION_PREDICT)
-		return false;
+	auto prediction = expectedAction<ActionPrediction>(game, action, ACTION_PREDICT);
+	if (!prediction) return false;
 
-	const auto& prediction = static_cast<const ActionPrediction&> (action);
-
-	game.predictedFaction = prediction.winner;
-	game.predictedTurn = prediction.round;
+	game.predictedFaction = prediction->winner;
+	game.predictedTurn = prediction->round;
 	log->info("set prediction to %s in turn %d", game.predictedFaction.label().c_str(), game.predictedTurn);
 
 	if (harkonnenMayRedraw(game))
@@ -101,12 +101,10 @@ bool GameLogic::phaseInitPrediction(GameState& game, const Action& action)
 
 bool GameLogic::phaseInitHarkonnenRedraw(GameState& game, const Action& action)
 {
-	if (action.type() != ACTION_HARKONNEN_REDRAW)
-		return false;
+	auto ac = expectedAction<ActionHarkonnenRedraw>(game, action, ACTION_HARKONNEN_REDRAW);
+	if (!ac) return false;
 
-	const auto& request = static_cast<const ActionHarkonnenRedraw&> (action);
-
-	if (request.redraw == true)
+	if (ac->redraw == true)
 	{
 		auto* player = getPlayerState(game, Faction::harkonnen());
 
@@ -130,21 +128,16 @@ bool GameLogic::phaseInitHarkonnenRedraw(GameState& game, const Action& action)
 
 bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 {
-	if (action.type() != ACTION_TRAITOR_SELECTION)
-		return false;
-	if (!expected(game, action.from()))
-		return false;
+	auto selection = expectedAction<ActionTraitorSelection> (game, action, ACTION_TRAITOR_SELECTION);
+	if (!selection) return false;
 
 	auto* state = getPlayerState(game, action.from());
-	if (state == nullptr)
-		return false;
-
-	const auto& selection = static_cast<const ActionTraitorSelection&> (action);
+	if (!state) return false;
 
 	int found = -1;
 	for (std::size_t i = 0; i < state->selectedTraitors.size(); ++i)
 	{
-		if (state->selectedTraitors[i] == selection.selection)
+		if (state->selectedTraitors[i] == selection->selection)
 		{
 			found = i;
 			break;
@@ -154,7 +147,7 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 	if (found == -1)
 		return false;
 
-	log->info("%s selected traitor %u", selection.from().label().c_str(), selection.selection);
+	log->info("%s selected traitor %u", selection->from().label().c_str(), selection->selection);
 	std::swap(state->selectedTraitors, state->discardedTraitors);
 	state->selectedTraitors.push_back(state->discardedTraitors[found]);
 
@@ -179,19 +172,16 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 
 bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 {
-	if (action.type() != ACTION_FREMEN_PLACEMENT)
-		return false;
+	auto ac = expectedAction<ActionFremenPlacement>(game, action, ACTION_FREMEN_PLACEMENT);
+	if (!ac) return false;
 
-	auto* state = getPlayerState(game, action.from());
-	if (state == nullptr)
-		return false;
-
-	const auto& ac = static_cast<const ActionFremenPlacement&> (action);
+	auto state = getPlayerState(game, action.from());
+	if (!state) return false;
 
 	int sum_normals = 0;
 	int sum_specials = 0;
 
-	for (const auto& p : ac.placements)
+	for (const auto& p : ac->placements)
 	{
 		if (!Arrakis::fremenInitArea(p.where))
 		{
@@ -217,10 +207,10 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 
 	std::map<Arrakis::AreaId, ForcesFrom> toPlace;
 
-	for (const auto& p : ac.placements)
+	for (const auto& p : ac->placements)
 	{
 		auto& value = toPlace[p.where];
-		value.from = ac.from();
+		value.from = ac->from();
 		value.forces.where = p.where;
 
 		value.forces.normal += p.normal;
@@ -242,6 +232,11 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 		advance(game, PHASE_INIT_end);
 
 	return true;
+}
+
+bool GameLogic::phaseInitBeneGesseritPlacement(GameState& game, const Action& action)
+{
+
 }
 
 //
@@ -310,6 +305,16 @@ GameLogic::getPlayerState(GameState& game, Faction faction)
 		return &(*it);
 	else
 		return nullptr;
+}
+
+template <typename A>
+const A* GameLogic::expectedAction(GameState& game, const Action& action, ActionType type)
+{
+	if (action.type() != type)
+		return nullptr;
+	if (!expected(game, action.from()))
+		return nullptr;
+	return static_cast<const A*> (&action);
 }
 
 void GameLogic::advance(GameState& game, GamePhase next)

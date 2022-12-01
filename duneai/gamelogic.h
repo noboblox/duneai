@@ -49,6 +49,7 @@ private:
 	bool phaseInitHarkonnenRedraw(GameState& game, const Action& action);
 	bool phaseInitTraitorSelect(GameState& game, const Action& action);
 	bool phaseInitFremenPlacement(GameState& game, const Action& action);
+	bool phaseInitBeneGesseritPlacement(GameState& game, const Action& action);
 
 	bool isAllowedAction(GameState& game, const Action& action);
 	bool expected(GameState& game, Faction faction);
@@ -58,6 +59,7 @@ private:
     bool harkonnenMayRedraw(GameState& game);
     void record(std::unique_ptr<const Action>&& action);
     PlayerState* getPlayerState(GameState& game, Faction faction);
+    template <typename A> const A* expectedAction(GameState& game, const Action& action, ActionType type);
 
 private:
     static std::vector<AllowedAction> msAllowedActions;
