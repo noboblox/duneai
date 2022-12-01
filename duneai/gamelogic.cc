@@ -11,7 +11,7 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 	{PHASE_INIT_HARKONNEN_REDRAW,  true, Faction::harkonnen(),                     ACTION_HARKONNEN_REDRAW},
 	{PHASE_INIT_TRAITOR_SELECTION, true, Faction::anyExcept(Faction::harkonnen()), ACTION_TRAITOR_SELECTION},
 	{PHASE_INIT_FREMEN_PLACEMENT,  true, Faction::fremen(),                        ACTION_FREMEN_PLACEMENT},
-	{PHASE_INIT_BG_PLACEMENT,      true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_PLACEMENT}
+	{PHASE_INIT_BG_PLACEMENT,      true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_START_FORCE}
 };
 
 GameLogic::GameLogic(Faction factionsInGame)
@@ -181,8 +181,8 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 	auto ac = expectedAction<ActionFremenPlacement>(game, action, ACTION_FREMEN_PLACEMENT);
 	if (!ac) return false;
 
-	auto state = getPlayerState(game, action.from());
-	if (!state) return false;
+	auto player = getPlayerState(game, action.from());
+	if (!player) return false;
 
 	int sum_normals = 0;
 	int sum_specials = 0;
@@ -205,19 +205,19 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 		return false;
 	}
 
-	if (sum_specials > state->specialForcesReserve)
+	if (sum_specials > player->specialForcesReserve)
 	{
-		log->warn("sum of fedaykin tokens to place %u > %u", sum_specials, state->specialForcesReserve);
+		log->warn("sum of fedaykin tokens to place %u > %u", sum_specials, player->specialForcesReserve);
 		return false;
 	}
 
 	for (const auto& p : ac->placements)
 	{
 		game.board.placeHostile(ac->from(), p);
-		state->reserve -= p.normal;
-		state->specialForcesReserve -= p.special;
+		player->reserve -= p.normal;
+		player->specialForcesReserve -= p.special;
 		log->info("add %u normals and %u fedaykin to area %s", p.normal, p.special, Arrakis::areaName(p.where));
-		log->info("fremen now has %u normals and %u fedaykin in reserve", state->reserve, state->specialForcesReserve);
+		log->info("fremen now has %u normals and %u fedaykin in reserve", player->reserve, player->specialForcesReserve);
 	}
 
 	placeStaticStartForces(game);
@@ -232,7 +232,27 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 
 bool GameLogic::phaseInitBeneGesseritPlacement(GameState& game, const Action& action)
 {
-	return false;
+	auto ac = expectedAction<ActionBeneGesseritStartingForce>(game, action, ACTION_BENE_GESSERIT_START_FORCE);
+	if (!ac) return false;
+
+	auto player = getPlayerState(game, action.from());
+	if (!player) return false;
+
+	if (game.board.hostileFactionsInTerritory(ac->where) > 0)
+	{
+		game.board.placeNeutral(player->faction, Placement{ac->where, 1, 0});
+		player->reserve -= 1;
+		log->info("place beneGesserit force in %s as advisor", Arrakis::areaName(ac->where));
+	}
+	else
+	{
+		game.board.placeHostile(player->faction, Placement{ac->where, 1, 0});
+		player->reserve -= 1;
+		log->info("place beneGesserit force in %s as fighter", Arrakis::areaName(ac->where));
+	}
+
+	advance(game, PHASE_INIT_end);
+	return true;
 }
 
 //

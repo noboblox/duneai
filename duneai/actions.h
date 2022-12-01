@@ -15,7 +15,7 @@ enum ActionType
 	ACTION_HARKONNEN_REDRAW,
 	ACTION_TRAITOR_SELECTION,
 	ACTION_FREMEN_PLACEMENT,
-	ACTION_BENE_GESSERIT_PLACEMENT,
+	ACTION_BENE_GESSERIT_START_FORCE
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
 
@@ -88,6 +88,18 @@ public:
 	}
 
 	const bool redraw;
+};
+
+class ActionBeneGesseritStartingForce : public Action
+{
+public:
+	explicit ActionBeneGesseritStartingForce(Faction aFrom, AreaId aWhere)
+	: Action(aFrom, ACTION_BENE_GESSERIT_START_FORCE),
+	  where(aWhere)
+	{
+	}
+
+	const AreaId where;
 };
 
 #endif /* ACTIONS_H_ */

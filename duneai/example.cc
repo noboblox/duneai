@@ -29,6 +29,16 @@ int main()
 	game.post(std::make_unique<ActionFremenPlacement>(Faction::fremen(), std::vector<Placement>{Placement{FalseWallSouth_5, 5, 3},
 			                                                                                    Placement{FalseWallWest_18, 1, 1}}));
 
+	// advisor
+	//game.post(std::make_unique<ActionBeneGesseritStartingForce>(Faction::beneGesserit(), Carthag));
+	// advisor
+	//game.post(std::make_unique<ActionBeneGesseritStartingForce>(Faction::beneGesserit(), Arrakeen));
+	// advisor
+	//game.post(std::make_unique<ActionBeneGesseritStartingForce>(Faction::beneGesserit(), TueksSietch));
+	// fighter
+	game.post(std::make_unique<ActionBeneGesseritStartingForce>(Faction::beneGesserit(), TheGreatFlat));
+
+
 	game.tick();
 	return 0;
 }
