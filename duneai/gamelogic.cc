@@ -1,10 +1,3 @@
-/*
- * gamelogic.cc
- *
- *  Created on: 15.11.2022
- *      Author: blox
- */
-
 #include "gamelogic.h"
 
 #include <algorithm>
