@@ -57,74 +57,28 @@ void GameLogic::setLogger(std::unique_ptr<const Logger>&& aLogger)
 	log = std::move(aLogger);
 }
 
-void GameLogic::advance(GameState& game, GamePhase next)
+//
+//-- PHASES
+//
+
+bool GameLogic::gameAction(GameState& game, const Action& action)
 {
-
-	auto it = std::find_if(msAllowedActions.cbegin(), msAllowedActions.cend(),
-			[next](const AllowedAction& a){ return a.mainAction && (a.when == next); });
-
-	if (it != msAllowedActions.end())
-		mGame.expectingInputFrom = it->who;
-	else
-		mGame.expectingInputFrom = Faction::none();
-
-	mGame.phase = next;
-	log->info("advance game -> %s | input required from %s", GamePhaseLabels::label(game.phase), mGame.expectingInputFrom.label().c_str());
-}
-
-void GameLogic::drawTraitors(GameState& game, PlayerState& player)
-{
-	auto& deck = game.traitors;
-	Leader::Id drawn[4] = {
-		deck.draw(),
-		deck.draw(),
-		deck.draw(),
-		deck.draw()
-	};
-
-	player.selectedTraitors.push_back(drawn[0]);
-	player.selectedTraitors.push_back(drawn[1]);
-	player.selectedTraitors.push_back(drawn[2]);
-	player.selectedTraitors.push_back(drawn[3]);
-	log->info("traitors drawn for %s: {%u,%u,%u,%u}", player.faction.label().c_str(),
-													  drawn[0], drawn[1], drawn[2], drawn[3]);
-}
-
-bool GameLogic::factionAvailable(GameState& game, Faction faction)
-{
-	return getPlayerState(game, faction) != nullptr;
-}
-
-bool GameLogic::harkonnenMayRedraw(GameState& game)
-{
-	auto* state = getPlayerState(game, Faction::harkonnen());
-
-	if (state == nullptr)
+	if (!isAllowedAction(game, action))
 		return false;
 
-	int own = 0;
-	for (const auto id : state->selectedTraitors)
+	switch (game.phase)
 	{
-		if (Leader::leader(id).faction() == Faction::harkonnen())
-			++own;
+	case PHASE_INIT_PREDICTION:
+		return phaseInitPrediction(game, action);
+	case PHASE_INIT_HARKONNEN_REDRAW:
+		return phaseInitHarkonnenRedraw(game, action);
+	case PHASE_INIT_TRAITOR_SELECTION:
+		return phaseInitTraitorSelect(game, action);
+	case PHASE_INIT_FREMEN_PLACEMENT:
+		return phaseInitFremenPlacement(game, action);
+	default:
+		return false;
 	}
-
-	return own > 1;
-}
-
-bool GameLogic::isAllowedAction(GameState& game, const Action& action)
-{
-	for (const auto& entry : msAllowedActions)
-	{
-		if (entry.when != game.phase)
-			continue;
-		if (!entry.who.contains(action.from()))
-			continue;
-		if (entry.what != action.type())
-			continue;
-		return true;
-	}
-	return false;
 }
 
 bool GameLogic::phaseInitPrediction(GameState& game, const Action& action)
@@ -290,6 +244,10 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 	return true;
 }
 
+//
+//-- AUXILIARY
+//
+
 bool GameLogic::expected(GameState& game, Faction faction)
 {
 	return game.expectingInputFrom.contains(faction);
@@ -338,26 +296,6 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 		advance(mGame, PHASE_INIT_TRAITOR_SELECTION);
 }
 
-bool GameLogic::gameAction(GameState& game, const Action& action)
-{
-	if (!isAllowedAction(game, action))
-		return false;
-
-	switch (game.phase)
-	{
-	case PHASE_INIT_PREDICTION:
-		return phaseInitPrediction(game, action);
-	case PHASE_INIT_HARKONNEN_REDRAW:
-		return phaseInitHarkonnenRedraw(game, action);
-	case PHASE_INIT_TRAITOR_SELECTION:
-		return phaseInitTraitorSelect(game, action);
-	case PHASE_INIT_FREMEN_PLACEMENT:
-		return phaseInitFremenPlacement(game, action);
-	default:
-		return false;
-	}
-}
-
 void GameLogic::record(std::unique_ptr<const Action>&& action)
 {
 	mRecorded.push_back(std::move(action));
@@ -374,3 +312,72 @@ GameLogic::getPlayerState(GameState& game, Faction faction)
 		return nullptr;
 }
 
+void GameLogic::advance(GameState& game, GamePhase next)
+{
+
+	auto it = std::find_if(msAllowedActions.cbegin(), msAllowedActions.cend(),
+			[next](const AllowedAction& a){ return a.mainAction && (a.when == next); });
+
+	if (it != msAllowedActions.end())
+		mGame.expectingInputFrom = it->who;
+	else
+		mGame.expectingInputFrom = Faction::none();
+
+	mGame.phase = next;
+	log->info("advance game -> %s | input required from %s", GamePhaseLabels::label(game.phase), mGame.expectingInputFrom.label().c_str());
+}
+
+void GameLogic::drawTraitors(GameState& game, PlayerState& player)
+{
+	auto& deck = game.traitors;
+	Leader::Id drawn[4] = {
+		deck.draw(),
+		deck.draw(),
+		deck.draw(),
+		deck.draw()
+	};
+
+	player.selectedTraitors.push_back(drawn[0]);
+	player.selectedTraitors.push_back(drawn[1]);
+	player.selectedTraitors.push_back(drawn[2]);
+	player.selectedTraitors.push_back(drawn[3]);
+	log->info("traitors drawn for %s: {%u,%u,%u,%u}", player.faction.label().c_str(),
+													  drawn[0], drawn[1], drawn[2], drawn[3]);
+}
+
+bool GameLogic::factionAvailable(GameState& game, Faction faction)
+{
+	return getPlayerState(game, faction) != nullptr;
+}
+
+bool GameLogic::harkonnenMayRedraw(GameState& game)
+{
+	auto* state = getPlayerState(game, Faction::harkonnen());
+
+	if (state == nullptr)
+		return false;
+
+	int own = 0;
+	for (const auto id : state->selectedTraitors)
+	{
+		if (Leader::leader(id).faction() == Faction::harkonnen())
+			++own;
+	}
+
+	return own > 1;
+}
+
+bool GameLogic::isAllowedAction(GameState& game, const Action& action)
+{
+	for (const auto& entry : msAllowedActions)
+	{
+		if (entry.when != game.phase)
+			continue;
+		if (!entry.who.contains(action.from()))
+			continue;
+		if (entry.what != action.type())
+			continue;
+		return true;
+	}
+	return false;
+}
