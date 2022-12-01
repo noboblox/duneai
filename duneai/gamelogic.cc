@@ -236,7 +236,7 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 
 bool GameLogic::phaseInitBeneGesseritPlacement(GameState& game, const Action& action)
 {
-
+	return false;
 }
 
 //

@@ -66,21 +66,26 @@ struct PlayerState
 
 };
 
-struct GameState
+struct PublicGameState
 {
 	int round = 1;
+	GamePhase phase = PHASE_invalid;
+
+	Faction expectingInputFrom = Faction::none();
+	std::vector<ForcesFrom> forces;
+};
+
+
+struct GameState : public PublicGameState
+{
 	unsigned int seed = 0;
 	std::mt19937 random;
-
-	GamePhase phase = PHASE_invalid;
-	Faction expectingInputFrom = Faction::none();
 
 	int predictedTurn = 0;
 	Faction predictedFaction = Faction::none();
 
 	TraitorDeck traitors;
 	std::vector<PlayerState> players;
-	std::vector<ForcesFrom> forces;
 };
 
 #endif /* GAMEDATA_H_ */
