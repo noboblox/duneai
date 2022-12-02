@@ -292,7 +292,7 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 		log->info("player %s at position %u", mGame.players.back().faction.label().c_str(), mGame.players.back().seat);
 	}
 
-	mGame.traitors = TraitorDeck(Faction::anyExcept(Faction::tleilaxu()), mGame.random);
+	mGame.traitors = TraitorDeck(factionsInGame, mGame.random);
 
 	for (auto& player : mGame.players)
 	{
