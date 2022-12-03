@@ -23,6 +23,14 @@ public:
 private:
 	std::unique_ptr<GameLogic> mpEngine;
 	std::vector<std::pair<Faction, bool>> factionEnabled;
+	std::vector<std::string> mLog;
+
+	Faction getSendFaction() const;
+	Faction getFactionFrom(const std::vector<std::pair<Faction, bool>>& factions) const;
+
+	void controlWindow(bool& showImguiDemo);
+	void logWindow();
+	void addLogEntry(const char* msg);
 
 	bool uniqueFaction = true;
 	int uniqueFactionIndex = 0;

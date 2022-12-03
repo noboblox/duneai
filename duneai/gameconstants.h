@@ -216,6 +216,17 @@ public:
 		return faction.mValue & mValue;
 	}
 
+	bool exactlyOne()
+	{
+		int count = 0;
+		for (int i = 1; i <= CODE_ANY; i <<= 1)
+		{
+			if (mValue & i)
+				++count;
+		}
+		return count == 1;
+	}
+
 private:
 	static constexpr int CODE_ANY           = 0x007F;
 	static constexpr int CODE_NONE          = 0;

@@ -12,11 +12,24 @@
 class GameLogic
 {
 public:
+
+	/// create a game logic without executing the initial setup
+	explicit GameLogic();
+
+	/// create a game logic an perform the initial setup
 	explicit GameLogic(Faction factionsInGame);
 	explicit GameLogic(Faction factionsInGame, unsigned aSeed);
 
 	/**
+	 * setup a new game.
+	 * @param factionsInGame
+	 */
+	void setup(Faction factionsInGame);
+	void setup(Faction factionsInGame, unsigned aSeed);
+
+	/**
 	 * @brief update the game including evaluation of posted action
+	 * @pre the game needs to be set-up via call to @ref setup
 	 */
 	void tick();
 
@@ -67,6 +80,7 @@ private:
     static std::vector<AllowedAction> msAllowedActions;
 
 private:
+    bool initialized = false;
     std::unique_ptr<const Logger> log;
     std::queue<std::unique_ptr<Action>> mPending;
     std::vector<std::unique_ptr<const Action>> mRecorded;

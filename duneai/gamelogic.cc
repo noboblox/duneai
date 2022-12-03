@@ -14,17 +14,37 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 	{PHASE_INIT_BG_PLACEMENT,      true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_START_FORCE}
 };
 
+GameLogic::GameLogic()
+: log(new StdoutLogger())
+{
+}
+
 GameLogic::GameLogic(Faction factionsInGame)
 : log(new StdoutLogger())
 {
-	std::random_device rd;
-	Init(mGame, factionsInGame, rd());
+	setup(factionsInGame);
 }
+
 
 GameLogic::GameLogic(Faction factionsInGame, unsigned aSeed)
 : log(new StdoutLogger())
 {
-	Init(mGame, factionsInGame, aSeed);
+	setup(factionsInGame, aSeed);
+}
+
+void GameLogic::setup(Faction factionsInGame)
+{
+	std::random_device rd;
+	setup(factionsInGame,  rd());
+}
+
+void GameLogic::setup(Faction factionsInGame, unsigned aSeed)
+{
+	if (!initialized)
+	{
+		Init(mGame, factionsInGame, aSeed);
+		initialized = true;
+	}
 }
 
 void GameLogic::tick()
@@ -32,7 +52,7 @@ void GameLogic::tick()
 	while (!mPending.empty())
 	{
 		auto& action = *mPending.front();
-		if (gameAction(mGame, action))
+		if (initialized && gameAction(mGame, action))
 		{
 			log->debug("record event %s from %s", action.label(), action.from().label().c_str());
 			record(std::move(mPending.front()));
