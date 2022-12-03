@@ -6,19 +6,19 @@
 PlayerState PlayerState::create(int aSeat, Faction aFaction)
 {
 	if (aFaction == Faction::emperor())
-		return PlayerState(aSeat, Faction::emperor(),       10, 15, 5);
+		return PlayerState(aSeat, Faction::emperor(),       10, 15, 5, Leader::of(Faction::emperor()));
 	if (aFaction == Faction::spacingGuild())
-		return PlayerState(aSeat, Faction::spacingGuild(),  5,  20, 0);
+		return PlayerState(aSeat, Faction::spacingGuild(),  5,  20, 0, Leader::of(Faction::spacingGuild()));
 	if (aFaction == Faction::atreides())
-		return PlayerState(aSeat, Faction::atreides(),      10, 20, 0);
+		return PlayerState(aSeat, Faction::atreides(),      10, 20, 0, Leader::of(Faction::atreides()));
 	if (aFaction == Faction::harkonnen())
-		return PlayerState(aSeat, Faction::harkonnen(),     10, 20, 0);
+		return PlayerState(aSeat, Faction::harkonnen(),     10, 20, 0, Leader::of(Faction::harkonnen()));
 	if (aFaction == Faction::fremen())
-		return PlayerState(aSeat, Faction::fremen(),        3,  15, 5);
+		return PlayerState(aSeat, Faction::fremen(),        3,  15, 5, Leader::of(Faction::fremen()));
 	if (aFaction == Faction::beneGesserit())
-		return PlayerState(aSeat, Faction::beneGesserit(),  5,  20, 0);
+		return PlayerState(aSeat, Faction::beneGesserit(),  5,  20, 0, Leader::of(Faction::beneGesserit()));
 	if (aFaction == Faction::tleilaxu())
-		return PlayerState(aSeat, Faction::tleilaxu(),      5,  20, 0);
+		return PlayerState(aSeat, Faction::tleilaxu(),      5,  20, 0, Leader::of(Faction::tleilaxu()));
 	else
 		return PlayerState();
 }

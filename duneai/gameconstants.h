@@ -315,6 +315,8 @@ public:
 	Id id() const noexcept { return mId; }
 	Faction faction() const noexcept { return mFaction; }
 
+	static std::vector<Leader::Id> of(Faction faction);
+
 private:
 	static const Leader leaders[];
 
@@ -327,36 +329,39 @@ private:
 	const Faction mFaction;
 };
 
-enum TreacheryCard
+class TreacheryCard
 {
-	LASGUN         ,
-	CHRYS_KNIFE    ,
-	MAULA_PISTOL   ,
-	SLIP_TIP       ,
-	STUNNER        ,
-	CHAUMAS        ,
-	CHAUMURKY      ,
-	ELLACA_DRUG    ,
-	GOM_JABBAR     ,
-	SHIELD         ,
-	SNOOPER        ,
+	enum Id
+	{
+		LASGUN         ,
+		CHRYS_KNIFE    ,
+		MAULA_PISTOL   ,
+		SLIP_TIP       ,
+		STUNNER        ,
+		CHAUMAS        ,
+		CHAUMURKY      ,
+		ELLACA_DRUG    ,
+		GOM_JABBAR     ,
+		SHIELD         ,
+		SNOOPER        ,
 
-	CHEAP_HERO     ,
-	CHEAP_HEROINE  ,
+		CHEAP_HERO     ,
+		CHEAP_HEROINE  ,
 
-	TLEILAXU_GHOLA ,
-	FAMILY_ATOMICS ,
-	HAJR           ,
-	WEATHER_CONTROL,
+		TLEILAXU_GHOLA ,
+		FAMILY_ATOMICS ,
+		HAJR           ,
+		WEATHER_CONTROL,
 
-	KARAMA         ,
-	TRUTH_TRANCE   ,
+		KARAMA         ,
+		TRUTH_TRANCE   ,
 
-	BALISET        ,
-	JUBBA_CLOAK    ,
-	KULON          ,
-	LA_LA_LA       ,
-	TRIP_TO_GAMONT ,
+		BALISET        ,
+		JUBBA_CLOAK    ,
+		KULON          ,
+		LA_LA_LA       ,
+		TRIP_TO_GAMONT ,
+	};
 };
 
 #endif

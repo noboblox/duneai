@@ -34,8 +34,9 @@ struct PlayerState
 	{
 	}
 
-	PlayerState(int aSeat, Faction aFaction, int aSpice, int aReserve, int aSpecialForces)
-	: seat(aSeat), faction(aFaction), spice(aSpice), reserve(aReserve), specialForcesReserve(aSpecialForces)
+	PlayerState(int aSeat, Faction aFaction, int aSpice, int aReserve, int aSpecialForces, std::vector<Leader::Id>&& leaders)
+	: seat(aSeat), faction(aFaction), spice(aSpice), reserve(aReserve), specialForcesReserve(aSpecialForces),
+	  alive(leaders)
 	{
 	}
 

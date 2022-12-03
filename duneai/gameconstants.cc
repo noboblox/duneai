@@ -92,3 +92,17 @@ std::vector<Faction> Faction::expand(Faction mask)
 
 	return result;
 }
+
+std::vector<Leader::Id> Leader::of(Faction faction)
+{
+	std::vector<Leader::Id> result;
+	result.reserve(5);
+
+	for (const auto& leader : leaders)
+	{
+		if (leader.faction().contains(faction))
+			result.push_back(leader.id());
+	}
+
+	return result;
+}
