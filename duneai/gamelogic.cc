@@ -106,6 +106,7 @@ bool GameLogic::phaseInitHarkonnenRedraw(GameState& game, const Action& action)
 
 	if (ac->redraw == true)
 	{
+		log->info("harkonnen mulligan. discard and redraw new traitors");
 		discardTraitors(game);
 		game.traitors.reshuffle();
 		drawTraitors(game);
