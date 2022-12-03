@@ -113,8 +113,6 @@ void DebugWindow::controlWindow(bool& showImguiDemo)
            	static int place_normal = 1;
            	static int place_special = 1;
 
-
-
             if (ImGui::BeginListBox("areas"))
             {
                 for (int i = 0; i < (int) Arrakis::allAreas().size(); ++i)
@@ -197,6 +195,25 @@ void DebugWindow::controlWindow(bool& showImguiDemo)
         }
         if (ImGui::TreeNode("Bene Gesserit starting position"))
         {
+           	static int area_add = AreaId::PolarSink;
+            if (ImGui::BeginListBox("areas"))
+            {
+                for (int i = 0; i < (int) Arrakis::allAreas().size(); ++i)
+                {
+                    const bool is_selected = (area_add == Arrakis::allAreas()[i].id);
+                    if (ImGui::Selectable(Arrakis::allAreas()[i].name, is_selected))
+                    	area_add = Arrakis::allAreas()[i].id;
+
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndListBox();
+
+                if (SendButton(ACTION_BENE_GESSERIT_START_FORCE))
+            		mpEngine->post(std::make_unique<ActionBeneGesseritStartingForce>(getSendFaction(),
+            				static_cast<AreaId> (area_add)));
+
+            }
         	ImGui::TreePop();
         }
 	}
