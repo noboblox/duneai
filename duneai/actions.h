@@ -4,6 +4,8 @@
 #include <vector>
 #include <utility>
 
+#include "event.h"
+
 #include "arrakis.h"
 #include "enumlabels.h"
 #include "gameconstants.h"
@@ -19,7 +21,7 @@ enum ActionType
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
 
-class Action
+class Action : public Event
 {
 public:
 
@@ -31,7 +33,8 @@ public:
 
 protected:
 	Action(Faction aFrom, ActionType aType)
-	: mFrom(aFrom), mType(aType)
+	: Event(ET_ACTION),
+	  mFrom(aFrom), mType(aType)
 	{
 	}
 

@@ -51,15 +51,24 @@ void GameLogic::tick()
 {
 	while (!mPending.empty())
 	{
-		auto& action = *mPending.front();
-		if (initialized && gameAction(mGame, action))
+		auto& ev = *mPending.front();
+
+		if (ev.isSystemEvent())
 		{
-			log->debug("record event %s from %s", action.label(), action.from().label().c_str());
-			record(std::move(mPending.front()));
+			systemEvent(ev.get<SystemEvent>());
 		}
-		else
+		else if (ev.isAction())
 		{
-			log->info("discard event %s from %s", action.label(), action.from().label().c_str());
+			auto& action = ev.get<Action>();
+			if (initialized && gameAction(mGame, action))
+			{
+				log->debug("record event %s from %s", action.label(), action.from().label().c_str());
+				record(std::unique_ptr<Action>(static_cast<Action*> (mPending.front().release())));
+			}
+			else
+			{
+				log->info("discard event %s from %s", action.label(), action.from().label().c_str());
+			}
 		}
 
 		mPending.pop();
@@ -75,6 +84,12 @@ void GameLogic::post(std::unique_ptr<Action>&& action)
 void GameLogic::setLogger(std::unique_ptr<const Logger>&& aLogger)
 {
 	log = std::move(aLogger);
+}
+
+void GameLogic::requestGameState(GameStateReceiver receiver)
+{
+	if (receiver)
+		mPending.push(std::make_unique<SystemRequestGameState>(receiver));
 }
 
 //
@@ -454,4 +469,8 @@ bool GameLogic::isAllowedAction(GameState& game, const Action& action)
 		return true;
 	}
 	return false;
+}
+
+void GameLogic::systemEvent(const SystemEvent& event)
+{
 }

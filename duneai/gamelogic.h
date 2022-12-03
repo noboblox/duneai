@@ -8,6 +8,7 @@
 #include "actions.h"
 #include "gameconstants.h"
 #include "logger.h"
+#include "systemevents.h"
 
 class GameLogic
 {
@@ -39,6 +40,14 @@ public:
 	 */
 	void post(std::unique_ptr<Action>&& action);
 
+
+	/**
+	 * @brief request the logic to provide the game state to the @param receiver function
+	 * The receiver will be called by the thread running the logic @ref tick
+	 */
+	using GameStateReceiver = std::function<void(const GameState&)>;
+	void requestGameState(GameStateReceiver receiver);
+
 	/**
 	 * @brief set a new logger for this logic instance.
 	 * the default logger is @ref StdoutLogger
@@ -64,6 +73,7 @@ private:
 	bool phaseInitFremenPlacement(GameState& game, const Action& action);
 	bool phaseInitBeneGesseritPlacement(GameState& game, const Action& action);
 
+	void systemEvent(const SystemEvent& event);
 	bool isAllowedAction(GameState& game, const Action& action);
 	bool expected(GameState& game, Faction faction);
 	void advance(GameState& game, GamePhase next);
@@ -82,7 +92,7 @@ private:
 private:
     bool initialized = false;
     std::unique_ptr<const Logger> log;
-    std::queue<std::unique_ptr<Action>> mPending;
+    std::queue<std::unique_ptr<Event>> mPending;
     std::vector<std::unique_ptr<const Action>> mRecorded;
 	GameState mGame;
 };
