@@ -473,4 +473,12 @@ bool GameLogic::isAllowedAction(GameState& game, const Action& action)
 
 void GameLogic::systemEvent(const SystemEvent& event)
 {
+	switch (event.type())
+	{
+	case SystemEvent::T_GAMESTATE_REQUEST:
+		static_cast<const SystemRequestGameState&>(event).invoceTarget(mGame);
+		break;
+	default:
+		break;
+	}
 }

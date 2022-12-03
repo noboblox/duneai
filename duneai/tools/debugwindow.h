@@ -29,6 +29,7 @@ private:
 	Faction getFactionFrom(const std::vector<std::pair<Faction, bool>>& factions) const;
 
 	void controlWindow(bool& showImguiDemo);
+	void gameStateWindow(const GameState& state);
 	void logWindow();
 	void addLogEntry(const char* msg);
 

@@ -31,7 +31,8 @@ class SystemRequestGameState : public SystemEvent
 {
 public:
 	explicit SystemRequestGameState(std::function<void(const GameState&)> target)
-	: SystemEvent(T_GAMESTATE_REQUEST)
+	: SystemEvent(T_GAMESTATE_REQUEST),
+	  invoceTarget(target)
 	{
 	}
 

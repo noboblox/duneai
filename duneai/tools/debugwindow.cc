@@ -76,6 +76,7 @@ void DebugWindow::controlWindow(bool& showImguiDemo)
         }
 	}
 
+	mpEngine->requestGameState([this](const GameState& gs){ this->gameStateWindow(gs); });
 	mpEngine->tick();
 	ImGui::End();
 }
@@ -88,6 +89,42 @@ void DebugWindow::logWindow()
 	{
 		ImGui::Text(msg.c_str());
 	}
+
+	ImGui::End();
+}
+
+
+static void fillRow(const char* name, const char* fmt, ...)
+{
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text(name);
+	ImGui::TableSetColumnIndex(1);
+    va_list args;
+    va_start(args, fmt);
+    ImGui::TextV(fmt, args);
+    va_end(args);
+}
+
+void DebugWindow::gameStateWindow(const GameState& state)
+{
+	ImGui::Begin("game state");
+
+    if (ImGui::BeginTable("Game State", 2))
+    {
+        ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("value", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableHeadersRow();
+
+        fillRow("seed",                "%u", state.seed);
+        fillRow("round",               "%d", state.round);
+        fillRow("maxRound",            "%d", state.maxRound);
+        fillRow("phase",               "%s", GamePhaseLabels::label(state.phase));
+        fillRow("input expected from", "%s", state.expectingInputFrom.label().c_str());
+        fillRow("predicted faction",   "%s", state.predictedFaction.label().c_str());
+        fillRow("predicted turn",      "%d", state.predictedTurn);
+        ImGui::EndTable();
+    }
 
 	ImGui::End();
 }
