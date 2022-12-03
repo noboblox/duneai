@@ -108,6 +108,12 @@ bool GameLogic::phaseInitPrediction(GameState& game, const Action& action)
 	auto prediction = expectedAction<ActionPrediction>(game, action, ACTION_PREDICT);
 	if (!prediction) return false;
 
+	if (!prediction->winner.exactlyOne())
+		return false;
+
+	if (prediction->round < 1 || prediction->round > game.maxRound)
+		return false;
+
 	game.predictedFaction = prediction->winner;
 	game.predictedTurn = prediction->round;
 	log->info("set prediction to %s in turn %d", game.predictedFaction.label().c_str(), game.predictedTurn);

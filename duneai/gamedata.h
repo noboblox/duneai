@@ -57,6 +57,7 @@ struct PlayerState
 struct PublicGameState
 {
 	int round = 1;
+	int maxRound = 10;
 	GamePhase phase = PHASE_invalid;
 
 	Faction expectingInputFrom = Faction::none();

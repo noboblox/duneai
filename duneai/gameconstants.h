@@ -216,7 +216,7 @@ public:
 		return faction.mValue & mValue;
 	}
 
-	bool exactlyOne()
+	bool exactlyOne() const noexcept
 	{
 		int count = 0;
 		for (int i = 1; i <= CODE_ANY; i <<= 1)
