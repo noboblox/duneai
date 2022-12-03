@@ -5,6 +5,7 @@
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_dx9.h"
 #include "../imgui/imgui_impl_win32.h"
+#include "debugwindow.h"
 #include <d3d9.h>
 #include <tchar.h>
 
@@ -86,6 +87,7 @@ int main(int, char**)
     // Our state
     bool show_demo_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    DebugWindow mainWindow;
 
     // Main loop
     bool done = false;
@@ -113,23 +115,7 @@ int main(int, char**)
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
-
-        //
-        // DEBUG WINDOW
-        //
-
-        {
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-
-            ImGui::End();
-        }
-
-        //
-        // END OF DEBUG WINDOW
-        //
+        mainWindow.updateWindow(show_demo_window);
 
         // Rendering
         ImGui::EndFrame();
