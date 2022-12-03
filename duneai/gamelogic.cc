@@ -178,7 +178,7 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 	if (found == -1)
 		return false;
 
-	log->info("%s selected traitor %u", selection->from().label().c_str(), selection->selection);
+	log->info("%s selected traitor %s", selection->from().label().c_str(), Leader::name(selection->selection));
 	std::swap(state->selectedTraitors, state->discardedTraitors);
 	state->selectedTraitors.push_back(state->discardedTraitors[found]);
 

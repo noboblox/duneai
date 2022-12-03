@@ -8,6 +8,22 @@ static void InitOnce(std::vector<std::pair<Faction, bool>>& result);
 static void FactionList(std::vector<std::pair<Faction, bool>>& factions,
 		                 const bool* unique = nullptr, int* uniqueIndex = nullptr);
 
+static const std::vector<const char*>& allLeadersNames()
+{
+	static std::vector<const char*> leaders;
+	static bool initialized = false;
+
+	if (!initialized)
+	{
+		for (int i = Leader::LEADERS_begin; i < Leader::LEADERS_end; ++i)
+			leaders.push_back(Leader::name(static_cast<Leader::Id>(i)));
+
+		initialized = true;
+	}
+
+	return leaders;
+}
+
 static bool SendButton(ActionType id);
 
 DebugWindow::DebugWindow()
@@ -66,6 +82,24 @@ void DebugWindow::controlWindow(bool& showImguiDemo)
         }
         if (ImGui::TreeNode("Traitor selection"))
         {
+           	static int selected = 0;
+            if (ImGui::BeginListBox("selected traitor"))
+            {
+                for (int i = 0; i < (int) allLeadersNames().size(); ++i)
+                {
+                    const bool is_selected = (selected == i);
+                    if (ImGui::Selectable(allLeadersNames()[i], is_selected))
+                        selected = i;
+
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndListBox();
+            }
+
+        	if (SendButton(ACTION_PREDICT))
+        		mpEngine->post(std::make_unique<ActionTraitorSelection>(getSendFaction(),
+        				       static_cast<Leader::Id>(selected)));
         	ImGui::TreePop();
         }
         if (ImGui::TreeNode("Fremen placement"))
