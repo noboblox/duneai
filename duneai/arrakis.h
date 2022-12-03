@@ -8,6 +8,13 @@
 class Arrakis
 {
 public:
+	struct Area
+	{
+		const AreaId id;
+		const char* name;
+		const int sector;
+	};
+
     static void reachable(AreaId from, int storm, int movement, std::vector<AreaId>& result);
     static bool insideStorm(AreaId id, int storm);
     static bool fremenInitArea(AreaId id);
@@ -21,6 +28,8 @@ public:
 	int hostileFactionsInTerritory(AreaId childArea);
 	int neutralFactionsInTerritory(AreaId childArea);
 
+	static const std::vector<Area>& allAreas() { return areas; }
+
 private:
 	void place(ForcesFrom&& source);
 	std::vector<ForcesFrom*> collectFromSameTerritory(AreaId childArea, const Faction* filterFaction, const bool* filterHostile);
@@ -28,13 +37,6 @@ private:
 	std::vector<ForcesFrom> mForces;
 
 private:
-	struct Area
-	{
-		const AreaId id;
-		const char* name;
-		const int sector;
-	};
-
 	struct Connection
 	{
 		const AreaId from;

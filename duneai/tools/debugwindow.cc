@@ -76,7 +76,7 @@ void DebugWindow::controlWindow(bool& showImguiDemo)
         {
         	static bool redrawWanted = true;
         	ImGui::Checkbox("redraw wanted", &redrawWanted);
-        	if (SendButton(ACTION_PREDICT))
+        	if (SendButton(ACTION_HARKONNEN_REDRAW))
         		mpEngine->post(std::make_unique<ActionHarkonnenRedraw>(getSendFaction(), redrawWanted));
         	ImGui::TreePop();
         }
@@ -97,13 +97,102 @@ void DebugWindow::controlWindow(bool& showImguiDemo)
                 ImGui::EndListBox();
             }
 
-        	if (SendButton(ACTION_PREDICT))
+        	if (SendButton(ACTION_TRAITOR_SELECTION))
         		mpEngine->post(std::make_unique<ActionTraitorSelection>(getSendFaction(),
         				       static_cast<Leader::Id>(selected)));
         	ImGui::TreePop();
         }
         if (ImGui::TreeNode("Fremen placement"))
         {
+           	static std::vector<Placement> placements =	{
+				Placement{AreaId::FalseWallSouth_5, 5, 2},
+				Placement{AreaId::FalseWallWest_17, 2, 1}};
+
+           	static int area_add = AreaId::PolarSink;
+           	static int area_del = AreaId::FalseWallSouth_5;
+           	static int place_normal = 1;
+           	static int place_special = 1;
+
+
+
+            if (ImGui::BeginListBox("areas"))
+            {
+                for (int i = 0; i < (int) Arrakis::allAreas().size(); ++i)
+                {
+                    const bool is_selected = (area_add == Arrakis::allAreas()[i].id);
+                    if (ImGui::Selectable(Arrakis::allAreas()[i].name, is_selected))
+                    	area_add = Arrakis::allAreas()[i].id;
+
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndListBox();
+            }
+
+            if (ImGui::Button("add"))
+            {
+            	bool found = false;
+            	for (const auto& p : placements)
+            	{
+            		if (p.where == area_add)
+            		{
+            			found = true;
+            			break;
+            		}
+            	}
+
+				if (!found)
+					placements.emplace_back(Placement{static_cast<AreaId>(area_add), place_normal, place_special});
+
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("remove"))
+            {
+            	for (auto it = placements.begin(); it != placements.end(); ++it)
+            	{
+            		if (it->where == area_del)
+            		{
+            			placements.erase(it);
+            			break;
+            		}
+            	}
+            }
+
+            ImGui::SliderInt("normal", &place_normal, 0, 20);
+            ImGui::SliderInt("fedaykin", &place_special, 0, 20);
+
+            if (ImGui::BeginTable("placements", 3))
+            {
+            	ImGui::TableSetupColumn("where", ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn("normal", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableSetupColumn("fedaykin", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableHeadersRow();
+
+                for (int i = 0; i < (int) placements.size(); ++i)
+                {
+                	ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0);
+                    const bool is_selected = (area_del == placements[i].where);
+
+                    if (ImGui::Selectable(Arrakis::areaName(placements[i].where), is_selected, ImGuiSelectableFlags_SpanAllColumns))
+                        area_del = placements[i].where;
+
+                    ImGui::TableNextColumn();
+                    ImGui::Text("%d", placements[i].normal);
+                    ImGui::TableNextColumn();
+                    ImGui::Text("%d", placements[i].special);
+
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+
+                ImGui::EndTable();
+            }
+
+            if (SendButton(ACTION_FREMEN_PLACEMENT))
+        		mpEngine->post(std::make_unique<ActionFremenPlacement>(getSendFaction(), placements));
+
         	ImGui::TreePop();
         }
         if (ImGui::TreeNode("Bene Gesserit starting position"))
