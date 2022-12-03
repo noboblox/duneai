@@ -106,23 +106,12 @@ bool GameLogic::phaseInitHarkonnenRedraw(GameState& game, const Action& action)
 
 	if (ac->redraw == true)
 	{
-		auto* player = getPlayerState(game, Faction::harkonnen());
-
-		for (const auto& traitor : player->selectedTraitors)
-		{
-			game.traitors.discard(traitor);
-		}
-
-		player->selectedTraitors.clear();
+		discardTraitors(game);
 		game.traitors.reshuffle();
-		drawTraitors(game, *player);
+		drawTraitors(game);
 	}
 
-	if (harkonnenMayRedraw(game))
-		advance(game, PHASE_INIT_HARKONNEN_REDRAW);
-	else
-		advance(game, PHASE_INIT_TRAITOR_SELECTION);
-
+	advance(game, PHASE_INIT_TRAITOR_SELECTION);
 	return true;
 }
 
@@ -293,11 +282,7 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 	}
 
 	mGame.traitors = TraitorDeck(factionsInGame, mGame.random);
-
-	for (auto& player : mGame.players)
-	{
-		drawTraitors(mGame, player);
-	}
+	drawTraitors(mGame);
 
 	if (factionAvailable(mGame, Faction::beneGesserit()))
 		advance(mGame, PHASE_INIT_PREDICTION);
@@ -348,22 +333,41 @@ void GameLogic::advance(GameState& game, GamePhase next)
 	log->info("advance game -> %s | input required from %s", GamePhaseLabels::label(game.phase), mGame.expectingInputFrom.label().c_str());
 }
 
-void GameLogic::drawTraitors(GameState& game, PlayerState& player)
+void GameLogic::discardTraitors(GameState& game)
 {
-	auto& deck = game.traitors;
-	Leader::Id drawn[4] = {
-		deck.draw(),
-		deck.draw(),
-		deck.draw(),
-		deck.draw()
-	};
+	for (auto& player : mGame.players)
+	{
+		auto& deck = game.traitors;
 
-	player.selectedTraitors.push_back(drawn[0]);
-	player.selectedTraitors.push_back(drawn[1]);
-	player.selectedTraitors.push_back(drawn[2]);
-	player.selectedTraitors.push_back(drawn[3]);
-	log->info("traitors drawn for %s: {%u,%u,%u,%u}", player.faction.label().c_str(),
-													  drawn[0], drawn[1], drawn[2], drawn[3]);
+		for (const auto& traitor : player.selectedTraitors)
+		{
+			deck.discard(traitor);
+		}
+
+		player.selectedTraitors.clear();
+	}
+
+}
+
+void GameLogic::drawTraitors(GameState& game)
+{
+	for (auto& player : mGame.players)
+	{
+		auto& deck = game.traitors;
+		Leader::Id drawn[4] = {
+			deck.draw(),
+			deck.draw(),
+			deck.draw(),
+			deck.draw()
+		};
+
+		player.selectedTraitors.push_back(drawn[0]);
+		player.selectedTraitors.push_back(drawn[1]);
+		player.selectedTraitors.push_back(drawn[2]);
+		player.selectedTraitors.push_back(drawn[3]);
+		log->info("traitors drawn for %s: {%u,%u,%u,%u}", player.faction.label().c_str(),
+														  drawn[0], drawn[1], drawn[2], drawn[3]);
+	}
 }
 
 bool GameLogic::factionAvailable(GameState& game, Faction faction)

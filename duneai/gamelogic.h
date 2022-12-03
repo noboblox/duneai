@@ -54,7 +54,8 @@ private:
 	bool isAllowedAction(GameState& game, const Action& action);
 	bool expected(GameState& game, Faction faction);
 	void advance(GameState& game, GamePhase next);
-	void drawTraitors(GameState& game, PlayerState& player);
+	void discardTraitors(GameState& game);
+	void drawTraitors(GameState& game);
     bool factionAvailable(GameState& game, Faction faction);
     bool harkonnenMayRedraw(GameState& game);
     void placeStaticStartForces(GameState& game);
