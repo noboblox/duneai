@@ -51,15 +51,17 @@ void DebugWindow::controlWindow(bool& showImguiDemo)
         	ImGui::SliderInt("round", &round, -1, 21);
 
         	if (SendButton(ACTION_PREDICT))
-        	{
         		mpEngine->post(std::make_unique<ActionPrediction>(getSendFaction(),
-        				getFactionFrom(predicted), round));
-        	}
+        					   getFactionFrom(predicted), round));
 
         	ImGui::TreePop();
         }
         if (ImGui::TreeNode("Harkonnen mulligan"))
         {
+        	static bool redrawWanted = true;
+        	ImGui::Checkbox("redraw wanted", &redrawWanted);
+        	if (SendButton(ACTION_PREDICT))
+        		mpEngine->post(std::make_unique<ActionHarkonnenRedraw>(getSendFaction(), redrawWanted));
         	ImGui::TreePop();
         }
         if (ImGui::TreeNode("Traitor selection"))
@@ -90,6 +92,8 @@ void DebugWindow::logWindow()
 		ImGui::Text(msg.c_str());
 	}
 
+	if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+		ImGui::SetScrollHereY(1.0f);
 	ImGui::End();
 }
 
