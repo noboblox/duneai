@@ -49,6 +49,14 @@ public:
 	void requestGameState(GameStateReceiver receiver);
 
 	/**
+	 * @brief request the logic to save the game
+	 * The receiver will be called by the thread running the logic @ref tick
+	 * The save game needs to be either processed or copied as it will be destroyed after the call returns
+	 */
+	using SaveGameReceiver = std::function<void(const SaveGame&)>;
+	void requestSave(SaveGameReceiver receiver);
+
+	/**
 	 * @brief set a new logger for this logic instance.
 	 * the default logger is @ref StdoutLogger
 	 * @param aLogger new logger instance to use

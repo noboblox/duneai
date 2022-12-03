@@ -92,6 +92,12 @@ void GameLogic::requestGameState(GameStateReceiver receiver)
 		mPending.push(std::make_unique<SystemRequestGameState>(receiver));
 }
 
+void GameLogic::requestSave(SaveGameReceiver receiver)
+{
+	if (receiver)
+		mPending.push(std::make_unique<SystemRequestSaveGame>(receiver));
+}
+
 //
 //-- PHASES
 //
@@ -480,6 +486,9 @@ void GameLogic::systemEvent(const SystemEvent& event)
 	{
 	case SystemEvent::T_GAMESTATE_REQUEST:
 		static_cast<const SystemRequestGameState&>(event).invoceTarget(mGame);
+		break;
+	case SystemEvent::T_SAVE_GAME:
+		static_cast<const SystemRequestSaveGame&>(event).invoceTarget(SaveGame(mGame, mRecorded));
 		break;
 	default:
 		break;

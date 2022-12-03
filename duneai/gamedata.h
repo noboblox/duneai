@@ -67,6 +67,8 @@ struct PublicGameState
 
 struct GameState : public PublicGameState
 {
+	static constexpr int VERSION = 1;
+
 	unsigned int seed = 0;
 	std::mt19937 random;
 

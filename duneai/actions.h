@@ -24,8 +24,10 @@ using ActionTypeLabels = EnumLabels<ActionType>;
 class Action : public Event
 {
 public:
+	static constexpr int VERSION = 1;
 
 	virtual ~Action() {}
+	virtual void serialize(std::ostream& out) const;
 
 	Faction from() const noexcept { return mFrom; }
 	ActionType type() const noexcept {return mType; }
@@ -53,6 +55,8 @@ public:
 	{
 	}
 
+	virtual void serialize(std::ostream& out) const override;
+
 	const Faction winner;
 	const int round;
 };
@@ -66,6 +70,7 @@ public:
 	{
 	}
 
+	virtual void serialize(std::ostream& out) const override;
 	const Leader::Id selection;
 };
 
@@ -78,6 +83,7 @@ public:
 	{
 	}
 
+	virtual void serialize(std::ostream& out) const override;
 	const std::vector<Placement> placements;
 };
 
@@ -90,6 +96,7 @@ public:
 	{
 	}
 
+	virtual void serialize(std::ostream& out) const override;
 	const bool redraw;
 };
 
@@ -102,6 +109,7 @@ public:
 	{
 	}
 
+	virtual void serialize(std::ostream& out) const override;
 	const AreaId where;
 };
 

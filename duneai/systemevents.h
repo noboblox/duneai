@@ -2,6 +2,7 @@
 #define SYSTEMEVENTS_H_
 
 #include "event.h"
+#include "savegame.h"
 #include <functional>
 
 class GameState;
@@ -11,7 +12,8 @@ class SystemEvent : public Event
 public:
 	enum SystemType
 	{
-		T_GAMESTATE_REQUEST
+		T_GAMESTATE_REQUEST,
+		T_SAVE_GAME
 	};
 
 	SystemType type() const noexcept { return mType; }
@@ -37,6 +39,18 @@ public:
 	}
 
 	const std::function<void(const GameState&)> invoceTarget;
+};
+
+class SystemRequestSaveGame : public SystemEvent
+{
+public:
+	explicit SystemRequestSaveGame(std::function<void(const SaveGame&)> target)
+	: SystemEvent(T_SAVE_GAME),
+	  invoceTarget(target)
+	{
+	}
+
+	const std::function<void(const SaveGame&)> invoceTarget;
 };
 
 

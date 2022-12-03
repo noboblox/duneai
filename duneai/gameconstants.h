@@ -157,6 +157,11 @@ public:
 	static constexpr Faction anyExcept(Faction excluded) { return Faction(any().mValue & (~excluded.mValue)); }
 	static std::vector<Faction> expand(Faction mask);
 
+	explicit operator int() const noexcept
+    {
+		return mValue;
+    }
+
 	std::string label() const
 	{
 		std::string o = codeLabel(mValue);
@@ -188,6 +193,8 @@ public:
 	: mValue(other.mValue)
 	{
 	}
+
+	constexpr explicit Faction(int value):  mValue(value) {}
 
 	bool operator==(Faction other) const noexcept { return mValue == other.mValue; }
 	bool operator!=(Faction other) const noexcept { return !operator==(other); }
@@ -239,9 +246,9 @@ private:
 	static constexpr int CODE_BENE_GESSERIT = 0x0020;
 	static constexpr int CODE_TLEILAXU      = 0x0040;
 
-	static const char* codeLabel(Faction value)
+	static const char* codeLabel(int value)
 	{
-		switch (value.mValue)
+		switch (value)
 		{
 		case CODE_ANY          : return "any";
 		case CODE_NONE         : return "none";
@@ -256,7 +263,6 @@ private:
 		}
 	}
 
-	constexpr Faction(int value):  mValue(value) {}
 	int mValue;
 };
 
