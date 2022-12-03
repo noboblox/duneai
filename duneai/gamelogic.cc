@@ -485,10 +485,10 @@ void GameLogic::systemEvent(const SystemEvent& event)
 	switch (event.type())
 	{
 	case SystemEvent::T_GAMESTATE_REQUEST:
-		static_cast<const SystemRequestGameState&>(event).invoceTarget(mGame);
+		static_cast<const SystemRequestGameState&>(event).invokeTarget(mGame);
 		break;
 	case SystemEvent::T_SAVE_GAME:
-		static_cast<const SystemRequestSaveGame&>(event).invoceTarget(SaveGame(mGame, mRecorded));
+		static_cast<const SystemRequestSaveGame&>(event).invokeTarget(SaveGame(mGame, mRecorded));
 		break;
 	default:
 		break;

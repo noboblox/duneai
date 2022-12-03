@@ -34,11 +34,11 @@ class SystemRequestGameState : public SystemEvent
 public:
 	explicit SystemRequestGameState(std::function<void(const GameState&)> target)
 	: SystemEvent(T_GAMESTATE_REQUEST),
-	  invoceTarget(target)
+	  invokeTarget(target)
 	{
 	}
 
-	const std::function<void(const GameState&)> invoceTarget;
+	const std::function<void(const GameState&)> invokeTarget;
 };
 
 class SystemRequestSaveGame : public SystemEvent
@@ -46,11 +46,11 @@ class SystemRequestSaveGame : public SystemEvent
 public:
 	explicit SystemRequestSaveGame(std::function<void(const SaveGame&)> target)
 	: SystemEvent(T_SAVE_GAME),
-	  invoceTarget(target)
+	  invokeTarget(target)
 	{
 	}
 
-	const std::function<void(const SaveGame&)> invoceTarget;
+	const std::function<void(const SaveGame&)> invokeTarget;
 };
 
 
