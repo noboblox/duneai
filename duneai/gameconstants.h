@@ -315,6 +315,11 @@ public:
 
 	static const Leader INVALID;
 
+	static const char* name(Leader::Id id)
+    {
+		return leader(id).name();
+	}
+
 	static const Leader& leader(Leader::Id id)
 	{
 		if (id < LEADERS_end)
@@ -325,19 +330,21 @@ public:
 
 	Id id() const noexcept { return mId; }
 	Faction faction() const noexcept { return mFaction; }
+	const char* name() const noexcept { return mName; }
 
 	static std::vector<Leader::Id> of(Faction faction);
 
 private:
 	static const Leader leaders[];
 
-	constexpr Leader(Id id, Faction faction)
-	: mId(id), mFaction(faction)
+	constexpr Leader(Id id, const char* name, Faction faction)
+	: mId(id), mFaction(faction), mName(name)
 	{
 	}
 
 	const Id mId;
 	const Faction mFaction;
+	const char* mName;
 };
 
 class TreacheryCard

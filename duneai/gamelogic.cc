@@ -407,8 +407,11 @@ void GameLogic::drawTraitors(GameState& game)
 		player.selectedTraitors.push_back(drawn[1]);
 		player.selectedTraitors.push_back(drawn[2]);
 		player.selectedTraitors.push_back(drawn[3]);
-		log->info("traitors drawn for %s: {%u,%u,%u,%u}", player.faction.label().c_str(),
-														  drawn[0], drawn[1], drawn[2], drawn[3]);
+		log->info("traitors drawn for %-12s: { %-20s, %-20s, %-20s, %-20s }", player.faction.label().c_str(),
+														  Leader::name(drawn[0]),
+														  Leader::name(drawn[1]),
+														  Leader::name(drawn[2]),
+														  Leader::name(drawn[3]));
 	}
 }
 
