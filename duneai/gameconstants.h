@@ -18,6 +18,7 @@ enum GamePhase
 	PHASE_INIT_end    = 1000,
 
 	PHASE_STORM_begin = PHASE_INIT_end,
+	PHASE_STORM_INITAL_DIAL = PHASE_STORM_begin,
 	PHASE_STORM_end   = 2000,
 
 	PHASE_SPICE_begin = PHASE_STORM_end,
@@ -209,6 +210,18 @@ public:
 		return Faction(mValue | other.mValue);
 	}
 
+	Faction& operator&=(Faction other)
+	{
+		mValue &= other.mValue;
+		return *this;
+	}
+
+	Faction& operator|=(Faction other)
+	{
+		mValue |= other.mValue;
+		return *this;
+	}
+
 	void set(Faction added) noexcept
 	{
 		mValue |= added.mValue;
@@ -219,11 +232,14 @@ public:
 		mValue &= (~removed.mValue);
 	}
 
-	constexpr bool contains(Faction faction) const noexcept {
+	constexpr bool contains(Faction faction) const noexcept
+	{
 		return faction.mValue & mValue;
 	}
 
-	bool exactlyOne() const noexcept
+	bool exactlyOne() const noexcept { return count() == 1; }
+
+	int count() const noexcept
 	{
 		int count = 0;
 		for (int i = 1; i <= CODE_ANY; i <<= 1)
@@ -231,7 +247,7 @@ public:
 			if (mValue & i)
 				++count;
 		}
-		return count == 1;
+		return count;
 	}
 
 private:

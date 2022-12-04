@@ -11,7 +11,8 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 	{PHASE_INIT_HARKONNEN_REDRAW,  true, Faction::harkonnen(),                     ACTION_HARKONNEN_REDRAW},
 	{PHASE_INIT_TRAITOR_SELECTION, true, Faction::anyExcept(Faction::harkonnen()), ACTION_TRAITOR_SELECTION},
 	{PHASE_INIT_FREMEN_PLACEMENT,  true, Faction::fremen(),                        ACTION_FREMEN_PLACEMENT},
-	{PHASE_INIT_BG_PLACEMENT,      true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_START_FORCE}
+	{PHASE_INIT_BG_PLACEMENT,      true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_START_FORCE},
+	{PHASE_STORM_INITAL_DIAL,      true, Faction::any(),                           ACTION_STORM_INITIAL_DIAL}
 };
 
 GameLogic::GameLogic()
@@ -207,7 +208,7 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 		if (factionAvailable(game, Faction::beneGesserit()))
 			advance(game, PHASE_INIT_BG_PLACEMENT);
 		else
-			advance(game, PHASE_INIT_end);
+			advance(game, PHASE_STORM_INITAL_DIAL, randomFactions(game, 2));
 	}
 
 	return true;
@@ -262,7 +263,7 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 	if (factionAvailable(game, Faction::beneGesserit()))
 		advance(game, PHASE_INIT_BG_PLACEMENT);
 	else
-		advance(game, PHASE_INIT_end);
+		advance(game, PHASE_STORM_INITAL_DIAL, randomFactions(game, 2));
 
 	return true;
 }
@@ -288,7 +289,7 @@ bool GameLogic::phaseInitBeneGesseritPlacement(GameState& game, const Action& ac
 		log->info("place beneGesserit force in %s as fighter", Arrakis::areaName(ac->where));
 	}
 
-	advance(game, PHASE_INIT_end);
+	advance(game, PHASE_STORM_INITAL_DIAL, randomFactions(game, 2));
 	return true;
 }
 
@@ -366,13 +367,15 @@ const A* GameLogic::expectedAction(GameState& game, const Action& action, Action
 	return static_cast<const A*> (&action);
 }
 
-void GameLogic::advance(GameState& game, GamePhase next)
+void GameLogic::advance(GameState& game, GamePhase next, Faction customFactions)
 {
 
 	auto it = std::find_if(msAllowedActions.cbegin(), msAllowedActions.cend(),
 			[next](const AllowedAction& a){ return a.mainAction && (a.when == next); });
 
-	if (it != msAllowedActions.end())
+	if (customFactions != Faction::none())
+		mGame.expectingInputFrom = customFactions;
+	else if (it != msAllowedActions.end())
 		mGame.expectingInputFrom = it->who;
 	else
 		mGame.expectingInputFrom = Faction::none();
@@ -478,6 +481,17 @@ bool GameLogic::isAllowedAction(GameState& game, const Action& action)
 		return true;
 	}
 	return false;
+}
+
+Faction GameLogic::randomFactions(GameState& game, int count)
+{
+	Faction result = Faction::none();
+	while (result.count() != count)
+	{
+		int index = game.random() % game.players.size();
+		result |= game.players[index].faction;
+	}
+	return result;
 }
 
 void GameLogic::systemEvent(const SystemEvent& event)

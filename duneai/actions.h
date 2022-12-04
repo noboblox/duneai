@@ -17,7 +17,8 @@ enum ActionType
 	ACTION_HARKONNEN_REDRAW,
 	ACTION_TRAITOR_SELECTION,
 	ACTION_FREMEN_PLACEMENT,
-	ACTION_BENE_GESSERIT_START_FORCE
+	ACTION_BENE_GESSERIT_START_FORCE,
+	ACTION_STORM_INITIAL_DIAL
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
 
@@ -111,6 +112,19 @@ public:
 
 	virtual void serialize(std::ostream& out) const override;
 	const AreaId where;
+};
+
+class ActionStormInitialDial : public Action
+{
+public:
+	explicit ActionStormInitialDial(Faction aFrom, int aDial)
+	: Action(aFrom, ACTION_STORM_INITIAL_DIAL),
+	  dial(aDial)
+	{
+	}
+
+	virtual void serialize(std::ostream& out) const override;
+	const int dial;
 };
 
 #endif /* ACTIONS_H_ */

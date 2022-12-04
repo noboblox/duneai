@@ -84,13 +84,14 @@ private:
 	void systemEvent(const SystemEvent& event);
 	bool isAllowedAction(GameState& game, const Action& action);
 	bool expected(GameState& game, Faction faction);
-	void advance(GameState& game, GamePhase next);
+	void advance(GameState& game, GamePhase next, Faction customFactions = Faction::none());
 	void discardTraitors(GameState& game);
 	void drawTraitors(GameState& game);
     bool factionAvailable(GameState& game, Faction faction);
     bool harkonnenMayRedraw(GameState& game);
     void placeStaticStartForces(GameState& game);
     void record(std::unique_ptr<const Action>&& action);
+    Faction randomFactions(GameState& game, int count);
     PlayerState* getPlayerState(GameState& game, Faction faction);
     template <typename A> const A* expectedAction(GameState& game, const Action& action, ActionType type);
 

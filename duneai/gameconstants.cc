@@ -70,7 +70,8 @@ std::unordered_map<GamePhase, const char*> GamePhaseLabels::labels =
 	{PHASE_INIT_HARKONNEN_REDRAW,  "init.harkonnenRedraw"},
 	{PHASE_INIT_TRAITOR_SELECTION, "init.traitorSelection"},
 	{PHASE_INIT_FREMEN_PLACEMENT,  "init.fremenPlacement"},
-	{PHASE_INIT_BG_PLACEMENT,      "init.beneGesseritPlacement"}
+	{PHASE_INIT_BG_PLACEMENT,      "init.beneGesseritPlacement"},
+	{PHASE_STORM_INITAL_DIAL,      "strom.initialDial"}
 };
 
 std::vector<Faction> Faction::expand(Faction mask)
