@@ -689,6 +689,18 @@ void Arrakis::placeNeutral(Faction from, Placement source)
 	place(ForcesFrom{from, source, false});
 }
 
+int Arrakis::getStorm()
+{
+	return storm;
+}
+
+int Arrakis::advanceStorm(int count)
+{
+	storm += count;
+	storm = ((storm - 1) % 18) + 1;
+	return storm;
+}
+
 void Arrakis::place(ForcesFrom&& source)
 {
 	auto it = std::find_if(mForces.begin(), mForces.end(),

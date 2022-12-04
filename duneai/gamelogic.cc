@@ -120,6 +120,8 @@ bool GameLogic::gameAction(GameState& game, const Action& action)
 		return phaseInitFremenPlacement(game, action);
 	case PHASE_INIT_BG_PLACEMENT:
 		return phaseInitBeneGesseritPlacement(game, action);
+	case PHASE_STORM_INITAL_DIAL:
+		return phaseStormInitialStormDial(game, action);
 	default:
 		return false;
 	}
@@ -291,6 +293,43 @@ bool GameLogic::phaseInitBeneGesseritPlacement(GameState& game, const Action& ac
 
 	advance(game, PHASE_STORM_INITAL_DIAL, randomFactions(game, 2));
 	return true;
+}
+
+bool GameLogic::phaseStormInitialStormDial(GameState& game, const Action& action)
+{
+	auto ac = expectedAction<ActionStormInitialDial>(game, action, ACTION_STORM_INITIAL_DIAL);
+	if (!ac) return false;
+
+	if (ac->dial < 0 || ac->dial > 20)
+		return false;
+
+	if (game.initialStormDial[0].first == Faction::none())
+		game.initialStormDial[0] = std::make_pair(action.from(), ac->dial);
+	else
+		game.initialStormDial[1] = std::make_pair(action.from(), ac->dial);
+
+	game.expectingInputFrom.clear(action.from());
+
+	if (game.expectingInputFrom != Faction::none())
+		return true;
+
+	const auto& dial = game.initialStormDial;
+	log->info("initial storm dial: %d (%s) + %d (%s) = %d", dial[0].second, dial[0].first.label().c_str(),
+			  dial[1].second, dial[1].first.label().c_str(), dial[0].second + dial[1].second);
+
+	const int toAdvance = (dial[0].second + dial[1].second) % 18;
+	log->info("initial storm advances %d sectors", toAdvance);
+	const int storm = game.board.advanceStorm(toAdvance);
+	log->info("storm at sector %d", storm);
+
+
+	advance(game, PHASE_SPICE_SPICE_BLOW);
+	phaseSpiceSpiceBlow(game);
+	return true;
+}
+
+void GameLogic::phaseSpiceSpiceBlow(GameState& game)
+{
 }
 
 //

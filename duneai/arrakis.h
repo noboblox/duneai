@@ -28,6 +28,9 @@ public:
 	int hostileFactionsInTerritory(AreaId childArea);
 	int neutralFactionsInTerritory(AreaId childArea);
 
+	int getStorm();
+	int advanceStorm(int count);
+
 	static const std::vector<Area>& allAreas() { return areas; }
 
 private:
@@ -35,6 +38,7 @@ private:
 	std::vector<ForcesFrom*> collectFromSameTerritory(AreaId childArea, const Faction* filterFaction, const bool* filterHostile);
 
 	std::vector<ForcesFrom> mForces;
+	int storm = 1;
 
 private:
 	struct Connection

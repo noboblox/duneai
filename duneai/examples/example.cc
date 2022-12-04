@@ -1,7 +1,7 @@
 #include "../gamelogic.h"
 #include "../forces.h"
 
-#if 0
+#if 1
 int main()
 {
 	GameLogic game(Faction::any(), 4004030159);
@@ -38,6 +38,9 @@ int main()
 	//game.post(std::make_unique<ActionBeneGesseritStartingForce>(Faction::beneGesserit(), TueksSietch));
 	// fighter
 	game.post(std::make_unique<ActionBeneGesseritStartingForce>(Faction::beneGesserit(), TheGreatFlat));
+
+	game.post(std::make_unique<ActionStormInitialDial>(Faction::emperor(), 13));
+	game.post(std::make_unique<ActionStormInitialDial>(Faction::tleilaxu(), 19));
 
 
 	game.tick();

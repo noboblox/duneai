@@ -80,6 +80,8 @@ private:
 	bool phaseInitTraitorSelect(GameState& game, const Action& action);
 	bool phaseInitFremenPlacement(GameState& game, const Action& action);
 	bool phaseInitBeneGesseritPlacement(GameState& game, const Action& action);
+	bool phaseStormInitialStormDial(GameState& game, const Action& action);
+	void phaseSpiceSpiceBlow(GameState& game);
 
 	void systemEvent(const SystemEvent& event);
 	bool isAllowedAction(GameState& game, const Action& action);

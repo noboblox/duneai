@@ -77,6 +77,8 @@ struct GameState : public PublicGameState
 
 	TraitorDeck traitors;
 	std::vector<PlayerState> players;
+
+	std::pair<Faction, int> initialStormDial[2] = { {Faction::none(), 0}, {Faction::none(), 0}};
 };
 
 #endif /* GAMEDATA_H_ */

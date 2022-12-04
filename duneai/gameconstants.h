@@ -9,20 +9,17 @@ enum GamePhase
 {
 	PHASE_invalid    = 0,
 
-	PHASE_INIT_begin = 1,
-	PHASE_INIT_PREDICTION = PHASE_INIT_begin,
+	PHASE_INIT_PREDICTION = 1,
 	PHASE_INIT_HARKONNEN_REDRAW,
 	PHASE_INIT_TRAITOR_SELECTION,
 	PHASE_INIT_FREMEN_PLACEMENT,
 	PHASE_INIT_BG_PLACEMENT,
-	PHASE_INIT_end    = 1000,
 
-	PHASE_STORM_begin = PHASE_INIT_end,
-	PHASE_STORM_INITAL_DIAL = PHASE_STORM_begin,
-	PHASE_STORM_end   = 2000,
+	PHASE_STORM_INITAL_DIAL,
 
-	PHASE_SPICE_begin = PHASE_STORM_end,
-	PHASE_SPICE_end   = 3000,
+	// TODO spice blow is currently done automatically
+	PHASE_SPICE_SPICE_BLOW
+
 };
 using GamePhaseLabels = EnumLabels<GamePhase>;
 
