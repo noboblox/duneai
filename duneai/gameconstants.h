@@ -25,6 +25,8 @@ using GamePhaseLabels = EnumLabels<GamePhase>;
 
 enum AreaId
 {
+	INVALID                = 0,
+
 	PolarSink              = 10 ,
 	FalseWallEast_5        = 20 ,
 	FalseWallEast_6        = 21 ,

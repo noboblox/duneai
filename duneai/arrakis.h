@@ -30,6 +30,9 @@ public:
 
 	int getStorm();
 	int advanceStorm(int count);
+	int addSpice(AreaId area, int amount);
+	int removeSpice(AreaId area, int amount) noexcept;
+	int getSpice(AreaId area) const noexcept;
 
 	static const std::vector<Area>& allAreas() { return areas; }
 
@@ -38,7 +41,9 @@ private:
 	std::vector<ForcesFrom*> collectFromSameTerritory(AreaId childArea, const Faction* filterFaction, const bool* filterHostile);
 
 	std::vector<ForcesFrom> mForces;
+	std::vector<std::pair<AreaId, int>> spice;
 	int storm = 1;
+
 
 private:
 	struct Connection

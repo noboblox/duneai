@@ -701,6 +701,56 @@ int Arrakis::advanceStorm(int count)
 	return storm;
 }
 
+static std::vector<std::pair<AreaId, int>>::iterator findSpice(AreaId id,
+		std::vector<std::pair<AreaId, int>>& source) noexcept
+{
+	return std::find_if(source.begin(), source.end(), [id](const std::pair<AreaId, int>& v) { return v.first == id; });
+}
+
+
+int Arrakis::addSpice(AreaId area, int amount)
+{
+	auto it = findSpice(area, spice);
+	if (it != spice.end())
+	{
+		(it->second) += amount;
+		return it->second;
+	}
+	else
+	{
+		spice.emplace_back(area, amount);
+		return amount;
+	}
+}
+
+int Arrakis::removeSpice(AreaId area, int amount) noexcept
+{
+	auto it = findSpice(area, spice);
+
+	if (it == spice.end())
+		return 0;
+
+	int& available = it->second;
+
+	if (available <= amount)
+	{
+		spice.erase(it);
+		return 0;
+	}
+	else
+	{
+		available -= amount;
+		return available;
+	}
+}
+
+int Arrakis::getSpice(AreaId area) const noexcept
+{
+	auto it = findSpice(area, const_cast<std::vector<std::pair<AreaId, int>>&> (spice));
+	return it == spice.end() ? 0 : it->second;
+}
+
+
 void Arrakis::place(ForcesFrom&& source)
 {
 	auto it = std::find_if(mForces.begin(), mForces.end(),

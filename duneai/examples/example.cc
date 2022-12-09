@@ -39,7 +39,7 @@ int main()
 	// fighter
 	game.post(std::make_unique<ActionBeneGesseritStartingForce>(Faction::beneGesserit(), TheGreatFlat));
 
-	game.post(std::make_unique<ActionStormInitialDial>(Faction::emperor(), 13));
+	game.post(std::make_unique<ActionStormInitialDial>(Faction::fremen(), 13));
 	game.post(std::make_unique<ActionStormInitialDial>(Faction::tleilaxu(), 19));
 
 

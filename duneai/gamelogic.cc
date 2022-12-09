@@ -330,6 +330,34 @@ bool GameLogic::phaseStormInitialStormDial(GameState& game, const Action& action
 
 void GameLogic::phaseSpiceSpiceBlow(GameState& game)
 {
+	// TODO basic rule 1 blow
+	// TODO round > 1
+
+	int territoriesDrawn = 0;
+	int shaiHuluds = 0;
+
+	while (territoriesDrawn < 2)
+	{
+		const auto& card = game.spiceDeck.draw();
+		if (card.id() == SpiceCard::SHAI_HULUD)
+		{
+			++shaiHuluds;
+			game.spiceDeck.placeDrawBottom(card);
+		}
+		else
+		{
+			++territoriesDrawn;
+			game.board.addSpice(card.area(), card.base());
+
+			if (territoriesDrawn == 1)
+				game.spiceDeck.discardA(card);
+			else
+				game.spiceDeck.discardB(card);
+		}
+	}
+
+	if (shaiHuluds > 0)
+		game.spiceDeck.reshuffle();
 }
 
 //
@@ -371,6 +399,7 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 
 	mGame.traitors = TraitorDeck(factionsInGame, mGame.random);
 	drawTraitors(mGame);
+	mGame.spiceDeck = SpiceDeck(mGame.random);
 
 	if (factionAvailable(mGame, Faction::beneGesserit()))
 		advance(mGame, PHASE_INIT_PREDICTION);
