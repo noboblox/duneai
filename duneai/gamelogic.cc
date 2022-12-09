@@ -434,6 +434,18 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 	mGame.spiceDeck = SpiceDeck(mGame.random);
 	mGame.treacheryDeck = TreacheryDeck(mGame.random);
 
+	for (auto& p : mGame.players)
+	{
+		p.hand.push_back(mGame.treacheryDeck.draw());
+		log->info("starting card %d for %s", p.hand[0], p.faction.label().c_str());
+
+		if (p.faction == Faction::harkonnen())
+		{
+			p.hand.push_back(mGame.treacheryDeck.draw());
+			log->info("starting card %d for %s", p.hand[1], p.faction.label().c_str());
+		}
+	}
+
 	if (factionAvailable(mGame, Faction::beneGesserit()))
 		advance(mGame, PHASE_INIT_PREDICTION);
 	else if (harkonnenMayRedraw(mGame))
