@@ -9,7 +9,7 @@ std::unordered_map<ActionType, const char*> ActionTypeLabels::labels =
 		{ACTION_TRAITOR_SELECTION,          "traitorSelection"},
 		{ACTION_FREMEN_PLACEMENT,           "fremenPlacement"},
 		{ACTION_BENE_GESSERIT_START_FORCE,  "beneGesseritStartForce"},
-		{ACTION_STORM_INITIAL_DIAL,         "stromInitialDial"}
+		{ACTION_STORM_INITIAL_DIAL,         "stormInitialDial"}
 };
 
 void Action::serialize(std::ostream& out) const
