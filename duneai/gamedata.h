@@ -134,7 +134,6 @@ struct PlayerState
 
 	std::vector<Leader::Id> alive;
 	std::vector<Leader::Id> selectedTraitors;
-	std::vector<Leader::Id> discardedTraitors;
 	std::vector<TreacheryCard> hand;
 
 };

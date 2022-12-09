@@ -171,29 +171,25 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 	auto selection = expectedAction<ActionTraitorSelection> (game, action, ACTION_TRAITOR_SELECTION);
 	if (!selection) return false;
 
-	auto* state = getPlayerState(game, action.from());
-	if (!state) return false;
+	auto* player = getPlayerState(game, action.from());
+	if (!player) return false;
 
-	int found = -1;
-	for (std::size_t i = 0; i < state->selectedTraitors.size(); ++i)
+	bool found = false;
+	for (std::size_t i = 0; i < player->selectedTraitors.size(); ++i)
 	{
-		if (state->selectedTraitors[i] == selection->selection)
+		if (player->selectedTraitors[i] == selection->selection)
 		{
-			found = i;
+			found = true;
 			break;
 		}
 	}
 
-	if (found == -1)
+	if (!found)
 		return false;
 
 	log->info("%s selected traitor %s", selection->from().label().c_str(), Leader::name(selection->selection));
-	std::swap(state->selectedTraitors, state->discardedTraitors);
-	state->selectedTraitors.push_back(state->discardedTraitors[found]);
-
-	auto it = state->discardedTraitors.begin();
-	std::advance(it, found);
-	state->discardedTraitors.erase(it);
+	player->selectedTraitors.clear();
+	player->selectedTraitors.push_back(selection->selection);
 
 	game.expectingInputFrom.clear(action.from());
 
