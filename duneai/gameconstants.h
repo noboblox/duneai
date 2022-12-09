@@ -369,40 +369,5 @@ private:
 	const char* mName;
 };
 
-class TreacheryCard
-{
-	enum Id
-	{
-		LASGUN         ,
-		CHRYS_KNIFE    ,
-		MAULA_PISTOL   ,
-		SLIP_TIP       ,
-		STUNNER        ,
-		CHAUMAS        ,
-		CHAUMURKY      ,
-		ELLACA_DRUG    ,
-		GOM_JABBAR     ,
-		SHIELD         ,
-		SNOOPER        ,
-
-		CHEAP_HERO     ,
-		CHEAP_HEROINE  ,
-
-		TLEILAXU_GHOLA ,
-		FAMILY_ATOMICS ,
-		HAJR           ,
-		WEATHER_CONTROL,
-
-		KARAMA         ,
-		TRUTH_TRANCE   ,
-
-		BALISET        ,
-		JUBBA_CLOAK    ,
-		KULON          ,
-		LA_LA_LA       ,
-		TRIP_TO_GAMONT ,
-	};
-};
-
 #endif
 

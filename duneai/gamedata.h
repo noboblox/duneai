@@ -107,6 +107,95 @@ private:
 	std::mt19937* mpRandom;
 };
 
+class TreacheryCard
+{
+public:
+	enum Id
+	{
+	    LASGUN         ,
+	    CHRYS_KNIFE    ,
+	    MAULA_PISTOL   ,
+	    SLIP_TIP       ,
+	    STUNNER        ,
+	    CHAUMAS        ,
+	    CHAUMURKY      ,
+	    ELLACA_DRUG    ,
+	    GOM_JABBAR     ,
+	    SHIELD_1       ,
+	    SHIELD_2       ,
+	    SHIELD_3       ,
+	    SHIELD_4       ,
+	    SNOOPER_1      ,
+	    SNOOPER_2      ,
+	    SNOOPER_3      ,
+	    SNOOPER_4      ,
+
+		CHEAP_HERO_1   ,
+	    CHEAP_HERO_2   ,
+	    CHEAP_HEROINE  ,
+
+	    TLEILAXU_GHOLA ,
+	    FAMILY_ATOMICS ,
+	    HAJR           ,
+	    WEATHER_CONTROL,
+
+	    KARAMA_1       ,
+	    KARAMA_2       ,
+	    TRUTH_TRANCE_1 ,
+	    TRUTH_TRANCE_2 ,
+
+	    BALISET        ,
+	    JUBBA_CLOAK    ,
+	    KULON          ,
+	    LA_LA_LA       ,
+	    TRIP_TO_GAMONT ,
+	};
+
+	enum Property
+	{
+		P_LASGUN             = 0x00000001,
+		P_PROJECTILE_WEAPON  = 0x00000002,
+		P_POISON_WEAPON      = 0x00000004,
+		P_PROJECTILE_DEFENSE = 0x00000008,
+		P_POISON_DEFENSE     = 0x00000010,
+		P_HERO               = 0x00000020,
+		P_SPECIAL_EFFECT     = 0x00000040,
+		P_KARAMA             = 0x00000080,
+		P_WORTHLESS          = 0x00000100,
+		P_TRUTHTRANCE        = 0x00000200,
+	};
+
+	explicit TreacheryCard(Id aId) : mId(aId), mProperties(0) {}
+	explicit TreacheryCard(Id aId, int aProperties) : mId(aId), mProperties(aProperties) {}
+
+	static void swap(TreacheryCard& l, TreacheryCard& r) noexcept
+	{
+		std::swap(l.mId, r.mId);
+	}
+
+	Id id() const noexcept { return mId; }
+
+private:
+	Id mId;
+	int mProperties;
+};
+
+class TreacheryDeck
+{
+public:
+	explicit TreacheryDeck() : mpRandom(nullptr) {}
+	explicit TreacheryDeck(std::mt19937& random);
+
+	TreacheryCard draw();
+	TreacheryCard peek() const;
+	void discard(TreacheryCard card);
+	void reshuffle();
+
+private:
+	std::mt19937* mpRandom;
+	std::vector<TreacheryCard> drawPile;
+	std::vector<TreacheryCard> discardPile;
+};
 
 
 
@@ -115,17 +204,18 @@ struct PlayerState
 	static PlayerState create(int aSeat, Faction aFaction);
 
 	PlayerState()
-	: seat(0), faction(Faction::none()), spice(0), reserve(0), specialForcesReserve(0)
+	: seat(0), maxHand(0), faction(Faction::none()), spice(0), reserve(0), specialForcesReserve(0)
 	{
 	}
 
-	PlayerState(int aSeat, Faction aFaction, int aSpice, int aReserve, int aSpecialForces, std::vector<Leader::Id>&& leaders)
-	: seat(aSeat), faction(aFaction), spice(aSpice), reserve(aReserve), specialForcesReserve(aSpecialForces),
+	PlayerState(int aSeat, Faction aFaction, int aSpice, int aReserve, int aSpecialForces, int aMaxHand, std::vector<Leader::Id>&& leaders)
+	: seat(aSeat), maxHand(aMaxHand), faction(aFaction), spice(aSpice), reserve(aReserve), specialForcesReserve(aSpecialForces),
 	  alive(leaders)
 	{
 	}
 
 	int seat;
+	int maxHand;
 	Faction faction;
 
 	int spice;
@@ -161,6 +251,7 @@ struct GameState : public PublicGameState
 
 	TraitorDeck traitors;
 	SpiceDeck spiceDeck;
+	TreacheryDeck treacheryDeck;
 	std::vector<PlayerState> players;
 
 	std::pair<Faction, int> initialStormDial[2] = { {Faction::none(), 0}, {Faction::none(), 0}};

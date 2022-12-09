@@ -5,19 +5,19 @@
 PlayerState PlayerState::create(int aSeat, Faction aFaction)
 {
 	if (aFaction == Faction::emperor())
-		return PlayerState(aSeat, Faction::emperor(),       10, 15, 5, Leader::of(Faction::emperor()));
+		return PlayerState(aSeat, Faction::emperor(),       10, 15, 5, 4, Leader::of(Faction::emperor()));
 	if (aFaction == Faction::spacingGuild())
-		return PlayerState(aSeat, Faction::spacingGuild(),  5,  20, 0, Leader::of(Faction::spacingGuild()));
+		return PlayerState(aSeat, Faction::spacingGuild(),  5,  20, 0, 4, Leader::of(Faction::spacingGuild()));
 	if (aFaction == Faction::atreides())
-		return PlayerState(aSeat, Faction::atreides(),      10, 20, 0, Leader::of(Faction::atreides()));
+		return PlayerState(aSeat, Faction::atreides(),      10, 20, 0, 4, Leader::of(Faction::atreides()));
 	if (aFaction == Faction::harkonnen())
-		return PlayerState(aSeat, Faction::harkonnen(),     10, 20, 0, Leader::of(Faction::harkonnen()));
+		return PlayerState(aSeat, Faction::harkonnen(),     10, 20, 0, 8, Leader::of(Faction::harkonnen()));
 	if (aFaction == Faction::fremen())
-		return PlayerState(aSeat, Faction::fremen(),        3,  17, 3, Leader::of(Faction::fremen()));
+		return PlayerState(aSeat, Faction::fremen(),        3,  17, 3, 4, Leader::of(Faction::fremen()));
 	if (aFaction == Faction::beneGesserit())
-		return PlayerState(aSeat, Faction::beneGesserit(),  5,  20, 0, Leader::of(Faction::beneGesserit()));
+		return PlayerState(aSeat, Faction::beneGesserit(),  5,  20, 0, 4, Leader::of(Faction::beneGesserit()));
 	if (aFaction == Faction::tleilaxu())
-		return PlayerState(aSeat, Faction::tleilaxu(),      5,  20, 0, Leader::of(Faction::tleilaxu()));
+		return PlayerState(aSeat, Faction::tleilaxu(),      5,  20, 0, 4, Leader::of(Faction::tleilaxu()));
 	else
 		return PlayerState();
 }
@@ -163,4 +163,73 @@ void SpiceDeck::reshuffle()
 	recycleDiscardPile(discardPileA, drawPile);
 	recycleDiscardPile(discardPileB, drawPile);
 	std::shuffle(drawPile.begin(), drawPile.end(), *mpRandom);
+}
+
+TreacheryDeck::TreacheryDeck(std::mt19937& random)
+: mpRandom(&random),
+  drawPile{
+	TreacheryCard{TreacheryCard::LASGUN         , TreacheryCard::P_LASGUN | TreacheryCard::P_PROJECTILE_WEAPON | TreacheryCard::P_POISON_WEAPON },
+    TreacheryCard{TreacheryCard::CHRYS_KNIFE    , TreacheryCard::P_PROJECTILE_WEAPON},
+    TreacheryCard{TreacheryCard::MAULA_PISTOL   , TreacheryCard::P_PROJECTILE_WEAPON},
+    TreacheryCard{TreacheryCard::SLIP_TIP       , TreacheryCard::P_PROJECTILE_WEAPON},
+    TreacheryCard{TreacheryCard::STUNNER        , TreacheryCard::P_PROJECTILE_WEAPON},
+    TreacheryCard{TreacheryCard::CHAUMAS        , TreacheryCard::P_POISON_WEAPON},
+    TreacheryCard{TreacheryCard::CHAUMURKY      , TreacheryCard::P_POISON_WEAPON},
+    TreacheryCard{TreacheryCard::ELLACA_DRUG    , TreacheryCard::P_POISON_WEAPON},
+    TreacheryCard{TreacheryCard::GOM_JABBAR     , TreacheryCard::P_POISON_WEAPON},
+    TreacheryCard{TreacheryCard::SHIELD_1       , TreacheryCard::P_PROJECTILE_DEFENSE},
+    TreacheryCard{TreacheryCard::SHIELD_2       , TreacheryCard::P_PROJECTILE_DEFENSE},
+    TreacheryCard{TreacheryCard::SHIELD_3       , TreacheryCard::P_PROJECTILE_DEFENSE},
+    TreacheryCard{TreacheryCard::SHIELD_4       , TreacheryCard::P_PROJECTILE_DEFENSE},
+    TreacheryCard{TreacheryCard::SNOOPER_1      , TreacheryCard::P_POISON_DEFENSE},
+    TreacheryCard{TreacheryCard::SNOOPER_2      , TreacheryCard::P_POISON_DEFENSE},
+    TreacheryCard{TreacheryCard::SNOOPER_3      , TreacheryCard::P_POISON_DEFENSE},
+    TreacheryCard{TreacheryCard::SNOOPER_4      , TreacheryCard::P_POISON_DEFENSE},
+    TreacheryCard{TreacheryCard::CHEAP_HERO_1   , TreacheryCard::P_HERO},
+    TreacheryCard{TreacheryCard::CHEAP_HERO_2   , TreacheryCard::P_HERO},
+    TreacheryCard{TreacheryCard::CHEAP_HEROINE  , TreacheryCard::P_HERO},
+    TreacheryCard{TreacheryCard::TLEILAXU_GHOLA , TreacheryCard::P_SPECIAL_EFFECT},
+    TreacheryCard{TreacheryCard::FAMILY_ATOMICS , TreacheryCard::P_SPECIAL_EFFECT},
+    TreacheryCard{TreacheryCard::HAJR           , TreacheryCard::P_SPECIAL_EFFECT},
+    TreacheryCard{TreacheryCard::WEATHER_CONTROL, TreacheryCard::P_SPECIAL_EFFECT},
+    TreacheryCard{TreacheryCard::KARAMA_1       , TreacheryCard::P_KARAMA},
+    TreacheryCard{TreacheryCard::KARAMA_2       , TreacheryCard::P_KARAMA},
+    TreacheryCard{TreacheryCard::TRUTH_TRANCE_1 , TreacheryCard::P_TRUTHTRANCE},
+    TreacheryCard{TreacheryCard::TRUTH_TRANCE_2 , TreacheryCard::P_TRUTHTRANCE},
+    TreacheryCard{TreacheryCard::BALISET        , TreacheryCard::P_WORTHLESS},
+    TreacheryCard{TreacheryCard::JUBBA_CLOAK    , TreacheryCard::P_WORTHLESS},
+    TreacheryCard{TreacheryCard::KULON          , TreacheryCard::P_WORTHLESS},
+    TreacheryCard{TreacheryCard::LA_LA_LA       , TreacheryCard::P_WORTHLESS},
+    TreacheryCard{TreacheryCard::TRIP_TO_GAMONT , TreacheryCard::P_WORTHLESS}}
+{
+    std::shuffle(drawPile.begin(), drawPile.end(), random);
+}
+
+
+TreacheryCard TreacheryDeck::draw()
+{
+	TreacheryCard result = peek();
+	drawPile.pop_back();
+
+	if (drawPile.empty())
+		reshuffle();
+
+	return result;
+}
+
+TreacheryCard TreacheryDeck::peek() const
+{
+	return drawPile.back();
+}
+
+void TreacheryDeck::discard(TreacheryCard card)
+{
+	discardPile.push_back(card);
+}
+
+void TreacheryDeck::reshuffle()
+{
+	drawPile.insert(drawPile.end(), discardPile.begin(), discardPile.end());
+	discardPile.clear();
+    std::shuffle(drawPile.begin(), drawPile.end(), *mpRandom);
 }

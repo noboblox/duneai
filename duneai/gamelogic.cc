@@ -432,6 +432,7 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 	mGame.traitors = TraitorDeck(factionsInGame, mGame.random);
 	drawTraitors(mGame);
 	mGame.spiceDeck = SpiceDeck(mGame.random);
+	mGame.treacheryDeck = TreacheryDeck(mGame.random);
 
 	if (factionAvailable(mGame, Faction::beneGesserit()))
 		advance(mGame, PHASE_INIT_PREDICTION);
