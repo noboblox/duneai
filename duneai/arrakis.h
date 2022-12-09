@@ -21,6 +21,7 @@ public:
     static const char* areaName(AreaId id);
 
 	Arrakis();
+	explicit Arrakis(const std::vector<int>& aSeats);
 
 	void placeHostile(Faction from, Placement source);
 	void placeNeutral(Faction from, Placement source);
@@ -28,7 +29,13 @@ public:
 	int hostileFactionsInTerritory(AreaId childArea);
 	int neutralFactionsInTerritory(AreaId childArea);
 
-	int getStorm();
+	int getStorm() const noexcept;
+
+	int firstByStormOrder() const noexcept;
+	int nextByStormOrder(int seatBefore) const noexcept;
+	int prevByStormOrder(int seatAfter) const noexcept;
+	int lastByStormOrder() const noexcept;
+
 	int advanceStorm(int count);
 	int addSpice(AreaId area, int amount);
 	int removeSpice(AreaId area, int amount) noexcept;
@@ -42,6 +49,7 @@ private:
 
 	std::vector<ForcesFrom> mForces;
 	std::vector<std::pair<AreaId, int>> spice;
+	std::vector<int> seats;
 	int storm = 1;
 
 

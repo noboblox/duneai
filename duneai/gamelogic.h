@@ -93,8 +93,9 @@ private:
     bool harkonnenMayRedraw(GameState& game);
     void placeStaticStartForces(GameState& game);
     void record(std::unique_ptr<const Action>&& action);
-    Faction randomFactions(GameState& game, int count);
+    Faction initialStormDialFactions(GameState& game);
     PlayerState* getPlayerState(GameState& game, Faction faction);
+    PlayerState* getPlayerState(GameState& game, int seat);
     template <typename A> const A* expectedAction(GameState& game, const Action& action, ActionType type);
 
 private:

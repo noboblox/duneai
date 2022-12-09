@@ -206,7 +206,7 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 		if (factionAvailable(game, Faction::beneGesserit()))
 			advance(game, PHASE_INIT_BG_PLACEMENT);
 		else
-			advance(game, PHASE_STORM_INITAL_DIAL, randomFactions(game, 2));
+			advance(game, PHASE_STORM_INITAL_DIAL, initialStormDialFactions(game));
 	}
 
 	return true;
@@ -261,7 +261,7 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 	if (factionAvailable(game, Faction::beneGesserit()))
 		advance(game, PHASE_INIT_BG_PLACEMENT);
 	else
-		advance(game, PHASE_STORM_INITAL_DIAL, randomFactions(game, 2));
+		advance(game, PHASE_STORM_INITAL_DIAL, initialStormDialFactions(game));
 
 	return true;
 }
@@ -287,7 +287,7 @@ bool GameLogic::phaseInitBeneGesseritPlacement(GameState& game, const Action& ac
 		log->info("place beneGesserit force in %s as fighter", Arrakis::areaName(ac->where));
 	}
 
-	advance(game, PHASE_STORM_INITAL_DIAL, randomFactions(game, 2));
+	advance(game, PHASE_STORM_INITAL_DIAL, initialStormDialFactions(game));
 	return true;
 }
 
@@ -393,6 +393,7 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 		log->info("player %s at position %u", mGame.players.back().faction.label().c_str(), mGame.players.back().seat);
 	}
 
+	mGame.board = Arrakis(seats);
 	mGame.traitors = TraitorDeck(factionsInGame, mGame.random);
 	drawTraitors(mGame);
 	mGame.spiceDeck = SpiceDeck(mGame.random);
@@ -415,6 +416,17 @@ GameLogic::getPlayerState(GameState& game, Faction faction)
 {
 	auto it = std::find_if(game.players.begin(), game.players.end(),
 				[faction] (const PlayerState& s) -> bool { return s.faction == faction; });
+	if (it != game.players.end())
+		return &(*it);
+	else
+		return nullptr;
+}
+
+PlayerState*
+GameLogic::getPlayerState(GameState& game, int seat)
+{
+	auto it = std::find_if(game.players.begin(), game.players.end(),
+				[seat] (const PlayerState& s) -> bool { return s.seat == seat; });
 	if (it != game.players.end())
 		return &(*it);
 	else
@@ -547,14 +559,12 @@ bool GameLogic::isAllowedAction(GameState& game, const Action& action)
 	return false;
 }
 
-Faction GameLogic::randomFactions(GameState& game, int count)
+Faction GameLogic::initialStormDialFactions(GameState& game)
 {
 	Faction result = Faction::none();
-	while (result.count() != count)
-	{
-		int index = game.random() % game.players.size();
-		result |= game.players[index].faction;
-	}
+
+	result |= getPlayerState(game, game.board.firstByStormOrder())->faction;
+	result |= getPlayerState(game, game.board.lastByStormOrder())->faction;
 	return result;
 }
 
