@@ -72,7 +72,8 @@ std::unordered_map<GamePhase, const char*> GamePhaseLabels::labels =
 	{PHASE_INIT_FREMEN_PLACEMENT,  "init.fremenPlacement"},
 	{PHASE_INIT_BG_PLACEMENT,      "init.beneGesseritPlacement"},
 	{PHASE_STORM_INITAL_DIAL,      "storm.initialDial"},
-	{PHASE_SPICE_SPICE_BLOW,       "spice.spiceBlow"}
+	{PHASE_SPICE_SPICE_BLOW,       "spice.spiceBlow"},
+	{PHASE_CHOAM_CHARITY,          "choam.charity"}
 };
 
 std::vector<Faction> Faction::expand(Faction mask)

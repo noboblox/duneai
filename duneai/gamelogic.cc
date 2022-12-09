@@ -12,7 +12,8 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 	{PHASE_INIT_TRAITOR_SELECTION, true, Faction::anyExcept(Faction::harkonnen()), ACTION_TRAITOR_SELECTION},
 	{PHASE_INIT_FREMEN_PLACEMENT,  true, Faction::fremen(),                        ACTION_FREMEN_PLACEMENT},
 	{PHASE_INIT_BG_PLACEMENT,      true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_START_FORCE},
-	{PHASE_STORM_INITAL_DIAL,      true, Faction::any(),                           ACTION_STORM_INITIAL_DIAL}
+	{PHASE_STORM_INITAL_DIAL,      true, Faction::any(),                           ACTION_STORM_INITIAL_DIAL},
+	{PHASE_CHOAM_CHARITY,          true, Faction::any(),                           ACTION_CHOAM_CHARITY}
 };
 
 GameLogic::GameLogic()
@@ -122,6 +123,8 @@ bool GameLogic::gameAction(GameState& game, const Action& action)
 		return phaseInitBeneGesseritPlacement(game, action);
 	case PHASE_STORM_INITAL_DIAL:
 		return phaseStormInitialStormDial(game, action);
+	case PHASE_CHOAM_CHARITY:
+		return phaseChoamCharity(game, action);
 	default:
 		return false;
 	}
@@ -339,11 +342,13 @@ void GameLogic::phaseSpiceSpiceBlow(GameState& game)
 		{
 			++shaiHuluds;
 			game.spiceDeck.placeDrawBottom(card);
+			log->info("shai hulud is ignored in round 1");
 		}
 		else
 		{
 			++territoriesDrawn;
 			game.board.addSpice(card.area(), card.base());
+			log->info("add %d spice to %s", card.base(), Arrakis::areaName(card.area()));
 
 			if (territoriesDrawn == 1)
 				game.spiceDeck.discardA(card);
@@ -353,7 +358,37 @@ void GameLogic::phaseSpiceSpiceBlow(GameState& game)
 	}
 
 	if (shaiHuluds > 0)
+	{
 		game.spiceDeck.reshuffle();
+		log->info("drawn %d shai huluds -> reshuffle deck", shaiHuluds);
+	}
+
+	advance(game, PHASE_CHOAM_CHARITY);
+}
+
+bool GameLogic::phaseChoamCharity(GameState& game, const Action& action)
+{
+	auto ac = expectedAction<ActionChoamCharity>(game, action, ACTION_CHOAM_CHARITY);
+	if (!ac) return false;
+
+	auto player = getPlayerState(game, action.from());
+
+	if (ac->need)
+	{
+		int amount = 2;
+
+		if (action.from() != Faction::beneGesserit())
+			amount -= player->spice;
+
+		if (amount <= 0)
+			return false;
+
+		player->spice += amount;
+		log->info("%s receives %d spice", action.from().label().c_str(), amount);
+	}
+
+	game.expectingInputFrom.clear(action.from());
+	return true;
 }
 
 //

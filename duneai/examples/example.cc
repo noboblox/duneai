@@ -42,6 +42,13 @@ int main()
 	game.post(std::make_unique<ActionStormInitialDial>(Faction::spacingGuild(), 13));
 	game.post(std::make_unique<ActionStormInitialDial>(Faction::tleilaxu(), 19));
 
+	game.post(std::make_unique<ActionChoamCharity>(Faction::harkonnen(),    false));
+	game.post(std::make_unique<ActionChoamCharity>(Faction::emperor(),      false));
+	game.post(std::make_unique<ActionChoamCharity>(Faction::spacingGuild(), false));
+	game.post(std::make_unique<ActionChoamCharity>(Faction::fremen(),       false));
+	game.post(std::make_unique<ActionChoamCharity>(Faction::atreides(),     false));
+	game.post(std::make_unique<ActionChoamCharity>(Faction::beneGesserit(), true));
+	game.post(std::make_unique<ActionChoamCharity>(Faction::tleilaxu(),     false));
 
 	game.tick();
 	return 0;

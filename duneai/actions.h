@@ -18,7 +18,8 @@ enum ActionType
 	ACTION_TRAITOR_SELECTION,
 	ACTION_FREMEN_PLACEMENT,
 	ACTION_BENE_GESSERIT_START_FORCE,
-	ACTION_STORM_INITIAL_DIAL
+	ACTION_STORM_INITIAL_DIAL,
+	ACTION_CHOAM_CHARITY,
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
 
@@ -125,6 +126,19 @@ public:
 
 	virtual void serialize(std::ostream& out) const override;
 	const int dial;
+};
+
+class ActionChoamCharity : public Action
+{
+public:
+	explicit ActionChoamCharity(Faction aFrom, bool aNeed)
+	: Action(aFrom, ACTION_CHOAM_CHARITY),
+	  need(aNeed)
+	{
+	}
+
+	virtual void serialize(std::ostream& out) const override;
+	const bool need;
 };
 
 #endif /* ACTIONS_H_ */

@@ -18,8 +18,9 @@ enum GamePhase
 	PHASE_STORM_INITAL_DIAL,
 
 	// TODO spice blow is currently done automatically
-	PHASE_SPICE_SPICE_BLOW
+	PHASE_SPICE_SPICE_BLOW,
 
+	PHASE_CHOAM_CHARITY,
 };
 using GamePhaseLabels = EnumLabels<GamePhase>;
 
