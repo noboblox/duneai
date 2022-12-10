@@ -21,6 +21,7 @@ enum GamePhase
 	PHASE_SPICE_SPICE_BLOW,
 
 	PHASE_CHOAM_CHARITY,
+	PHASE_AUCTION_BIDDING,
 };
 using GamePhaseLabels = EnumLabels<GamePhase>;
 

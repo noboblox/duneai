@@ -83,17 +83,20 @@ private:
 	bool phaseStormInitialStormDial(GameState& game, const Action& action);
 	void phaseSpiceSpiceBlow(GameState& game);
 	bool phaseChoamCharity(GameState& game, const Action& action);
+	bool phaseBidding(GameState& game, const Action& action);
 
 	void systemEvent(const SystemEvent& event);
 	bool isAllowedAction(GameState& game, const Action& action);
 	bool expected(GameState& game, Faction faction);
+	void prepareAuction(GameState& game);
+	void auctionWinTransaction(GameState& game, Faction won, int spice, bool karama);
 	void advance(GameState& game, GamePhase next, Faction customFactions = Faction::none());
 	void discardTraitors(GameState& game);
 	void drawTraitors(GameState& game);
     bool factionAvailable(GameState& game, Faction faction);
     bool harkonnenMayRedraw(GameState& game);
     void placeStaticStartForces(GameState& game);
-    int eligibleForBidding(const GameState& game) const;
+    bool hasKarama(GameState& game, Faction faction);
     void record(std::unique_ptr<const Action>&& action);
     Faction initialStormDialFactions(GameState& game);
     PlayerState* getPlayerState(GameState& game, Faction faction);

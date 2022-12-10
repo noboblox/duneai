@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "arrakis.h"
+#include "auction.h"
 #include "gameconstants.h"
 
 class TraitorDeck
@@ -168,6 +169,8 @@ public:
 	explicit TreacheryCard(Id aId) : mId(aId), mProperties(0) {}
 	explicit TreacheryCard(Id aId, int aProperties) : mId(aId), mProperties(aProperties) {}
 
+	bool isKarama() const noexcept { return mProperties & P_KARAMA; }
+
 	static void swap(TreacheryCard& l, TreacheryCard& r) noexcept
 	{
 		std::swap(l.mId, r.mId);
@@ -236,6 +239,7 @@ struct PublicGameState
 
 	Faction expectingInputFrom = Faction::none();
 	Arrakis board;
+	Auction auction;
 };
 
 
@@ -255,6 +259,7 @@ struct GameState : public PublicGameState
 	std::vector<PlayerState> players;
 
 	std::pair<Faction, int> initialStormDial[2] = { {Faction::none(), 0}, {Faction::none(), 0}};
+	std::vector<TreacheryCard> biddingPool;
 };
 
 #endif /* GAMEDATA_H_ */

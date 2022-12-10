@@ -13,7 +13,8 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 	{PHASE_INIT_FREMEN_PLACEMENT,  true, Faction::fremen(),                        ACTION_FREMEN_PLACEMENT},
 	{PHASE_INIT_BG_PLACEMENT,      true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_START_FORCE},
 	{PHASE_STORM_INITAL_DIAL,      true, Faction::any(),                           ACTION_STORM_INITIAL_DIAL},
-	{PHASE_CHOAM_CHARITY,          true, Faction::any(),                           ACTION_CHOAM_CHARITY}
+	{PHASE_CHOAM_CHARITY,          true, Faction::any(),                           ACTION_CHOAM_CHARITY},
+	{PHASE_AUCTION_BIDDING,        true, Faction::any(),                           ACTION_BID}
 };
 
 GameLogic::GameLogic()
@@ -125,6 +126,8 @@ bool GameLogic::gameAction(GameState& game, const Action& action)
 		return phaseStormInitialStormDial(game, action);
 	case PHASE_CHOAM_CHARITY:
 		return phaseChoamCharity(game, action);
+	case PHASE_AUCTION_BIDDING:
+		return phaseBidding(game, action);
 	default:
 		return false;
 	}
@@ -388,6 +391,62 @@ bool GameLogic::phaseChoamCharity(GameState& game, const Action& action)
 	}
 
 	game.expectingInputFrom.clear(action.from());
+
+	if (game.expectingInputFrom == Faction::none())
+	{
+		prepareAuction(game);
+		advance(game, PHASE_AUCTION_BIDDING, game.auction.currentBidder());
+		// TODO eligible players == 0
+	}
+
+	return true;
+}
+
+bool GameLogic::phaseBidding(GameState& game, const Action& action)
+{
+	auto ac = expectedAction<ActionBid>(game, action, ACTION_BID);
+	if (!ac) return false;
+
+	auto player = getPlayerState(game, action.from());
+	if (!player) return false;
+
+	auto& auction = game.auction;
+
+	if (auction.currentBidder() != ac->from())
+		return false;
+
+	if (ac->type == ActionBid::RAISE)
+	{
+		if (ac->bid > player->spice || ac->bid <= auction.currentBid())
+			return false;
+
+		auction.bid(ac->bid);
+	}
+	else if (ac->type == ActionBid::KARAMA_BUY)
+	{
+		if (!hasKarama(game, ac->from()))
+			return false;
+
+		auction.karamaWin();
+	}
+	else if (ac->type == ActionBid::PASS)
+		auction.pass(); // TODO all have passed
+	else
+		return false;
+
+	if (!auction.roundFinished())
+	{
+		game.expectingInputFrom = auction.currentBidder();
+		return true;
+	}
+
+	auctionWinTransaction(game, auction.winner(), auction.winningCost(), auction.wasKaramaWin());
+
+	if (auction.nextRound())
+		game.expectingInputFrom = auction.currentBidder();
+	else
+		game.expectingInputFrom = Faction::none(); // TODO next phase
+
 	return true;
 }
 
@@ -491,6 +550,53 @@ const A* GameLogic::expectedAction(GameState& game, const Action& action, Action
 	return static_cast<const A*> (&action);
 }
 
+void GameLogic::prepareAuction(GameState& game)
+{
+	game.auction = Auction(game);
+
+	for (int i = 0; i < game.auction.eligible(); ++i)
+	{
+		game.biddingPool.insert(game.biddingPool.begin(), game.treacheryDeck.draw());
+	}
+
+	log->info("prepare auction with %d cards", game.auction.eligible());
+}
+
+void GameLogic::auctionWinTransaction(GameState& game, Faction won, int spice, bool karama)
+{
+	if (game.biddingPool.empty())
+		return;
+
+	auto player = getPlayerState(game, won);
+
+	if (karama)
+	{
+		auto it = std::find_if(player->hand.begin(), player->hand.end(), [](const TreacheryCard& c) -> bool { return c.isKarama(); });
+
+		if (it == player->hand.end())
+			return;
+
+		log->info("%s discards karama card %d", player->faction.label().c_str(), it->id());
+		game.treacheryDeck.discard(*it);
+		player->hand.erase(it);
+	}
+	else
+	{
+		player->spice -= spice;
+		log->info("%s pays %d spice", player->faction.label().c_str(), spice);
+
+		if (factionAvailable(game, Faction::emperor()) && player->faction != Faction::emperor())
+		{
+			getPlayerState(game, Faction::emperor())->spice += spice;
+			log->info("emperor receives %d spice", spice);
+		}
+	}
+
+	log->info("%s receives card %d", player->faction.label().c_str(), game.biddingPool.back().id());
+	player->hand.push_back(game.biddingPool.back());
+	game.biddingPool.pop_back();
+}
+
 void GameLogic::advance(GameState& game, GamePhase next, Faction customFactions)
 {
 
@@ -592,16 +698,12 @@ void GameLogic::placeStaticStartForces(GameState& game)
 	}
 }
 
-int GameLogic::eligibleForBidding(const GameState& game) const
+bool GameLogic::hasKarama(GameState& game, Faction faction)
 {
-	int eligible = 0;
-	for (const auto& p : game.players)
-	{
-		if (static_cast<int> (p.hand.size()) < p.maxHand)
-			++eligible;
-	}
+	auto player = getPlayerState(game, faction);
+	auto it = std::find_if(player->hand.begin(), player->hand.end(), [](const TreacheryCard& c) -> bool { return c.isKarama(); });
 
-	return eligible;
+	return it != player->hand.end();
 }
 
 bool GameLogic::isAllowedAction(GameState& game, const Action& action)

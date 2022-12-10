@@ -20,6 +20,7 @@ enum ActionType
 	ACTION_BENE_GESSERIT_START_FORCE,
 	ACTION_STORM_INITIAL_DIAL,
 	ACTION_CHOAM_CHARITY,
+	ACTION_BID,
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
 
@@ -139,6 +140,35 @@ public:
 
 	virtual void serialize(std::ostream& out) const override;
 	const bool need;
+};
+
+class ActionBid : public Action
+{
+public:
+	enum Type
+	{
+		RAISE,
+		PASS,
+		KARAMA_BUY
+	};
+
+	explicit ActionBid(Faction aFrom, int aBid)
+	: Action(aFrom, ACTION_BID),
+	  type(RAISE),
+	  bid(aBid)
+	{
+	}
+
+	explicit ActionBid(Faction aFrom, Type aType)
+	: Action(aFrom, ACTION_BID),
+	  type(aType),
+	  bid(0)
+	{
+	}
+
+	virtual void serialize(std::ostream& out) const override;
+	const Type type;
+	const int bid;
 };
 
 #endif /* ACTIONS_H_ */
