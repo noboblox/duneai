@@ -568,9 +568,10 @@ Arrakis::Arrakis()
 }
 
 Arrakis::Arrakis(const std::vector<int>& aSeats)
-: seats(aSeats)
+: mStormOrder(aSeats)
 {
-	std::sort(seats.begin(), seats.end());
+	std::sort(mStormOrder.begin(), mStormOrder.end());
+	updateStormOrder();
 }
 
 const char* Arrakis::areaName(AreaId id)
@@ -709,54 +710,39 @@ static std::size_t firstIndex(const std::vector<int>& v, int storm) noexcept
 		return std::distance(v.cbegin(), it);
 }
 
-static std::size_t indexOf(const std::vector<int>& v, int storm) noexcept
-{
-	const auto it = std::find(v.cbegin(), v.cend(), storm);
-	if (it == v.cend())
-		return 0;
-	else
-		return std::distance(v.cbegin(), it);
-}
-
-static std::size_t nextIndex(const std::vector<int>& v, std::size_t index) noexcept
-{
-	++index;
-	index %= v.size();
-	return index;
-}
-
-static std::size_t prevIndex(const std::vector<int>& v, std::size_t index) noexcept
-{
-	if (index == 0)
-		return v.size() - 1;
-	else
-		return --index;
-}
-
 int Arrakis::firstByStormOrder() const noexcept
 {
-	return seats[firstIndex(seats, storm)];
-}
-
-int Arrakis::nextByStormOrder(int seatBefore) const noexcept
-{
-	return seats[nextIndex(seats, indexOf(seats, seatBefore))];
-}
-
-int Arrakis::prevByStormOrder(int seatAfter) const noexcept
-{
-	return seats[prevIndex(seats, indexOf(seats, seatAfter))];
+	return mStormOrder.front();
 }
 
 int Arrakis::lastByStormOrder() const noexcept
 {
-	return seats[prevIndex(seats, firstIndex(seats, storm))];
+	return mStormOrder.back();
+}
+
+std::vector<int> Arrakis::stormOrder() const
+{
+	return std::vector<int>(mStormOrder.cbegin(), mStormOrder.cend());
+}
+
+void Arrakis::updateStormOrder()
+{
+	auto i = firstIndex(mStormOrder, storm);
+
+	while (i > 0)
+	{
+		const int v = mStormOrder.front();
+		mStormOrder.erase(mStormOrder.begin());
+		mStormOrder.push_back(v);
+		--i;
+	}
 }
 
 int Arrakis::advanceStorm(int count)
 {
 	storm += count;
 	storm = ((storm - 1) % 18) + 1;
+	updateStormOrder();
 	return storm;
 }
 

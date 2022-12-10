@@ -93,6 +93,7 @@ private:
     bool factionAvailable(GameState& game, Faction faction);
     bool harkonnenMayRedraw(GameState& game);
     void placeStaticStartForces(GameState& game);
+    int eligibleForBidding(const GameState& game) const;
     void record(std::unique_ptr<const Action>&& action);
     Faction initialStormDialFactions(GameState& game);
     PlayerState* getPlayerState(GameState& game, Faction faction);

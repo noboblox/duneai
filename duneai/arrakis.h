@@ -32,10 +32,8 @@ public:
 	int getStorm() const noexcept;
 
 	int firstByStormOrder() const noexcept;
-	int nextByStormOrder(int seatBefore) const noexcept;
-	int prevByStormOrder(int seatAfter) const noexcept;
 	int lastByStormOrder() const noexcept;
-
+	std::vector<int> stormOrder() const;
 	int advanceStorm(int count);
 	int addSpice(AreaId area, int amount);
 	int removeSpice(AreaId area, int amount) noexcept;
@@ -44,12 +42,13 @@ public:
 	static const std::vector<Area>& allAreas() { return areas; }
 
 private:
+	void updateStormOrder();
 	void place(ForcesFrom&& source);
 	std::vector<ForcesFrom*> collectFromSameTerritory(AreaId childArea, const Faction* filterFaction, const bool* filterHostile);
 
 	std::vector<ForcesFrom> mForces;
 	std::vector<std::pair<AreaId, int>> spice;
-	std::vector<int> seats;
+	std::vector<int> mStormOrder;
 	int storm = 1;
 
 

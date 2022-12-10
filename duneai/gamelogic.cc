@@ -592,6 +592,18 @@ void GameLogic::placeStaticStartForces(GameState& game)
 	}
 }
 
+int GameLogic::eligibleForBidding(const GameState& game) const
+{
+	int eligible = 0;
+	for (const auto& p : game.players)
+	{
+		if (static_cast<int> (p.hand.size()) < p.maxHand)
+			++eligible;
+	}
+
+	return eligible;
+}
+
 bool GameLogic::isAllowedAction(GameState& game, const Action& action)
 {
 	for (const auto& entry : msAllowedActions)
@@ -611,8 +623,15 @@ Faction GameLogic::initialStormDialFactions(GameState& game)
 {
 	Faction result = Faction::none();
 
-	result |= getPlayerState(game, game.board.firstByStormOrder())->faction;
-	result |= getPlayerState(game, game.board.lastByStormOrder())->faction;
+	auto stormOrder = game.board.stormOrder();
+	result |= getPlayerState(game, stormOrder.front())->faction;
+
+	auto second = stormOrder.size() - 1;
+
+	if (stormOrder[second] == game.board.getStorm())
+		--second;
+
+	result |= getPlayerState(game, stormOrder[second])->faction;
 	return result;
 }
 
