@@ -138,7 +138,7 @@ Faction Auction::winner() const noexcept
 {
 	if (indexWinner == NO_WINNER)
 		return Faction::none();
-	else if (data[indexBidder].bid == 0)
+	else if (data[indexWinner].bid == 0)
 		return Faction::none();
 	else
 		return data[indexWinner].faction;

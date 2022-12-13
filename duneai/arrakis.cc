@@ -679,7 +679,7 @@ bool Arrakis::fremenInitArea(AreaId id)
 const Arrakis::Area* Arrakis::getArea(AreaId id)
 {
 	auto it = std::find_if(areas.cbegin(), areas.cend(),
-			[id](const Area& a) -> bool { return a.id == id; });
+			[id](const Area& a) { return a.id == id; });
 
 	if (it == areas.cend())
 		return nullptr;
@@ -793,7 +793,7 @@ int Arrakis::getSpice(AreaId area) const noexcept
 void Arrakis::place(ForcesFrom&& source)
 {
 	auto it = std::find_if(mForces.begin(), mForces.end(),
-			[&source](const ForcesFrom& f) -> bool
+			[&source](const ForcesFrom& f)
 			{ return f.from == source.from && f.where == source.where; });
 
 	if (it == mForces.end())

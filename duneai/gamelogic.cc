@@ -478,6 +478,14 @@ bool GameLogic::phaseBidding(GameState& game, const Action& action)
 	return true;
 }
 
+bool GameLogic::phaseShipment(GameState& game, const Action& action)
+{
+	auto ac = expectedAction<ActionBid>(game, action, ACTION_BID);
+	if (!ac) return false;
+
+	return false; // TODO
+}
+
 //
 //-- AUXILIARY
 //

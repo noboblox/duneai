@@ -76,3 +76,28 @@ void ActionBid::serialize(std::ostream& out) const
 	out << static_cast<int> (type)
 		<< bid;
 }
+
+void ActionGuildShipmentDecision::serialize(std::ostream& out) const
+{
+	Action::serialize(out);
+	out << static_cast<int> (shipNow);
+}
+
+void ActionShip::serialize(std::ostream& out) const
+{
+	Action::serialize(out);
+	out << static_cast<int> (to.where)
+		<< to.normal << to.special
+		<< static_cast<int> (fromArea)
+		<< static_cast<int> (fromReserve)
+		<< static_cast<int> (inverted);
+}
+
+void ActionMove::serialize(std::ostream& out) const
+{
+	Action::serialize(out);
+	out << static_cast<int> (to.where)
+		<< to.normal << to.special
+		<< static_cast<int> (fromArea)
+		<< static_cast<int> (useHajr);
+}

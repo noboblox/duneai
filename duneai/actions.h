@@ -21,6 +21,9 @@ enum ActionType
 	ACTION_STORM_INITIAL_DIAL,
 	ACTION_CHOAM_CHARITY,
 	ACTION_BID,
+	ACTION_GUILD_SHIPMENT_DECISION,
+	ACTION_SHIP,
+	ACTION_MOVE,
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
 
@@ -170,5 +173,78 @@ public:
 	const Type type;
 	const int bid;
 };
+
+class ActionGuildShipmentDecision : public Action
+{
+public:
+	explicit ActionGuildShipmentDecision(Faction aFrom, bool aShipNow)
+	: Action(aFrom, ACTION_GUILD_SHIPMENT_DECISION),
+	  shipNow(aShipNow)
+	{
+	}
+
+	virtual void serialize(std::ostream& out) const override;
+	const bool shipNow;
+};
+
+class ActionShip : public Action
+{
+public:
+	enum InvertShipment { TRUE };
+
+	/**
+	 * perform a standard shipment.
+	 * forces are taken from reserve
+	 * @note this event is also applicable for fremen shipments
+	 */
+	explicit ActionShip(Faction aFaction, Placement aTo)
+	: Action(aFaction, ACTION_SHIP),
+	  to(aTo), fromArea(AreaId::INVALID), fromReserve(true), inverted(false)
+	{
+	}
+
+	/**
+	 * perform an on-planet shipment.
+	 * Usually this is allowed for the guild player only
+	 */
+	explicit ActionShip(Faction aFaction, AreaId aFrom, Placement aTo)
+	: Action(aFaction, ACTION_SHIP),
+	  to(aTo), fromArea(aFrom), fromReserve(false), inverted(false)
+	{
+	}
+
+	/**
+	 * perform a very special FROM planet TO reserve shipment.
+	 * Usually this is allowed for the guild player only
+	 */
+	explicit ActionShip(Faction aFaction, Placement aFrom, InvertShipment)
+	: Action(aFaction, ACTION_SHIP),
+	  to(aFrom), fromArea(AreaId::INVALID), fromReserve(true), inverted(true)
+	{
+	}
+
+	virtual void serialize(std::ostream& out) const override;
+
+	const Placement to;
+	const AreaId fromArea;
+	const bool fromReserve;
+	const bool inverted;
+};
+
+class ActionMove : public Action
+{
+	explicit ActionMove(Faction aFaction, AreaId aFrom, Placement aTo, bool aUseHajr = false)
+	: Action(aFaction, ACTION_MOVE),
+	  to(aTo), fromArea(aFrom), useHajr(aUseHajr)
+	{
+	}
+
+	virtual void serialize(std::ostream& out) const override;
+
+	const Placement to;
+	const AreaId fromArea;
+	const bool useHajr;
+};
+
 
 #endif /* ACTIONS_H_ */
