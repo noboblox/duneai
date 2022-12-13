@@ -50,6 +50,7 @@ int main()
 	game.post(std::make_unique<ActionChoamCharity>(Faction::beneGesserit(), true));
 	game.post(std::make_unique<ActionChoamCharity>(Faction::tleilaxu(),     false));
 
+	// AUCTION CARD 1
 	game.post(std::make_unique<ActionBid>(Faction::spacingGuild(), 1));
 	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     2));
 	game.post(std::make_unique<ActionBid>(Faction::harkonnen(),    3));
@@ -65,6 +66,7 @@ int main()
 	game.post(std::make_unique<ActionBid>(Faction::atreides(),     ActionBid::PASS));
 	game.post(std::make_unique<ActionBid>(Faction::beneGesserit(), ActionBid::PASS));
 
+	// AUCTION CARD 2
 	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     1));
 	game.post(std::make_unique<ActionBid>(Faction::harkonnen(),    2));
 	game.post(std::make_unique<ActionBid>(Faction::fremen(),       ActionBid::PASS));
@@ -78,6 +80,7 @@ int main()
 	game.post(std::make_unique<ActionBid>(Faction::fremen(),       ActionBid::PASS));
 	game.post(std::make_unique<ActionBid>(Faction::atreides(),     6));
 	game.post(std::make_unique<ActionBid>(Faction::beneGesserit(), ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::emperor(),      ActionBid::PASS));
 	game.post(std::make_unique<ActionBid>(Faction::spacingGuild(), ActionBid::PASS));
 
 	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     ActionBid::PASS));
@@ -85,8 +88,18 @@ int main()
 	game.post(std::make_unique<ActionBid>(Faction::fremen(),       ActionBid::PASS));
 	game.post(std::make_unique<ActionBid>(Faction::atreides(),     ActionBid::PASS));
 	game.post(std::make_unique<ActionBid>(Faction::beneGesserit(), ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::emperor(),      ActionBid::PASS));
 	game.post(std::make_unique<ActionBid>(Faction::spacingGuild(), ActionBid::PASS));
 
+	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     ActionBid::PASS));
+
+	// AUCTION CARD 3
+	game.post(std::make_unique<ActionBid>(Faction::harkonnen(),    ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::fremen(),       ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::atreides(),     ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::beneGesserit(), ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::emperor(),      ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::spacingGuild(), ActionBid::PASS));
 	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     ActionBid::PASS));
 
 	game.tick();

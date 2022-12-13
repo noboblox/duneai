@@ -44,7 +44,7 @@ Faction Auction::currentBidder() const noexcept
 
 int Auction::currentBid() const noexcept
 {
-	return data[indexBidder].bid;
+	return data[indexHighestBidder].bid;
 }
 
 bool Auction::roundFinished() const noexcept
@@ -77,6 +77,8 @@ bool Auction::nextRound() noexcept
 	if (round >= lastRound)
 		return false;
 	if (!eligible())
+		return false;
+	if (roundFinished() && winner() == Faction::none())
 		return false;
 
 	++round;
@@ -135,6 +137,8 @@ void Auction::pass() noexcept
 Faction Auction::winner() const noexcept
 {
 	if (indexWinner == NO_WINNER)
+		return Faction::none();
+	else if (data[indexBidder].bid == 0)
 		return Faction::none();
 	else
 		return data[indexWinner].faction;

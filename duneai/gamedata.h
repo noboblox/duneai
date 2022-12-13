@@ -170,6 +170,7 @@ public:
 	explicit TreacheryCard(Id aId, int aProperties) : mId(aId), mProperties(aProperties) {}
 
 	bool isKarama() const noexcept { return mProperties & P_KARAMA; }
+	bool isWorthless() const noexcept { return mProperties & P_WORTHLESS; }
 
 	static void swap(TreacheryCard& l, TreacheryCard& r) noexcept
 	{

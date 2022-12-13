@@ -96,6 +96,7 @@ private:
     bool factionAvailable(GameState& game, Faction faction);
     bool harkonnenMayRedraw(GameState& game);
     void placeStaticStartForces(GameState& game);
+    std::vector<TreacheryCard>::iterator findKarama(GameState& game, Faction faction);
     bool hasKarama(GameState& game, Faction faction);
     void record(std::unique_ptr<const Action>&& action);
     Faction initialStormDialFactions(GameState& game);

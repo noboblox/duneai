@@ -413,39 +413,67 @@ bool GameLogic::phaseBidding(GameState& game, const Action& action)
 	auto& auction = game.auction;
 
 	if (auction.currentBidder() != ac->from())
+	{
+		log->info("ignore unexpected bid from %s. Expected: %s", ac->from().label().c_str(),
+				auction.currentBidder().label().c_str());
 		return false;
+	}
 
 	if (ac->type == ActionBid::RAISE)
 	{
 		if (ac->bid > player->spice || ac->bid <= auction.currentBid())
+		{
+			log->info("bid %d is not allowed. Player spice: %d, Current bid: %d", ac->bid, player->spice, auction.currentBid());
 			return false;
+		}
 
+		log->info("%s bids %d", ac->from().label().c_str(), ac->bid);
 		auction.bid(ac->bid);
 	}
 	else if (ac->type == ActionBid::KARAMA_BUY)
 	{
 		if (!hasKarama(game, ac->from()))
+		{
+			log->info("cannot karama buy without karama card");
 			return false;
+		}
 
+		log->info("%s uses karama buy", ac->from().label().c_str());
 		auction.karamaWin();
 	}
 	else if (ac->type == ActionBid::PASS)
-		auction.pass(); // TODO all have passed
+	{
+		log->info("%s passes", ac->from().label().c_str());
+		auction.pass();
+	}
 	else
+	{
 		return false;
+	}
 
 	if (!auction.roundFinished())
 	{
 		game.expectingInputFrom = auction.currentBidder();
+		log->info("-> next bid by %s", auction.currentBidder().label().c_str());
 		return true;
 	}
 
-	auctionWinTransaction(game, auction.winner(), auction.winningCost(), auction.wasKaramaWin());
+	if (auction.winner() != Faction::none())
+	{
+		log->info("%s wins card %d", auction.winner().label().c_str(), auction.currentRound());
+		auctionWinTransaction(game, auction.winner(), auction.winningCost(), auction.wasKaramaWin());
+	}
 
 	if (auction.nextRound())
+	{
+		log->info("auction round %d, start with %s", auction.currentRound(), auction.currentBidder().label().c_str());
 		game.expectingInputFrom = auction.currentBidder();
+	}
 	else
+	{
+		log->info("auction phase finished");
 		game.expectingInputFrom = Faction::none(); // TODO next phase
+	}
 
 	return true;
 }
@@ -571,8 +599,7 @@ void GameLogic::auctionWinTransaction(GameState& game, Faction won, int spice, b
 
 	if (karama)
 	{
-		auto it = std::find_if(player->hand.begin(), player->hand.end(), [](const TreacheryCard& c) -> bool { return c.isKarama(); });
-
+		auto it = findKarama(game, won);
 		if (it == player->hand.end())
 			return;
 
@@ -595,6 +622,14 @@ void GameLogic::auctionWinTransaction(GameState& game, Faction won, int spice, b
 	log->info("%s receives card %d", player->faction.label().c_str(), game.biddingPool.back().id());
 	player->hand.push_back(game.biddingPool.back());
 	game.biddingPool.pop_back();
+
+	if (player->faction == Faction::harkonnen() && ((int) player->hand.size() < player->maxHand))
+	{
+		auto card = game.treacheryDeck.draw();
+		log->info("%s receives additional card %d", player->faction.label().c_str(), card.id());
+		player->hand.push_back(card);
+	}
+
 }
 
 void GameLogic::advance(GameState& game, GamePhase next, Faction customFactions)
@@ -701,10 +736,27 @@ void GameLogic::placeStaticStartForces(GameState& game)
 bool GameLogic::hasKarama(GameState& game, Faction faction)
 {
 	auto player = getPlayerState(game, faction);
-	auto it = std::find_if(player->hand.begin(), player->hand.end(), [](const TreacheryCard& c) -> bool { return c.isKarama(); });
-
-	return it != player->hand.end();
+	return findKarama(game, faction) != player->hand.end();
 }
+
+std::vector<TreacheryCard>::iterator
+GameLogic::findKarama(GameState& game, Faction faction)
+{
+	auto player = getPlayerState(game, faction);
+
+	const bool includeWorthless = (faction == Faction::beneGesserit());
+	auto it = std::find_if(player->hand.begin(), player->hand.end(),
+			[includeWorthless](const TreacheryCard& c) -> bool
+			{
+				if (includeWorthless)
+					return c.isKarama() || c.isWorthless();
+				else
+					return c.isKarama();
+			});
+
+	return it;
+}
+
 
 bool GameLogic::isAllowedAction(GameState& game, const Action& action)
 {

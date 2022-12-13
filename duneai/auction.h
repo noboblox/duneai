@@ -22,6 +22,7 @@ public:
 	void karamaWin() noexcept;
 	void pass() noexcept;
 
+	int currentRound() const noexcept { return round; }
 	Faction winner() const noexcept;
 	int winningCost() const noexcept;
 	bool wasKaramaWin() const noexcept;
