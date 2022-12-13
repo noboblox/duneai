@@ -54,8 +54,7 @@ bool Auction::roundFinished() const noexcept
 
 void Auction::leftShift(std::vector<AuctionData>& data)
 {
-	data.push_back(data.front());
-	data.erase(data.begin());
+	std::rotate(data.begin(), ++data.begin(), data.end());
 }
 
 void Auction::nextIndex() noexcept

@@ -7,6 +7,7 @@
 
 #include "arrakis.h"
 #include <algorithm>
+#include <iterator>
 
 
 const std::vector<Arrakis::Area> Arrakis::areas = {
@@ -701,13 +702,14 @@ int Arrakis::getStorm() const noexcept
 	return storm;
 }
 
-static std::size_t firstIndex(const std::vector<int>& v, int storm) noexcept
+static std::vector<int>::iterator
+firstPlayer(std::vector<int>& v, int storm) noexcept
 {
-	const auto it = std::upper_bound(v.cbegin(), v.cend(), storm);
+	const auto it = std::upper_bound(v.begin(), v.end(), storm);
 	if (it == v.cend())
-		return 0;
+		return v.begin();
 	else
-		return std::distance(v.cbegin(), it);
+		return it;
 }
 
 int Arrakis::firstByStormOrder() const noexcept
@@ -727,15 +729,7 @@ std::vector<int> Arrakis::stormOrder() const
 
 void Arrakis::updateStormOrder()
 {
-	auto i = firstIndex(mStormOrder, storm);
-
-	while (i > 0)
-	{
-		const int v = mStormOrder.front();
-		mStormOrder.erase(mStormOrder.begin());
-		mStormOrder.push_back(v);
-		--i;
-	}
+	std::rotate(mStormOrder.begin(), firstPlayer(mStormOrder, storm), mStormOrder.end());
 }
 
 int Arrakis::advanceStorm(int count)
@@ -749,7 +743,8 @@ int Arrakis::advanceStorm(int count)
 static std::vector<std::pair<AreaId, int>>::iterator findSpice(AreaId id,
 		std::vector<std::pair<AreaId, int>>& source) noexcept
 {
-	return std::find_if(source.begin(), source.end(), [id](const std::pair<AreaId, int>& v) { return v.first == id; });
+	return std::find_if(source.begin(), source.end(),
+			[id](const auto& v) { return v.first == id; });
 }
 
 
