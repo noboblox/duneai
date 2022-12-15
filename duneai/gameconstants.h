@@ -22,6 +22,11 @@ enum GamePhase
 
 	PHASE_CHOAM_CHARITY,
 	PHASE_AUCTION_BIDDING,
+	PHASE_SHIPMENT_GUILD_DECISION,
+	PHASE_SHIPMENT_SHIP,
+	PHASE_SHIPMENT_INTRUSION_REACTION,
+	PHASE_SHIPMENT_ACCOMPANY_DECISION,
+	PHASE_SHIPMENT_MOVE,
 };
 using GamePhaseLabels = EnumLabels<GamePhase>;
 
@@ -200,6 +205,7 @@ public:
 
 	bool operator==(Faction other) const noexcept { return mValue == other.mValue; }
 	bool operator!=(Faction other) const noexcept { return !operator==(other); }
+	bool operator<(Faction other) const noexcept { return mValue < other.mValue; }
 
 	Faction operator&(Faction other)
 	{

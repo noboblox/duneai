@@ -66,15 +66,20 @@ const std::vector<int>* const SeatConfig::configs[] = {
 template<>
 std::unordered_map<GamePhase, const char*> GamePhaseLabels::labels =
 {
-	{PHASE_INIT_PREDICTION,        "init.prediction"},
-	{PHASE_INIT_HARKONNEN_REDRAW,  "init.harkonnenRedraw"},
-	{PHASE_INIT_TRAITOR_SELECTION, "init.traitorSelection"},
-	{PHASE_INIT_FREMEN_PLACEMENT,  "init.fremenPlacement"},
-	{PHASE_INIT_BG_PLACEMENT,      "init.beneGesseritPlacement"},
-	{PHASE_STORM_INITAL_DIAL,      "storm.initialDial"},
-	{PHASE_SPICE_SPICE_BLOW,       "spice.spiceBlow"},
-	{PHASE_CHOAM_CHARITY,          "choam.charity"},
-	{PHASE_AUCTION_BIDDING,        "auction.bidding"}
+	{PHASE_INIT_PREDICTION,             "init.prediction"            },
+	{PHASE_INIT_HARKONNEN_REDRAW,       "init.harkonnenRedraw"       },
+	{PHASE_INIT_TRAITOR_SELECTION,      "init.traitorSelection"      },
+	{PHASE_INIT_FREMEN_PLACEMENT,       "init.fremenPlacement"       },
+	{PHASE_INIT_BG_PLACEMENT,           "init.beneGesseritPlacement" },
+	{PHASE_STORM_INITAL_DIAL,           "storm.initialDial"          },
+	{PHASE_SPICE_SPICE_BLOW,            "spice.spiceBlow"            },
+	{PHASE_CHOAM_CHARITY,               "choam.charity"              },
+	{PHASE_AUCTION_BIDDING,             "auction.bidding"            },
+	{PHASE_SHIPMENT_GUILD_DECISION,     "shipment.guildDecision"     },
+	{PHASE_SHIPMENT_SHIP,               "shipment.ship"              },
+	{PHASE_SHIPMENT_INTRUSION_REACTION, "shipment.intrusionReaction" },
+	{PHASE_SHIPMENT_ACCOMPANY_DECISION, "shipment.accompanyDecision" },
+	{PHASE_SHIPMENT_MOVE,               "shipment.move"              },
 };
 
 std::vector<Faction> Faction::expand(Faction mask)

@@ -568,9 +568,15 @@ Arrakis::Arrakis()
 {
 }
 
-Arrakis::Arrakis(const std::vector<int>& aSeats)
-: mStormOrder(aSeats)
+Arrakis::Arrakis(const std::vector<int>& aSeats, const std::vector<Faction>& aFactions)
+: mStormOrder()
 {
+	mStormOrder.reserve(aSeats.size());
+	for (std::size_t i = 0; i < aSeats.size(); ++i)
+	{
+		mStormOrder.emplace_back(FactionPosition{aSeats[i], aFactions[i]});
+	}
+
 	std::sort(mStormOrder.begin(), mStormOrder.end());
 	updateStormOrder();
 }
@@ -702,29 +708,29 @@ int Arrakis::getStorm() const noexcept
 	return storm;
 }
 
-static std::vector<int>::iterator
-firstPlayer(std::vector<int>& v, int storm) noexcept
+static std::vector<Arrakis::FactionPosition>::iterator
+firstPlayer(std::vector<Arrakis::FactionPosition>& v, int storm) noexcept
 {
-	const auto it = std::upper_bound(v.begin(), v.end(), storm);
+	const auto it = std::upper_bound(v.begin(), v.end(), Arrakis::FactionPosition{storm, Faction::any()});
 	if (it == v.cend())
 		return v.begin();
 	else
 		return it;
 }
 
-int Arrakis::firstByStormOrder() const noexcept
+Arrakis::FactionPosition Arrakis::firstByStormOrder() const noexcept
 {
 	return mStormOrder.front();
 }
 
-int Arrakis::lastByStormOrder() const noexcept
+Arrakis::FactionPosition Arrakis::lastByStormOrder() const noexcept
 {
 	return mStormOrder.back();
 }
 
-std::vector<int> Arrakis::stormOrder() const
+std::vector<Arrakis::FactionPosition> Arrakis::stormOrder() const
 {
-	return std::vector<int>(mStormOrder.cbegin(), mStormOrder.cend());
+	return std::vector<FactionPosition>(mStormOrder.cbegin(), mStormOrder.cend());
 }
 
 void Arrakis::updateStormOrder()

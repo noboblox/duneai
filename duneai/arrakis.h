@@ -15,13 +15,35 @@ public:
 		const int sector;
 	};
 
+	struct FactionPosition
+	{
+		int seat;
+		Faction faction;
+
+		FactionPosition(int aSeat, Faction aFaction) : seat(aSeat), faction(aFaction) {}
+
+		const bool operator!=(const FactionPosition& o) const noexcept { return !operator==(o); }
+		const bool operator==(const FactionPosition& o) const noexcept { return seat == o.seat && faction == o.faction; }
+
+		const bool operator>=(const FactionPosition& o) const noexcept { return !operator<(o); }
+		const bool operator<(const FactionPosition& o) const noexcept
+		{
+			if (seat == o.seat)
+				return faction < o.faction;
+			return seat < o.seat;
+		}
+
+		const bool operator>(const FactionPosition& o) const noexcept { return o.operator<(*this); }
+		const bool operator<=(const FactionPosition& o) const noexcept { return !(o.operator<(*this)); }
+	};
+
     static void reachable(AreaId from, int storm, int movement, std::vector<AreaId>& result);
     static bool insideStorm(AreaId id, int storm);
     static bool fremenInitArea(AreaId id);
     static const char* areaName(AreaId id);
 
 	Arrakis();
-	explicit Arrakis(const std::vector<int>& aSeats);
+	explicit Arrakis(const std::vector<int>& aSeats, const std::vector<Faction>& aFactions);
 
 	void placeHostile(Faction from, Placement source);
 	void placeNeutral(Faction from, Placement source);
@@ -31,9 +53,9 @@ public:
 
 	int getStorm() const noexcept;
 
-	int firstByStormOrder() const noexcept;
-	int lastByStormOrder() const noexcept;
-	std::vector<int> stormOrder() const;
+	FactionPosition firstByStormOrder() const noexcept;
+	FactionPosition lastByStormOrder() const noexcept;
+	std::vector<FactionPosition> stormOrder() const;
 	int advanceStorm(int count);
 	int addSpice(AreaId area, int amount);
 	int removeSpice(AreaId area, int amount) noexcept;
@@ -48,7 +70,7 @@ private:
 
 	std::vector<ForcesFrom> mForces;
 	std::vector<std::pair<AreaId, int>> spice;
-	std::vector<int> mStormOrder;
+	std::vector<FactionPosition> mStormOrder;
 	int storm = 1;
 
 

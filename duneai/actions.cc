@@ -11,7 +11,12 @@ std::unordered_map<ActionType, const char*> ActionTypeLabels::labels =
 		{ACTION_BENE_GESSERIT_START_FORCE,  "beneGesseritStartForce"},
 		{ACTION_STORM_INITIAL_DIAL,         "stormInitialDial"},
 		{ACTION_CHOAM_CHARITY,              "choamCharity"},
-		{ACTION_BID,                        "bid"}
+		{ACTION_BID,                        "bid"},
+		{ACTION_GUILD_SHIPMENT_DECISION,    "guildShipmentDecision"},
+		{ACTION_INTRUSION_RESPONSE,         "intrusionResponse"},
+		{ACTION_ACOMMPANY_SHIPMENT,         "accompanyShipment"},
+		{ACTION_SHIP,                       "ship"},
+		{ACTION_MOVE,                       "move"},
 };
 
 void Action::serialize(std::ostream& out) const
@@ -91,6 +96,18 @@ void ActionShip::serialize(std::ostream& out) const
 		<< static_cast<int> (fromArea)
 		<< static_cast<int> (fromReserve)
 		<< static_cast<int> (inverted);
+}
+
+void ActionIntrusionReaction::serialize(std::ostream& out) const
+{
+	Action::serialize(out);
+	out << static_cast<int> (disengage);
+}
+
+void ActionAccompanyDecision::serialize(std::ostream& out) const
+{
+	Action::serialize(out);
+	out << static_cast<int> (decision);
 }
 
 void ActionMove::serialize(std::ostream& out) const

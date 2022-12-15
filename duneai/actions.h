@@ -23,6 +23,8 @@ enum ActionType
 	ACTION_BID,
 	ACTION_GUILD_SHIPMENT_DECISION,
 	ACTION_SHIP,
+	ACTION_INTRUSION_RESPONSE,
+	ACTION_ACOMMPANY_SHIPMENT,
 	ACTION_MOVE,
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
@@ -229,6 +231,40 @@ public:
 	const AreaId fromArea;
 	const bool fromReserve;
 	const bool inverted;
+};
+
+class ActionIntrusionReaction : public Action
+{
+public:
+	explicit ActionIntrusionReaction(Faction aFrom, bool aDisengage)
+	: Action(aFrom, ACTION_INTRUSION_RESPONSE),
+	  disengage(aDisengage)
+	{
+	}
+
+	virtual void serialize(std::ostream& out) const override;
+	bool disengage;
+};
+
+class ActionAccompanyDecision : public Action
+{
+public:
+	enum Decision
+	{
+		PASS               = 0,
+		ACCOMPANY_SHIPMENT = 1,
+		SEND_TO_POLAR_SINK = 2
+	};
+
+	explicit ActionAccompanyDecision(Faction aFrom, Decision aDecision)
+	: Action(aFrom, ACTION_ACOMMPANY_SHIPMENT),
+	  decision(aDecision)
+	{
+	}
+
+	virtual void serialize(std::ostream& out) const override;
+
+	const Decision decision;
 };
 
 class ActionMove : public Action

@@ -8,6 +8,7 @@
 #include "arrakis.h"
 #include "auction.h"
 #include "gameconstants.h"
+#include "shipormove.h"
 
 class TraitorDeck
 {
@@ -241,6 +242,7 @@ struct PublicGameState
 	Faction expectingInputFrom = Faction::none();
 	Arrakis board;
 	Auction auction;
+	ShipOrMove shipper;
 };
 
 

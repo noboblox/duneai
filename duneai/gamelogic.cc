@@ -7,14 +7,19 @@
 
 std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 {
-	{PHASE_INIT_PREDICTION,        true, Faction::beneGesserit(),                  ACTION_PREDICT},
-	{PHASE_INIT_HARKONNEN_REDRAW,  true, Faction::harkonnen(),                     ACTION_HARKONNEN_REDRAW},
-	{PHASE_INIT_TRAITOR_SELECTION, true, Faction::anyExcept(Faction::harkonnen()), ACTION_TRAITOR_SELECTION},
-	{PHASE_INIT_FREMEN_PLACEMENT,  true, Faction::fremen(),                        ACTION_FREMEN_PLACEMENT},
-	{PHASE_INIT_BG_PLACEMENT,      true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_START_FORCE},
-	{PHASE_STORM_INITAL_DIAL,      true, Faction::any(),                           ACTION_STORM_INITIAL_DIAL},
-	{PHASE_CHOAM_CHARITY,          true, Faction::any(),                           ACTION_CHOAM_CHARITY},
-	{PHASE_AUCTION_BIDDING,        true, Faction::any(),                           ACTION_BID}
+	{PHASE_INIT_PREDICTION,             true, Faction::beneGesserit(),                  ACTION_PREDICT},
+	{PHASE_INIT_HARKONNEN_REDRAW,       true, Faction::harkonnen(),                     ACTION_HARKONNEN_REDRAW},
+	{PHASE_INIT_TRAITOR_SELECTION,      true, Faction::anyExcept(Faction::harkonnen()), ACTION_TRAITOR_SELECTION},
+	{PHASE_INIT_FREMEN_PLACEMENT,       true, Faction::fremen(),                        ACTION_FREMEN_PLACEMENT},
+	{PHASE_INIT_BG_PLACEMENT,           true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_START_FORCE},
+	{PHASE_STORM_INITAL_DIAL,           true, Faction::any(),                           ACTION_STORM_INITIAL_DIAL},
+	{PHASE_CHOAM_CHARITY,               true, Faction::any(),                           ACTION_CHOAM_CHARITY},
+	{PHASE_AUCTION_BIDDING,             true, Faction::any(),                           ACTION_BID},
+	{PHASE_SHIPMENT_GUILD_DECISION,     true, Faction::spacingGuild(),                  ACTION_GUILD_SHIPMENT_DECISION},
+	{PHASE_SHIPMENT_SHIP,               true, Faction::any(),                           ACTION_SHIP},
+	{PHASE_SHIPMENT_INTRUSION_REACTION, true, Faction::beneGesserit(),                  ACTION_INTRUSION_RESPONSE},
+	{PHASE_SHIPMENT_ACCOMPANY_DECISION, true, Faction::beneGesserit(),                  ACTION_ACOMMPANY_SHIPMENT},
+	{PHASE_SHIPMENT_MOVE,               true, Faction::any(),                           ACTION_MOVE},
 };
 
 GameLogic::GameLogic()
@@ -128,6 +133,16 @@ bool GameLogic::gameAction(GameState& game, const Action& action)
 		return phaseChoamCharity(game, action);
 	case PHASE_AUCTION_BIDDING:
 		return phaseBidding(game, action);
+	case PHASE_SHIPMENT_GUILD_DECISION:
+		return phaseShipmentGuildDecision(game, action);
+	case PHASE_SHIPMENT_SHIP:
+		return phaseShipmentShip(game, action);
+	case PHASE_SHIPMENT_INTRUSION_REACTION:
+		return phaseShipmentIntrusionReaction(game, action);
+	case PHASE_SHIPMENT_ACCOMPANY_DECISION:
+		return phaseShipmentAccompanyDecision(game, action);
+	case PHASE_SHIPMENT_MOVE:
+		return phaseShipmentMove(game, action);
 	default:
 		return false;
 	}
@@ -394,9 +409,10 @@ bool GameLogic::phaseChoamCharity(GameState& game, const Action& action)
 
 	if (game.expectingInputFrom == Faction::none())
 	{
-		prepareAuction(game);
-		advance(game, PHASE_AUCTION_BIDDING, game.auction.currentBidder());
-		// TODO eligible players == 0
+		if (prepareAuction(game) > 0)
+			advance(game, PHASE_AUCTION_BIDDING, game.auction.currentBidder());
+		else
+			advanceToShipmentPhase(game);
 	}
 
 	return true;
@@ -472,18 +488,73 @@ bool GameLogic::phaseBidding(GameState& game, const Action& action)
 	else
 	{
 		log->info("auction phase finished");
-		game.expectingInputFrom = Faction::none(); // TODO next phase
+		advanceToShipmentPhase(game);
 	}
 
 	return true;
 }
 
-bool GameLogic::phaseShipment(GameState& game, const Action& action)
+bool GameLogic::phaseShipmentGuildDecision(GameState& game, const Action& action)
 {
-	auto ac = expectedAction<ActionBid>(game, action, ACTION_BID);
+	auto ac = expectedAction<ActionGuildShipmentDecision>(game, action, ACTION_GUILD_SHIPMENT_DECISION);
 	if (!ac) return false;
 
-	return false; // TODO
+	auto& shipper = game.shipper;
+	bool success = false;
+
+	if (ac->shipNow)
+		shipper.forceGuildShipment();
+	else
+		shipper.delayGuildShipment();
+
+	if (!success)
+		return false;
+
+	advanceInShipmentPhase(game);
+	return true;
+}
+
+bool GameLogic::phaseShipmentShip(GameState& game, const Action& action)
+{
+	auto ac = expectedAction<ActionShip>(game, action, ACTION_SHIP);
+	if (!ac) return false;
+
+	auto& shipper = game.shipper;
+
+	if (ac->from() != shipper.currentlyShipping())
+		return false;
+
+	bool success = false;
+
+	if (ac->fromReserve && !ac->inverted)
+		success = shipper.shipFromReserve(ac->to.where, ac->to.normal, ac->to.special);
+	else if (ac->fromArea && !ac->inverted)
+		success = shipper.shipCrossPlanet(ac->fromArea, ac->to.where, ac->to.normal, ac->to.special);
+	else if (ac->fromReserve)
+		success = shipper.shipToReserve(ac->to.where, ac->to.normal, ac->to.special);
+	else if (ac->fromArea)
+		success = shipper.shipCrossPlanet(ac->to.where, ac->fromArea, ac->to.normal, ac->to.special);
+
+	if (!success)
+		return false;
+
+	advanceInShipmentPhase(game);
+	return true;
+}
+
+bool GameLogic::phaseShipmentIntrusionReaction(GameState& game, const Action& action)
+{
+	return false;
+}
+
+bool GameLogic::phaseShipmentAccompanyDecision(GameState& game, const Action& action)
+{
+	return false;
+}
+
+bool GameLogic::phaseShipmentMove(GameState& game, const Action& action)
+{
+	return false;
 }
 
 //
@@ -523,7 +594,7 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 		log->info("player %s at position %u", mGame.players.back().faction.label().c_str(), mGame.players.back().seat);
 	}
 
-	mGame.board = Arrakis(seats);
+	mGame.board = Arrakis(seats, factions);
 	mGame.traitors = TraitorDeck(factionsInGame, mGame.random);
 	drawTraitors(mGame);
 	mGame.spiceDeck = SpiceDeck(mGame.random);
@@ -565,17 +636,6 @@ GameLogic::getPlayerState(GameState& game, Faction faction)
 		return nullptr;
 }
 
-PlayerState*
-GameLogic::getPlayerState(GameState& game, int seat)
-{
-	auto it = std::find_if(game.players.begin(), game.players.end(),
-				[seat] (const PlayerState& s) -> bool { return s.seat == seat; });
-	if (it != game.players.end())
-		return &(*it);
-	else
-		return nullptr;
-}
-
 template <typename A>
 const A* GameLogic::expectedAction(GameState& game, const Action& action, ActionType type)
 {
@@ -586,16 +646,18 @@ const A* GameLogic::expectedAction(GameState& game, const Action& action, Action
 	return static_cast<const A*> (&action);
 }
 
-void GameLogic::prepareAuction(GameState& game)
+int GameLogic::prepareAuction(GameState& game)
 {
 	game.auction = Auction(game);
+	const int eligible = game.auction.eligible();
 
-	for (int i = 0; i < game.auction.eligible(); ++i)
+	for (int i = 0; i < eligible; ++i)
 	{
 		game.biddingPool.insert(game.biddingPool.begin(), game.treacheryDeck.draw());
 	}
 
 	log->info("prepare auction with %d cards", game.auction.eligible());
+	return eligible;
 }
 
 void GameLogic::auctionWinTransaction(GameState& game, Faction won, int spice, bool karama)
@@ -655,6 +717,31 @@ void GameLogic::advance(GameState& game, GamePhase next, Faction customFactions)
 
 	mGame.phase = next;
 	log->info("advance game -> %s | input required from %s", GamePhaseLabels::label(game.phase), mGame.expectingInputFrom.label().c_str());
+}
+
+void GameLogic::advanceToShipmentPhase(GameState& game)
+{
+	game.shipper = ShipOrMove(game);
+	if (game.shipper.pendingGuildDecision())
+		advance(game, PHASE_SHIPMENT_GUILD_DECISION);
+	else
+		advance(game, PHASE_SHIPMENT_SHIP, game.shipper.currentlyShipping());
+}
+
+void GameLogic::advanceInShipmentPhase(GameState& game)
+{
+	if      (game.shipper.pendingGuildDecision())
+		advance(game, PHASE_SHIPMENT_GUILD_DECISION);
+	else if (game.shipper.pendingIntrusionReaction())
+		advance(game, PHASE_SHIPMENT_INTRUSION_REACTION);
+	else if (game.shipper.pendingAccompanyDecision())
+		advance(game, PHASE_SHIPMENT_ACCOMPANY_DECISION);
+	else if (game.shipper.pendingMovement())
+		advance(game, PHASE_SHIPMENT_MOVE);
+	else if (game.shipper.finished())
+		advance(game, PHASE_invalid); // TODO -> battle phase
+	else
+		advance(game, PHASE_SHIPMENT_SHIP, game.shipper.currentlyShipping());
 }
 
 void GameLogic::discardTraitors(GameState& game)
@@ -786,14 +873,14 @@ Faction GameLogic::initialStormDialFactions(GameState& game)
 	Faction result = Faction::none();
 
 	auto stormOrder = game.board.stormOrder();
-	result |= getPlayerState(game, stormOrder.front())->faction;
+	result |= stormOrder.front().faction;
 
 	auto second = stormOrder.size() - 1;
 
-	if (stormOrder[second] == game.board.getStorm())
+	if (stormOrder[second].seat == game.board.getStorm())
 		--second;
 
-	result |= getPlayerState(game, stormOrder[second])->faction;
+	result |= stormOrder[second].faction;
 	return result;
 }
 

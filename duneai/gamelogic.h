@@ -84,14 +84,20 @@ private:
 	void phaseSpiceSpiceBlow(GameState& game);
 	bool phaseChoamCharity(GameState& game, const Action& action);
 	bool phaseBidding(GameState& game, const Action& action);
-	bool phaseShipment(GameState& game, const Action& action);
+	bool phaseShipmentGuildDecision(GameState& game, const Action& action);
+	bool phaseShipmentShip(GameState& game, const Action& action);
+	bool phaseShipmentIntrusionReaction(GameState& game, const Action& action);
+	bool phaseShipmentAccompanyDecision(GameState& game, const Action& action);
+	bool phaseShipmentMove(GameState& game, const Action& action);
 
 	void systemEvent(const SystemEvent& event);
 	bool isAllowedAction(GameState& game, const Action& action);
 	bool expected(GameState& game, Faction faction);
-	void prepareAuction(GameState& game);
+	int prepareAuction(GameState& game);
 	void auctionWinTransaction(GameState& game, Faction won, int spice, bool karama);
 	void advance(GameState& game, GamePhase next, Faction customFactions = Faction::none());
+	void advanceToShipmentPhase(GameState& game);
+	void advanceInShipmentPhase(GameState& game);
 	void discardTraitors(GameState& game);
 	void drawTraitors(GameState& game);
     bool factionAvailable(GameState& game, Faction faction);
@@ -102,7 +108,6 @@ private:
     void record(std::unique_ptr<const Action>&& action);
     Faction initialStormDialFactions(GameState& game);
     PlayerState* getPlayerState(GameState& game, Faction faction);
-    PlayerState* getPlayerState(GameState& game, int seat);
     template <typename A> const A* expectedAction(GameState& game, const Action& action, ActionType type);
 
 private:

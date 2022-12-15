@@ -19,10 +19,10 @@ Auction::Auction(const GameState& state)
 {
 	auto turnOrder = state.board.stormOrder();
 
-	for (const auto& seat : turnOrder)
+	for (const auto& position : turnOrder)
 	{
 		auto it = std::find_if(state.players.cbegin(), state.players.cend(),
-				[seat](const PlayerState& p) -> bool { return p.seat == seat; });
+				[&position](const PlayerState& p) -> bool { return p.seat == position.seat; });
 		data.push_back(AuctionData{it->maxHand, (int) it->hand.size(), 0, it->faction});
 	}
 
