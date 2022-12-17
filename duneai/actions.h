@@ -24,7 +24,7 @@ enum ActionType
 	ACTION_GUILD_SHIPMENT_DECISION,
 	ACTION_SHIP,
 	ACTION_INTRUSION_RESPONSE,
-	ACTION_ACOMMPANY_SHIPMENT,
+	ACTION_ACCOMPANY_SHIPMENT,
 	ACTION_MOVE,
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
@@ -257,7 +257,7 @@ public:
 	};
 
 	explicit ActionAccompanyDecision(Faction aFrom, Decision aDecision)
-	: Action(aFrom, ACTION_ACOMMPANY_SHIPMENT),
+	: Action(aFrom, ACTION_ACCOMPANY_SHIPMENT),
 	  decision(aDecision)
 	{
 	}
@@ -269,9 +269,18 @@ public:
 
 class ActionMove : public Action
 {
+public:
+	enum BeneGesseritAdvisor { TRUE };
+
 	explicit ActionMove(Faction aFaction, AreaId aFrom, Placement aTo, bool aUseHajr = false)
 	: Action(aFaction, ACTION_MOVE),
-	  to(aTo), fromArea(aFrom), useHajr(aUseHajr)
+	  to(aTo), fromArea(aFrom), useHajr(aUseHajr), asAdvisor(false)
+	{
+	}
+
+	explicit ActionMove(Faction aFaction, AreaId aFrom, Placement aTo, BeneGesseritAdvisor, bool aUseHajr = false)
+	: Action(aFaction, ACTION_MOVE),
+	  to(aTo), fromArea(aFrom), useHajr(aUseHajr), asAdvisor(true)
 	{
 	}
 
@@ -280,6 +289,7 @@ class ActionMove : public Action
 	const Placement to;
 	const AreaId fromArea;
 	const bool useHajr;
+	const bool asAdvisor;
 };
 
 

@@ -84,6 +84,8 @@ private:
 	void phaseSpiceSpiceBlow(GameState& game);
 	bool phaseChoamCharity(GameState& game, const Action& action);
 	bool phaseBidding(GameState& game, const Action& action);
+
+
 	bool phaseShipmentGuildDecision(GameState& game, const Action& action);
 	bool phaseShipmentShip(GameState& game, const Action& action);
 	bool phaseShipmentIntrusionReaction(GameState& game, const Action& action);
@@ -107,7 +109,6 @@ private:
     bool hasKarama(GameState& game, Faction faction);
     void record(std::unique_ptr<const Action>&& action);
     Faction initialStormDialFactions(GameState& game);
-    PlayerState* getPlayerState(GameState& game, Faction faction);
     template <typename A> const A* expectedAction(GameState& game, const Action& action, ActionType type);
 
 private:

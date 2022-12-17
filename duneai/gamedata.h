@@ -265,4 +265,7 @@ struct GameState : public PublicGameState
 	std::vector<TreacheryCard> biddingPool;
 };
 
+PlayerState*
+getPlayerState(GameState& game, Faction faction);
+
 #endif /* GAMEDATA_H_ */

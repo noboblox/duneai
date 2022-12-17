@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <iterator>
 
-
 const std::vector<Arrakis::Area> Arrakis::areas = {
 		{ PolarSink              , "PolarSink"           , 0 },
 		{ FalseWallEast_5        , "FalseWallEast.5"     , 5 },
@@ -591,10 +590,33 @@ const char* Arrakis::areaName(AreaId id)
 		return pArea->name;
 }
 
+bool Arrakis::isReachable(AreaId from, AreaId to, int movement) const
+{
+	bool reachable = false;
+	searchReachableAreas(from, storm, movement, [&reachable, &to](AreaId a)
+			{
+				if (a != to)
+					return true;
+				reachable = true;
+				return false;
+			});
+	return reachable;
+}
+
 void Arrakis::reachable(AreaId from, int storm, int movement, std::vector<AreaId>& result)
 {
 	result.clear();
+	searchReachableAreas(from,storm, movement, [&result](AreaId a)
+	    {
+			if (std::find(result.cbegin(), result.cend(), a) == result.cend())
+				result.push_back(a);
+			return true;
+		});
 
+}
+
+void Arrakis::searchReachableAreas(AreaId from, int storm, int movement, const std::function<bool(AreaId)>& client)
+{
 	if (insideStorm(from, storm))
 		return;
 
@@ -620,10 +642,8 @@ void Arrakis::reachable(AreaId from, int storm, int movement, std::vector<AreaId
 			{
 				current.emplace_back(dest.first, totalCost);
 
-				if (std::find(result.cbegin(), result.cend(), dest.first) == result.cend())
-				{
-					result.push_back(dest.first);
-				}
+				if (!client(dest.first))
+					return;
 			}
 		}
 
@@ -666,6 +686,21 @@ bool Arrakis::insideStorm(AreaId id, int storm)
 	return p_area->sector == storm;
 }
 
+bool Arrakis::isSietch(AreaId id)
+{
+	switch (id)
+	{
+	case SietchTabr:
+	case Arrakeen:
+	case Carthag:
+	case HabbanyaSietch:
+	case TueksSietch:
+		return true;
+	default:
+		return false;
+	}
+}
+
 bool Arrakis::fremenInitArea(AreaId id)
 {
 	switch (id)
@@ -682,6 +717,18 @@ bool Arrakis::fremenInitArea(AreaId id)
 	}
 }
 
+bool Arrakis::fremenShipArea(AreaId id)
+{
+	static constexpr int STORM_OUTSIDE_FREMEN_AREA = 2;
+	static std::vector<AreaId> allowed;
+
+	if (allowed.empty())
+		reachable(TheGreatFlat, STORM_OUTSIDE_FREMEN_AREA, 2, allowed);
+
+	return std::find(allowed.cbegin(), allowed.cend(), id) != allowed.cend();
+}
+
+
 const Arrakis::Area* Arrakis::getArea(AreaId id)
 {
 	auto it = std::find_if(areas.cbegin(), areas.cend(),
@@ -693,6 +740,11 @@ const Arrakis::Area* Arrakis::getArea(AreaId id)
 		return &(*it);
 }
 
+void Arrakis::place(Faction from, Placement source, bool hostile)
+{
+	place(ForcesFrom{from, source, hostile});
+}
+
 void Arrakis::placeHostile(Faction from, Placement source)
 {
 	place(ForcesFrom{from, source, true});
@@ -701,6 +753,30 @@ void Arrakis::placeHostile(Faction from, Placement source)
 void Arrakis::placeNeutral(Faction from, Placement source)
 {
 	place(ForcesFrom{from, source, false});
+}
+
+void Arrakis::removeForces(Faction from, Placement source)
+{
+	auto it = std::find_if(mForces.begin(), mForces.end(),
+			[&source, &from](const ForcesFrom& f)
+			{ return f.from == from && f.where == source.where; });
+
+	if (it == mForces.end())
+		return;
+
+	it->normal  -= source.normal;
+	it->special -= source.special;
+
+	if (it->normal <= 0 && it->special <= 0)
+		mForces.erase(it);
+}
+
+void Arrakis::setTerritoryHostility(Faction from, AreaId where, bool value)
+{
+	auto found = collectFromSameTerritory(where, &from, nullptr);
+
+	if (!found.empty())
+		const_cast<ForcesFrom*> (found.front())->hostile = value;
 }
 
 int Arrakis::getStorm() const noexcept
@@ -813,15 +889,107 @@ void Arrakis::place(ForcesFrom&& source)
 	}
 }
 
-std::vector<ForcesFrom*>
-Arrakis::collectFromSameTerritory(AreaId childArea, const Faction* filterFaction, const bool* filterHostile)
+bool Arrakis::isOccupied(Faction shipper, AreaId where, bool moveAsHostiles) const
 {
-	std::vector<ForcesFrom*> result;
-	result.reserve(10);
+	if (!isSietch(where))
+		return false;
+
+	if (!moveAsHostiles)
+		return false;
+
+	static constexpr bool hostility = true;
+	static const Faction enemies = Faction::anyExcept(shipper);
+
+	return collectFromSameTerritory(where, &enemies, &hostility).size() >= 2;
+}
+
+int Arrakis::movementRange(Faction who) const noexcept
+{
+	if (hasMovementBonus(who))
+		return 3;
+	else if (who == Faction::fremen())
+		return 2;
+	else
+		return 1;
+}
+
+bool Arrakis::hasMovementBonus(Faction who) const noexcept
+{
+	static constexpr bool HOSTILITY = true;
+	return !collectFromSameArea(AreaId::Carthag, &who, &HOSTILITY).empty() ||
+		   !collectFromSameArea(AreaId::Arrakeen, &who, &HOSTILITY).empty();
+}
+
+bool Arrakis::canShip(Faction who, AreaId where) const
+{
+	if (who == Faction::fremen() && !fremenShipArea(where))
+		return false;
+	if (insideStorm(where, storm))
+		return false;
+	if (isOccupied(who, where))
+		return false;
+	return true;
+}
+
+bool Arrakis::canMove(Faction who, AreaId from, AreaId to, bool moveAsHostiles)
+{
+	if (!isReachable(from, to, movementRange(who)))
+		return false;
+	if (isOccupied(who, to, moveAsHostiles))
+		return false;
+	return true;
+}
+
+bool
+Arrakis::playerForcesInArea(Faction from, AreaId area, ForcesFrom& result) const
+{
+	auto forces = collectFromSameArea(area, &from, nullptr);
+
+	if (!forces.empty())
+	{
+		result = *forces.front();
+		return true;
+	}
+
+	return false;
+}
+
+bool
+Arrakis::playerForcesInTerritory(Faction from, AreaId childArea, ForcesFrom& result) const
+{
+	auto forces = collectFromSameTerritory(childArea, &from, nullptr);
+
+	if (!forces.empty())
+	{
+		result = *forces.front();
+		return true;
+	}
+
+	return false;
+}
+
+std::vector<const ForcesFrom*>
+Arrakis::collectFromSameTerritory(AreaId childArea, const Faction* filterFaction, const bool* filterHostile) const
+{
+	return collect(childArea, filterFaction, filterHostile, false);
+}
+
+std::vector<const ForcesFrom*>
+Arrakis::collectFromSameArea(AreaId childArea, const Faction* filterFaction, const bool* filterHostile) const
+{
+	return collect(childArea, filterFaction, filterHostile, true);
+}
+
+std::vector<const ForcesFrom*>
+Arrakis::collect(AreaId childArea, const Faction* filterFaction, const bool* filterHostile, bool restrictToArea) const
+{
+	std::vector<const ForcesFrom*> result;
 
 	for (auto& forces : mForces)
 	{
 		if (!sameTerritory(childArea, forces.where))
+			continue;
+		if (restrictToArea && childArea != forces.where)
 			continue;
 		if (filterFaction && !(filterFaction->contains(forces.from)))
 			continue;
@@ -834,13 +1002,21 @@ Arrakis::collectFromSameTerritory(AreaId childArea, const Faction* filterFaction
 	return result;
 }
 
-int Arrakis::hostileFactionsInTerritory(AreaId childArea)
+int Arrakis::hostileFactionsInTerritory(AreaId childArea) const
 {
 	static constexpr bool HOSTILITY = true;
 	return (int) collectFromSameTerritory(childArea, nullptr, &HOSTILITY).size();
 }
 
-int Arrakis::neutralFactionsInTerritory(AreaId childArea)
+int Arrakis::hostileEnemiesInTerritory(Faction own, AreaId childArea) const
+{
+	static constexpr bool HOSTILITY = true;
+	const Faction enemies = Faction::anyExcept(own);
+	return (int) collectFromSameTerritory(childArea, &enemies, &HOSTILITY).size();
+}
+
+
+int Arrakis::neutralFactionsInTerritory(AreaId childArea) const
 {
 	static constexpr bool HOSTILITY = false;
 	return (int) collectFromSameTerritory(childArea, nullptr, &HOSTILITY).size();

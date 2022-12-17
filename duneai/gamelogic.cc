@@ -18,7 +18,7 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 	{PHASE_SHIPMENT_GUILD_DECISION,     true, Faction::spacingGuild(),                  ACTION_GUILD_SHIPMENT_DECISION},
 	{PHASE_SHIPMENT_SHIP,               true, Faction::any(),                           ACTION_SHIP},
 	{PHASE_SHIPMENT_INTRUSION_REACTION, true, Faction::beneGesserit(),                  ACTION_INTRUSION_RESPONSE},
-	{PHASE_SHIPMENT_ACCOMPANY_DECISION, true, Faction::beneGesserit(),                  ACTION_ACOMMPANY_SHIPMENT},
+	{PHASE_SHIPMENT_ACCOMPANY_DECISION, true, Faction::beneGesserit(),                  ACTION_ACCOMPANY_SHIPMENT},
 	{PHASE_SHIPMENT_MOVE,               true, Faction::any(),                           ACTION_MOVE},
 };
 
@@ -500,15 +500,11 @@ bool GameLogic::phaseShipmentGuildDecision(GameState& game, const Action& action
 	if (!ac) return false;
 
 	auto& shipper = game.shipper;
-	bool success = false;
 
 	if (ac->shipNow)
 		shipper.forceGuildShipment();
 	else
 		shipper.delayGuildShipment();
-
-	if (!success)
-		return false;
 
 	advanceInShipmentPhase(game);
 	return true;
@@ -544,17 +540,52 @@ bool GameLogic::phaseShipmentShip(GameState& game, const Action& action)
 
 bool GameLogic::phaseShipmentIntrusionReaction(GameState& game, const Action& action)
 {
-	return false;
+	auto ac = expectedAction<ActionIntrusionReaction>(game, action, ACTION_INTRUSION_RESPONSE);
+	if (!ac) return false;
+
+	if (ac->disengage)
+		game.shipper.disengageIntrusion();
+	else
+		game.shipper.engageIntrusion();
+
+	advanceInShipmentPhase(game);
+	return true;
 }
 
 bool GameLogic::phaseShipmentAccompanyDecision(GameState& game, const Action& action)
 {
-	return false;
+	auto ac = expectedAction<ActionAccompanyDecision>(game, action, ACTION_ACCOMPANY_SHIPMENT);
+	if (!ac) return false;
+
+	switch (ac->decision)
+	{
+	case ActionAccompanyDecision::PASS:
+		game.shipper.keepAdvisor();
+		break;
+	case ActionAccompanyDecision::ACCOMPANY_SHIPMENT:
+		game.shipper.sendAdvisor(false);
+		break;
+	case ActionAccompanyDecision::SEND_TO_POLAR_SINK:
+		game.shipper.sendAdvisor(true);
+		break;
+	default:
+		return false;
+	}
+
+	advanceInShipmentPhase(game);
+	return true;
 }
 
 bool GameLogic::phaseShipmentMove(GameState& game, const Action& action)
 {
-	return false;
+	auto ac = expectedAction<ActionMove>(game, action, ACTION_MOVE);
+	if (!ac) return false;
+
+	if (!game.shipper.move(ac->fromArea, ac->to.where, ac->to.normal, ac->to.special, ac->useHajr, ac->asAdvisor))
+		return false;
+
+	advanceInShipmentPhase(game);
+	return true;
 }
 
 //
@@ -623,17 +654,6 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 void GameLogic::record(std::unique_ptr<const Action>&& action)
 {
 	mRecorded.push_back(std::move(action));
-}
-
-PlayerState*
-GameLogic::getPlayerState(GameState& game, Faction faction)
-{
-	auto it = std::find_if(game.players.begin(), game.players.end(),
-				[faction] (const PlayerState& s) -> bool { return s.faction == faction; });
-	if (it != game.players.end())
-		return &(*it);
-	else
-		return nullptr;
 }
 
 template <typename A>

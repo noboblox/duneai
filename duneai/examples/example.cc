@@ -102,6 +102,8 @@ int main()
 	game.post(std::make_unique<ActionBid>(Faction::spacingGuild(), ActionBid::PASS));
 	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     ActionBid::PASS));
 
+	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
+
 	game.tick();
 	return 0;
 }

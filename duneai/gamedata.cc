@@ -233,3 +233,14 @@ void TreacheryDeck::reshuffle()
 	discardPile.clear();
     std::shuffle(drawPile.begin(), drawPile.end(), *mpRandom);
 }
+
+PlayerState*
+getPlayerState(GameState& game, Faction faction)
+{
+	auto it = std::find_if(game.players.begin(), game.players.end(),
+				[faction] (const PlayerState& s) -> bool { return s.faction == faction; });
+	if (it != game.players.end())
+		return &(*it);
+	else
+		return nullptr;
+}
