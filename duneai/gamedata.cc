@@ -169,7 +169,7 @@ TreacheryDeck::TreacheryDeck(std::mt19937& random)
 : mpRandom(&random),
   drawPile{
 	TreacheryCard{TreacheryCard::LASGUN         , TreacheryCard::P_LASGUN | TreacheryCard::P_PROJECTILE_WEAPON | TreacheryCard::P_POISON_WEAPON },
-    TreacheryCard{TreacheryCard::CHRYS_KNIFE    , TreacheryCard::P_PROJECTILE_WEAPON},
+    TreacheryCard{TreacheryCard::CRYS_KNIFE     , TreacheryCard::P_PROJECTILE_WEAPON},
     TreacheryCard{TreacheryCard::MAULA_PISTOL   , TreacheryCard::P_PROJECTILE_WEAPON},
     TreacheryCard{TreacheryCard::SLIP_TIP       , TreacheryCard::P_PROJECTILE_WEAPON},
     TreacheryCard{TreacheryCard::STUNNER        , TreacheryCard::P_PROJECTILE_WEAPON},
