@@ -37,7 +37,7 @@ int main()
 	// advisor
 	//game.post(std::make_unique<ActionBeneGesseritStartingForce>(Faction::beneGesserit(), TueksSietch));
 	// fighter
-	game.post(std::make_unique<ActionBeneGesseritStartingForce>(Faction::beneGesserit(), TheGreatFlat));
+	game.post(std::make_unique<ActionBeneGesseritStartingForce>(Faction::beneGesserit(), Carthag));
 
 	game.post(std::make_unique<ActionStormInitialDial>(Faction::spacingGuild(), 13));
 	game.post(std::make_unique<ActionStormInitialDial>(Faction::tleilaxu(), 19));
