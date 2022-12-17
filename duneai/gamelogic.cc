@@ -69,14 +69,9 @@ void GameLogic::tick()
 		{
 			auto& action = ev.get<Action>();
 			if (initialized && gameAction(mGame, action))
-			{
-				log->debug("record event %s from %s", action.label(), action.from().label().c_str());
 				record(std::unique_ptr<Action>(static_cast<Action*> (mPending.front().release())));
-			}
 			else
-			{
 				log->info("discard event %s from %s", action.label(), action.from().label().c_str());
-			}
 		}
 
 		mPending.pop();

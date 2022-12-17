@@ -66,7 +66,7 @@ void ShipOrMove::disengageIntrusion() noexcept
 	if (phase != SP_INTRUSION)
 		return;
 
-	log->info("beneGesserit swaps to advisor in %s", last.where);
+	log->info("beneGesserit swaps to advisor in %s", Arrakis::areaName(last.where));
 	game->board.setTerritoryHostility(Faction::beneGesserit(), last.where, false);
 
 	if (beneGesseritCanAccompany())
@@ -81,6 +81,8 @@ void ShipOrMove::engageIntrusion() noexcept
 {
 	if (phase != SP_INTRUSION)
 		return;
+
+	log->info("beneGesserit stays fighter in %s", Arrakis::areaName(last.where));
 
 	if (last.origin != LastAction::MOVE_PHASE)
 		phase = SP_MOVE;
@@ -98,6 +100,8 @@ void ShipOrMove::sendAdvisor(bool toPolarSink)
 	if (phase != SP_ACCOMPANY)
 		return;
 
+	log->info("beneGesserit sends advisor -> %s",
+			  toPolarSink ? Arrakis::areaName(AreaId::PolarSink) : Arrakis::areaName(last.where));
 	auto player = getPlayerState(*game, Faction::beneGesserit());
 	--(player->reserve);
 
