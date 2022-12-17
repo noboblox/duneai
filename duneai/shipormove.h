@@ -25,6 +25,7 @@ public:
 	void keepAdvisor();
 
 	bool pendingMovement() const noexcept;
+	bool passMovement();
 	bool move(AreaId from, AreaId to, int normalAmount, int specialAmount, bool useHajr = false, bool advisor = false);
 
 	bool finished() const noexcept;
@@ -34,6 +35,7 @@ public:
 	bool shipFromReserve(AreaId to, int normalAmount, int specialAmount);
 	bool shipToReserve(AreaId from, int normalAmount, int specialAmount);
 	bool shipCrossPlanet(AreaId from, AreaId to, int normalAmount, int specialAmount);
+	bool passShipment();
 
 private:
 	enum SubPhase

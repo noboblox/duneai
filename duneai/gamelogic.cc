@@ -523,7 +523,9 @@ bool GameLogic::phaseShipmentShip(GameState& game, const Action& action)
 
 	bool success = false;
 
-	if (ac->fromReserve && !ac->inverted)
+	if (ac->to.where == AreaId::INVALID)
+		success = shipper.passShipment();
+	else if (ac->fromReserve && !ac->inverted)
 		success = shipper.shipFromReserve(ac->to.where, ac->to.normal, ac->to.special);
 	else if (ac->fromArea && !ac->inverted)
 		success = shipper.shipCrossPlanet(ac->fromArea, ac->to.where, ac->to.normal, ac->to.special);
@@ -582,7 +584,9 @@ bool GameLogic::phaseShipmentMove(GameState& game, const Action& action)
 	auto ac = expectedAction<ActionMove>(game, action, ACTION_MOVE);
 	if (!ac) return false;
 
-	if (!game.shipper.move(ac->fromArea, ac->to.where, ac->to.normal, ac->to.special, ac->useHajr, ac->asAdvisor))
+	if (ac->to.where == AreaId::INVALID)
+		game.shipper.passMovement();
+	else if (!game.shipper.move(ac->fromArea, ac->to.where, ac->to.normal, ac->to.special, ac->useHajr, ac->asAdvisor))
 		return false;
 
 	advanceInShipmentPhase(game);

@@ -214,6 +214,20 @@ bool ShipOrMove::beneGesseritCanAccompany() const noexcept
 	return true;
 }
 
+bool ShipOrMove::passShipment()
+{
+	if (phase == SP_SHIP)
+		advanceAfterShip(LastAction{currentlyShipping(), AreaId::INVALID, LastAction::SHIP_PHASE_SPECIAL});
+	return true;
+}
+
+bool ShipOrMove::passMovement()
+{
+	if (phase == SP_MOVE)
+		advanceAfterMove(LastAction{currentlyShipping(), AreaId::INVALID, LastAction::MOVE_PHASE});
+	return true;
+}
+
 bool ShipOrMove::shipFromReserve(AreaId to, int normalAmount, int specialAmount)
 {
 	const Faction who     = currentlyShipping();
