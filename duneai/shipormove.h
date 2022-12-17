@@ -68,8 +68,8 @@ private:
 		Origin origin;
 	};
 
-	void advanceAfterShip(LastAction&& last);
-	void advanceAfterMove(LastAction&& last);
+	void advanceAfterShip(LastAction&& aLast);
+	void advanceAfterMove(LastAction&& aLast);
 	void advanceToNextPlayer();
 	bool verifyShipment(const PlayerState* player, int cost, AreaId* from, AreaId* to, int normalAmount, int specialAmount);
 	bool verifyMovement(const PlayerState* player, AreaId from, AreaId to, int normalAmount, int specialAmount, bool advisor);

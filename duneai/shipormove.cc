@@ -197,7 +197,7 @@ bool ShipOrMove::beneGesseritCanAccompany() const noexcept
 {
 	if (!beneGesseritAvailable)
 		return false;
-	if (!last.origin == LastAction::SHIP_PHASE_TO_PLANET)
+	if (last.origin != LastAction::SHIP_PHASE_TO_PLANET)
 		return false;
 	if (last.who == Faction::beneGesserit() || last.who == Faction::fremen())
 		return false;
@@ -356,9 +356,9 @@ void ShipOrMove::payShipment(PlayerState* player, int cost)
 	player->spice -= cost;
 }
 
-void ShipOrMove::advanceAfterShip(LastAction&& last)
+void ShipOrMove::advanceAfterShip(LastAction&& aLast)
 {
-	last = std::move(last);
+	last = std::move(aLast);
 
 	if (beneGesseritCanReact())
 		phase = SP_INTRUSION;
@@ -368,9 +368,9 @@ void ShipOrMove::advanceAfterShip(LastAction&& last)
 		phase = SP_MOVE;
 }
 
-void ShipOrMove::advanceAfterMove(LastAction&& last)
+void ShipOrMove::advanceAfterMove(LastAction&& aLast)
 {
-	last = std::move(last);
+	last = std::move(aLast);
 
 	if (beneGesseritCanReact())
 		phase = SP_INTRUSION;
