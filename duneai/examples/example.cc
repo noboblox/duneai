@@ -209,6 +209,7 @@ void round1Shipment(GameLogic& game)
 {
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
 	game.post(std::make_unique<ActionShip>(Faction::tleilaxu(), Placement{ AreaId::HabbanyaSietch, 3, 0 }));
+	game.post(std::make_unique<ActionAccompanyDecision>(Faction::beneGesserit(), ActionAccompanyDecision::ACCOMPANY_SHIPMENT));
 }
 
 #endif

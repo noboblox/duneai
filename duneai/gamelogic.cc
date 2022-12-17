@@ -774,7 +774,7 @@ void GameLogic::advanceInShipmentPhase(GameState& game)
 	else if (game.shipper.pendingAccompanyDecision())
 		advance(game, PHASE_SHIPMENT_ACCOMPANY_DECISION);
 	else if (game.shipper.pendingMovement())
-		advance(game, PHASE_SHIPMENT_MOVE);
+		advance(game, PHASE_SHIPMENT_MOVE, game.shipper.currentlyShipping());
 	else if (game.shipper.finished())
 		advance(game, PHASE_invalid); // TODO -> battle phase
 	else
