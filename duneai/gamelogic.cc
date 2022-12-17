@@ -488,6 +488,7 @@ bool GameLogic::phaseBidding(GameState& game, const Action& action)
 	else
 	{
 		log->info("auction phase finished");
+		cleanupAuctionPool(game);
 		advanceToShipmentPhase(game);
 	}
 
@@ -678,6 +679,19 @@ int GameLogic::prepareAuction(GameState& game)
 
 	log->info("prepare auction with %d cards", game.auction.eligible());
 	return eligible;
+}
+
+void GameLogic::cleanupAuctionPool(GameState& game)
+{
+	if (game.biddingPool.empty())
+		return;
+
+	log->info("%u cards were not auctioned and will be placed back onto the deck", game.biddingPool.size());
+
+	std::for_each(game.biddingPool.cbegin(), game.biddingPool.cend(),
+			[&game](const auto& c) { game.treacheryDeck.placeOnTop(c); });
+
+	game.biddingPool.clear();
 }
 
 void GameLogic::auctionWinTransaction(GameState& game, Faction won, int spice, bool karama)

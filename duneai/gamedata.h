@@ -191,6 +191,7 @@ public:
 	explicit TreacheryDeck() : mpRandom(nullptr) {}
 	explicit TreacheryDeck(std::mt19937& random);
 
+	void placeOnTop(const TreacheryCard& card);
 	TreacheryCard draw();
 	TreacheryCard peek() const;
 	void discard(TreacheryCard card);

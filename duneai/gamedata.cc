@@ -206,6 +206,11 @@ TreacheryDeck::TreacheryDeck(std::mt19937& random)
 }
 
 
+void TreacheryDeck::placeOnTop(const TreacheryCard& card)
+{
+	drawPile.push_back(card);
+}
+
 TreacheryCard TreacheryDeck::draw()
 {
 	TreacheryCard result = peek();
