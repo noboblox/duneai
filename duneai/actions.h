@@ -270,7 +270,7 @@ public:
 class ActionMove : public Action
 {
 public:
-	enum BeneGesseritAdvisor { TRUE };
+	enum AsAdvisor { TRUE };
 
 	explicit ActionMove(Faction aFaction, AreaId aFrom, Placement aTo, bool aUseHajr = false)
 	: Action(aFaction, ACTION_MOVE),
@@ -278,7 +278,7 @@ public:
 	{
 	}
 
-	explicit ActionMove(Faction aFaction, AreaId aFrom, Placement aTo, BeneGesseritAdvisor, bool aUseHajr = false)
+	explicit ActionMove(Faction aFaction, AreaId aFrom, Placement aTo, AsAdvisor, bool aUseHajr = false)
 	: Action(aFaction, ACTION_MOVE),
 	  to(aTo), fromArea(aFrom), useHajr(aUseHajr), asAdvisor(true)
 	{

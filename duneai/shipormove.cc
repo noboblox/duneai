@@ -145,6 +145,9 @@ bool ShipOrMove::move(AreaId from, AreaId to, int normalAmount, int specialAmoun
 	else
 		game->board.place(who, Placement{to, normalAmount, specialAmount}, !advisor);
 
+	if (!game->board.hostileEnemiesInTerritory(Faction::beneGesserit(), from))
+		game->board.setTerritoryHostility(Faction::beneGesserit(), from, true);
+
 	advanceAfterMove(LastAction{who, to, useHajr ? LastAction::MOVE_PHASE_HAJR : LastAction::MOVE_PHASE});
 	return true;
 }

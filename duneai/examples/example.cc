@@ -208,8 +208,11 @@ void round1AuctionPhase(GameLogic& game)
 void round1Shipment(GameLogic& game)
 {
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
+
+	// 1. tleilaxu
 	game.post(std::make_unique<ActionShip>(Faction::tleilaxu(), Placement{ AreaId::HabbanyaSietch, 3, 0 }));
 	game.post(std::make_unique<ActionAccompanyDecision>(Faction::beneGesserit(), ActionAccompanyDecision::ACCOMPANY_SHIPMENT));
+	game.post(std::make_unique<ActionMove>(Faction::tleilaxu(), AreaId::HabbanyaSietch, Placement{ AreaId::HabbanyaRidgeFlat_18, 3, 0 }));
 }
 
 #endif
