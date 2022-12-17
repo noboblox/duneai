@@ -53,7 +53,7 @@ public:
 	void placeNeutral(Faction from, Placement source);
 	void removeForces(Faction from, Placement source);
 
-	void setTerritoryHostility(Faction from, AreaId where, bool value);
+	bool setTerritoryHostility(Faction from, AreaId where, bool value);
 
 	bool playerForcesInArea(Faction from, AreaId area, ForcesFrom& result) const;
 	bool playerForcesInTerritory(Faction from, AreaId childArea, ForcesFrom& result) const;

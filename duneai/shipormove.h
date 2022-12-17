@@ -2,6 +2,7 @@
 #define SHIPORMOVE_H_
 
 #include "gameconstants.h"
+#include "logger.h"
 
 class GameState;
 class PlayerState;
@@ -10,7 +11,7 @@ class ShipOrMove
 {
 public:
 	explicit ShipOrMove();
-	explicit ShipOrMove(GameState& game);
+	explicit ShipOrMove(GameState& game, const Logger& aLog);
 
 	bool pendingGuildDecision() const noexcept;
 	void forceGuildShipment() noexcept;
@@ -90,6 +91,7 @@ private:
 	int currentIndex               = 0;
 	GuildStatus priorityShipping   = NOT_AVAILABLE;
 	bool beneGesseritAvailable     = false;
+	const Logger* log              = nullptr;
 };
 
 #endif

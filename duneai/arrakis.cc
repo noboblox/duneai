@@ -771,12 +771,13 @@ void Arrakis::removeForces(Faction from, Placement source)
 		mForces.erase(it);
 }
 
-void Arrakis::setTerritoryHostility(Faction from, AreaId where, bool value)
+bool Arrakis::setTerritoryHostility(Faction from, AreaId where, bool value)
 {
 	auto found = collectFromSameTerritory(where, &from, nullptr);
 
 	if (!found.empty())
 		const_cast<ForcesFrom*> (found.front())->hostile = value;
+	return !found.empty();
 }
 
 int Arrakis::getStorm() const noexcept

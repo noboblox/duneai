@@ -5,8 +5,8 @@ ShipOrMove::ShipOrMove()
 {
 }
 
-ShipOrMove::ShipOrMove(GameState& aGame)
-: game(&aGame)
+ShipOrMove::ShipOrMove(GameState& aGame, const Logger& aLog)
+: game(&aGame), log(&aLog)
 {
 	const auto seats = game->board.stormOrder();
 	turnOrder.reserve(seats.size());
@@ -42,14 +42,18 @@ void ShipOrMove::forceGuildShipment() noexcept
 	if (phase != SP_GUILD_DECISION)
 		return;
 
+	log->info("guild forces priority shipment");
 	priorityShipping = ACTIVE;
 	phase = SP_SHIP;
 }
 
 void ShipOrMove::delayGuildShipment() noexcept
 {
-	if (phase == SP_GUILD_DECISION)
-		phase = SP_SHIP;
+	if (phase != SP_GUILD_DECISION)
+		return;
+
+	log->info("guild delays shipment");
+	phase = SP_SHIP;
 }
 
 bool ShipOrMove::pendingIntrusionReaction() const noexcept
@@ -62,6 +66,7 @@ void ShipOrMove::disengageIntrusion() noexcept
 	if (phase != SP_INTRUSION)
 		return;
 
+	log->info("beneGesserit swaps to advisor in %s", last.where);
 	game->board.setTerritoryHostility(Faction::beneGesserit(), last.where, false);
 
 	if (beneGesseritCanAccompany())
@@ -129,7 +134,10 @@ bool ShipOrMove::move(AreaId from, AreaId to, int normalAmount, int specialAmoun
 				[](const TreacheryCard& c) { return c.id() == TreacheryCard::HAJR; });
 
 		if (it_hajr == player->hand.end())
+		{
+			log->error("%s has no hajr card", who.label().c_str());
 			return false;
+		}
 
 		game->treacheryDeck.discard(*it_hajr);
 		player->hand.erase(it_hajr);
@@ -145,8 +153,14 @@ bool ShipOrMove::move(AreaId from, AreaId to, int normalAmount, int specialAmoun
 	else
 		game->board.place(who, Placement{to, normalAmount, specialAmount}, !advisor);
 
+	log->info("%s moves troops {%d, %d} from %s -> %s", who.label().c_str(),
+              normalAmount, specialAmount, Arrakis::areaName(from), Arrakis::areaName(to));
+
 	if (!game->board.hostileEnemiesInTerritory(Faction::beneGesserit(), from))
-		game->board.setTerritoryHostility(Faction::beneGesserit(), from, true);
+	{
+		if (game->board.setTerritoryHostility(Faction::beneGesserit(), from, true))
+			log->info("swap bene gesserit troops in territory %s to fighter", Arrakis::areaName(from));
+	}
 
 	advanceAfterMove(LastAction{who, to, useHajr ? LastAction::MOVE_PHASE_HAJR : LastAction::MOVE_PHASE});
 	return true;
@@ -216,15 +230,21 @@ bool ShipOrMove::beneGesseritCanAccompany() const noexcept
 
 bool ShipOrMove::passShipment()
 {
-	if (phase == SP_SHIP)
-		advanceAfterShip(LastAction{currentlyShipping(), AreaId::INVALID, LastAction::SHIP_PHASE_SPECIAL});
+	if (phase != SP_SHIP)
+		return false;
+
+	log->info("%s passes shipment", currentlyShipping().label().c_str());
+	advanceAfterShip(LastAction{currentlyShipping(), AreaId::INVALID, LastAction::SHIP_PHASE_SPECIAL});
 	return true;
 }
 
 bool ShipOrMove::passMovement()
 {
-	if (phase == SP_MOVE)
-		advanceAfterMove(LastAction{currentlyShipping(), AreaId::INVALID, LastAction::MOVE_PHASE});
+	if (phase != SP_MOVE)
+		return false;
+
+	log->info("%s passes shipment", currentlyShipping().label().c_str());
+	advanceAfterMove(LastAction{currentlyShipping(), AreaId::INVALID, LastAction::MOVE_PHASE});
 	return true;
 }
 
@@ -335,6 +355,11 @@ void ShipOrMove::shipmentTransaction(PlayerState* player, int cost, AreaId* from
 	const Faction who = player->faction;
 	payShipment(player, cost);
 
+	const char* logNameFrom = from ? Arrakis::areaName(*from) : "reserve";
+	const char* logNameTo   = to   ? Arrakis::areaName(*to)   : "reserve";
+	log->info("%s deploys {%d, %d} from %s -> %s", player->faction.label().c_str(),
+			  normalAmount, specialAmount, logNameFrom, logNameTo);
+
 	if (from)
 	{
 		game->board.removeForces(who, Placement{*from, normalAmount, specialAmount});
@@ -362,13 +387,18 @@ void ShipOrMove::shipmentTransaction(PlayerState* player, int cost, AreaId* from
 
 void ShipOrMove::payShipment(PlayerState* player, int cost)
 {
+	log->info("shipment cost %d", cost);
+
 	if (cost == 0)
 		return;
 
 	auto guild = getPlayerState(*game, Faction::spacingGuild());
 
 	if (guild && player != guild)
+	{
+		log->info("guild receives %d spice", cost);
 		guild->spice += cost;
+	}
 
 	player->spice -= cost;
 }
@@ -414,6 +444,7 @@ void ShipOrMove::advanceToNextPlayer()
 	// all in turn players + guild are finished -> shipping phase is finally over
 	if (currentIndex == (int) turnOrder.size() && priorityShipping != GuildStatus::AVAILABLE)
 	{
+		log->info("shipping phase finished");
 		phase = SP_FINISHED;
 	}
 	// all in turn players have finished, but the guild delayed until the last turn. we need to force them to ship now
@@ -432,5 +463,6 @@ void ShipOrMove::advanceToNextPlayer()
 	{
 		phase = SP_SHIP;
 	}
+
 }
 

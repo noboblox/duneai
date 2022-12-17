@@ -762,7 +762,7 @@ void GameLogic::advance(GameState& game, GamePhase next, Faction customFactions)
 
 void GameLogic::advanceToShipmentPhase(GameState& game)
 {
-	game.shipper = ShipOrMove(game);
+	game.shipper = ShipOrMove(game, *log);
 	if (game.shipper.pendingGuildDecision())
 		advance(game, PHASE_SHIPMENT_GUILD_DECISION);
 	else
