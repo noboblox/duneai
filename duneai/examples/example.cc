@@ -210,11 +210,11 @@ void round1Shipment(GameLogic& game)
 	// 1. tleilaxu
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
 	game.post(std::make_unique<ActionShip>(Faction::tleilaxu(),
-			  Placement{ AreaId::HabbanyaSietch, 3, 0 }));
+			  Placement{AreaId::HabbanyaSietch, 3, 0}));
 	game.post(std::make_unique<ActionAccompanyDecision>(Faction::beneGesserit(),
 			  ActionAccompanyDecision::ACCOMPANY_SHIPMENT));
 	game.post(std::make_unique<ActionMove>(Faction::tleilaxu(),
-			  AreaId::HabbanyaSietch, Placement{ AreaId::HabbanyaRidgeFlat_18, 3, 0 }));
+			  AreaId::HabbanyaSietch, Placement{AreaId::HabbanyaRidgeFlat_18, 3, 0}));
 
 	// 2. harkonnen
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
@@ -224,8 +224,36 @@ void round1Shipment(GameLogic& game)
 
 	// 3. fremen
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
-	game.post(std::make_unique<ActionShip>(Faction::fremen(), Placement{AreaId::SietchTabr, 3, 0}));
-	game.post(std::make_unique<ActionMove>(Faction::fremen(), AreaId::FalseWallWest_18, Placement{AreaId::HabbanyaRidgeFlat_18, 1, 1}));
+	game.post(std::make_unique<ActionShip>(Faction::fremen(),
+			  Placement{AreaId::SietchTabr, 3, 0}));
+	game.post(std::make_unique<ActionMove>(Faction::fremen(),
+			  AreaId::FalseWallWest_18, Placement{AreaId::HabbanyaRidgeFlat_18, 1, 1}));
+
+	// 4. spacing guild out of turn
+	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), true));
+	game.post(std::make_unique<ActionShip>(Faction::spacingGuild(),
+			  AreaId::TueksSietch, Placement{AreaId::Arrakeen, 5, 0}));
+	game.post(std::make_unique<ActionMove>(Faction::spacingGuild(),
+			  AreaId::INVALID, Placement{}));
+
+	// 5. areitdes
+	game.post(std::make_unique<ActionShip>(Faction::atreides(), Placement{}));
+	game.post(std::make_unique<ActionMove>(Faction::atreides(),
+			  AreaId::INVALID, Placement{}));
+
+	// 6. bene gesserit
+	game.post(std::make_unique<ActionShip>(Faction::beneGesserit(),
+			  Placement{AreaId::TueksSietch, 1, 0}));
+	game.post(std::make_unique<ActionMove>(Faction::beneGesserit(),
+			  AreaId::INVALID, Placement{}));
+
+	// 7. emperor
+	game.post(std::make_unique<ActionShip>(Faction::emperor(),
+			  Placement{AreaId::Carthag, 3, 3}));
+	game.post(std::make_unique<ActionAccompanyDecision>(Faction::beneGesserit(),
+			  ActionAccompanyDecision::ACCOMPANY_SHIPMENT));
+	game.post(std::make_unique<ActionMove>(Faction::emperor(),
+			  AreaId::INVALID, Placement{}));
 }
 
 #endif
