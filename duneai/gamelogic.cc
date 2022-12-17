@@ -476,7 +476,7 @@ bool GameLogic::phaseBidding(GameState& game, const Action& action)
 
 	if (auction.winner() != Faction::none())
 	{
-		log->info("%s wins card %d", auction.winner().label().c_str(), auction.currentRound());
+		log->info("%s wins round %d", auction.winner().label().c_str(), auction.currentRound());
 		auctionWinTransaction(game, auction.winner(), auction.winningCost(), auction.wasKaramaWin());
 	}
 
@@ -710,6 +710,7 @@ void GameLogic::auctionWinTransaction(GameState& game, Faction won, int spice, b
 		log->info("%s discards karama card %d", player->faction.label().c_str(), it->id());
 		game.treacheryDeck.discard(*it);
 		player->hand.erase(it);
+		game.auction.cardDiscarded();
 	}
 	else
 	{
@@ -726,12 +727,14 @@ void GameLogic::auctionWinTransaction(GameState& game, Faction won, int spice, b
 	log->info("%s receives card %d", player->faction.label().c_str(), game.biddingPool.back().id());
 	player->hand.push_back(game.biddingPool.back());
 	game.biddingPool.pop_back();
+	game.auction.cardReceived();
 
 	if (player->faction == Faction::harkonnen() && ((int) player->hand.size() < player->maxHand))
 	{
 		auto card = game.treacheryDeck.draw();
 		log->info("%s receives additional card %d", player->faction.label().c_str(), card.id());
 		player->hand.push_back(card);
+		game.auction.cardReceived();
 	}
 
 }

@@ -27,6 +27,9 @@ public:
 	int winningCost() const noexcept;
 	bool wasKaramaWin() const noexcept;
 
+	void cardReceived() noexcept;
+	void cardDiscarded() noexcept;
+
 private:
 	static constexpr int NO_WINNER = -1;
 

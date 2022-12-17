@@ -162,4 +162,14 @@ bool Auction::wasKaramaWin() const noexcept
 		return data[indexWinner].bid == AuctionData::KARAMA;
 }
 
+void Auction::cardReceived() noexcept
+{
+	if (indexWinner != NO_WINNER)
+		++(data[indexWinner].cards);
+}
 
+void Auction::cardDiscarded() noexcept
+{
+	if (indexWinner != NO_WINNER)
+		--(data[indexWinner].cards);
+}

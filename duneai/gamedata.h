@@ -115,7 +115,7 @@ public:
 	enum Id
 	{
 	    LASGUN         ,
-	    CRYS_KNIFE    ,
+	    CRYS_KNIFE     ,
 	    MAULA_PISTOL   ,
 	    SLIP_TIP       ,
 	    STUNNER        ,
