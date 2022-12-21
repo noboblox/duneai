@@ -80,6 +80,7 @@ std::unordered_map<GamePhase, const char*> GamePhaseLabels::labels =
 	{PHASE_SHIPMENT_INTRUSION_REACTION, "shipment.intrusionReaction" },
 	{PHASE_SHIPMENT_ACCOMPANY_DECISION, "shipment.accompanyDecision" },
 	{PHASE_SHIPMENT_MOVE,               "shipment.move"              },
+	{PHASE_BATTLE,                      "battle"                     },
 };
 
 std::vector<Faction> Faction::expand(Faction mask)

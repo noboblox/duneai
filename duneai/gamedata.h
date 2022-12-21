@@ -264,6 +264,7 @@ struct GameState : public PublicGameState
 
 	std::pair<Faction, int> initialStormDial[2] = { {Faction::none(), 0}, {Faction::none(), 0}};
 	std::vector<TreacheryCard> biddingPool;
+	std::vector<Conflict> conflicts;
 };
 
 PlayerState*

@@ -728,6 +728,25 @@ bool Arrakis::fremenShipArea(AreaId id)
 	return std::find(allowed.cbegin(), allowed.cend(), id) != allowed.cend();
 }
 
+int Arrakis::areaSector(AreaId id)
+{
+	auto area = getArea(id);
+	return area ? area->sector : 0;
+}
+
+int Arrakis::compareSector(int l, int r)
+{
+	if (l == r)
+		return 0;
+
+	int greaterFrom = ++r;
+	if (greaterFrom > 18)  greaterFrom -= 18;
+
+	int greaterUntil = r + 9;
+	if (greaterUntil > 18)  greaterUntil -= 18;
+
+	return l >= greaterFrom || l <= greaterUntil ? 1 : -1;
+}
 
 const Arrakis::Area* Arrakis::getArea(AreaId id)
 {
@@ -738,6 +757,20 @@ const Arrakis::Area* Arrakis::getArea(AreaId id)
 		return nullptr;
 	else
 		return &(*it);
+}
+
+const Arrakis::Area* Arrakis::getTerritorySector(AreaId childArea, int sector)
+{
+	for (const auto& a : areas)
+	{
+		if (!sameTerritory(childArea, a.id))
+			continue;
+		if (a.sector != sector)
+			continue;
+
+		return &a;
+	}
+	return nullptr;
 }
 
 void Arrakis::place(Faction from, Placement source, bool hostile)
@@ -873,15 +906,25 @@ int Arrakis::getSpice(AreaId area) const noexcept
 	return it == spice.end() ? 0 : it->second;
 }
 
+static bool FactionAndAreaEqual(const ForcesFrom& l, const ForcesFrom& r)
+{
+	return l.where == r.where && l.from == r.from;
+}
+
+static bool FactionAndAreaLess(const ForcesFrom& l, const ForcesFrom& r)
+{
+	if (l.where == r.where)
+		return l.from < r.from;
+	return l.where < r.where;
+}
+
 void Arrakis::place(ForcesFrom&& source)
 {
-	auto it = std::find_if(mForces.begin(), mForces.end(),
-			[&source](const ForcesFrom& f)
-			{ return f.from == source.from && f.where == source.where; });
+	auto it = std::lower_bound(mForces.begin(), mForces.end(), source, FactionAndAreaLess);
 
-	if (it == mForces.end())
+	if (it == mForces.end() || !FactionAndAreaEqual(source, *it))
 	{
-		mForces.push_back(source);
+		mForces.insert(it, source);
 	}
 	else
 	{
@@ -1022,5 +1065,69 @@ int Arrakis::neutralFactionsInTerritory(AreaId childArea) const
 	static constexpr bool HOSTILITY = false;
 	return (int) collectFromSameTerritory(childArea, nullptr, &HOSTILITY).size();
 }
+
+std::vector<Conflict> Arrakis::collectConflicts() const
+{
+	return actualConflicts(potentialConflicts(), storm);
+}
+
+std::vector<Conflict> Arrakis::potentialConflicts() const
+{
+	if (mForces.size() < 2)
+		return std::vector<Conflict>();
+
+	std::vector<Conflict> potential;
+
+	Conflict* current = nullptr;
+	auto l =   mForces.cbegin();
+	auto r = ++mForces.cbegin();
+
+	for (; r != mForces.cend(); ++r)
+	{
+		if (!sameTerritory(l->where, r->where))
+		{
+			current = nullptr;
+			l = r;
+			continue;
+		}
+
+		if (!l->hostile)
+		{
+			++l;
+			continue;
+		}
+
+		if (!r->hostile)
+		{
+			continue;
+		}
+
+		if (!current)
+		{
+			potential.emplace_back();
+			current = &potential.back();
+			current->add(*l);
+			current->add(*r);
+		}
+		else
+		{
+			current->add(*r);
+		}
+	}
+
+	return potential;
+}
+
+std::vector<Conflict> Arrakis::actualConflicts(const std::vector<Conflict>& potential, int storm) const
+{
+	std::vector<Conflict> actual;
+	for (auto& conflict : potential)
+	{
+		Conflict::partition(conflict, storm, actual);
+	}
+	return actual;
+}
+
+
 
 

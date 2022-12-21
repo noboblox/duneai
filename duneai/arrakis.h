@@ -43,6 +43,8 @@ public:
     static bool isSietch(AreaId id);
     static bool fremenInitArea(AreaId id);
     static bool fremenShipArea(AreaId id);
+    static int areaSector(AreaId id);
+    static int compareSector(int l, int r);
     static const char* areaName(AreaId id);
 
 	Arrakis();
@@ -54,12 +56,12 @@ public:
 	void removeForces(Faction from, Placement source);
 
 	bool setTerritoryHostility(Faction from, AreaId where, bool value);
-
 	bool playerForcesInArea(Faction from, AreaId area, ForcesFrom& result) const;
 	bool playerForcesInTerritory(Faction from, AreaId childArea, ForcesFrom& result) const;
 	int hostileFactionsInTerritory(AreaId childArea) const;
 	int hostileEnemiesInTerritory(Faction own, AreaId childArea) const;
 	int neutralFactionsInTerritory(AreaId childArea) const;
+	std::vector<Conflict> collectConflicts() const;
 
 	int getStorm() const noexcept;
 
@@ -67,6 +69,7 @@ public:
 	bool canMove(Faction who, AreaId from, AreaId to, bool moveAsHostiles = true);
 	bool isOccupied(Faction shipper, AreaId where, bool moveAsHostiles = true) const;
 	bool isReachable(AreaId from, AreaId to, int movement) const;
+	bool isSameBattleground(AreaId areaA, AreaId areaB) const noexcept;
 	int movementRange(Faction who) const noexcept;
 	bool hasMovementBonus(Faction who) const noexcept;
 
@@ -86,6 +89,8 @@ private:
 	std::vector<const ForcesFrom*> collectFromSameTerritory(AreaId childArea, const Faction* filterFaction, const bool* filterHostile) const;
 	std::vector<const ForcesFrom*> collectFromSameArea(AreaId childArea, const Faction* filterFaction, const bool* filterHostile) const;
 	std::vector<const ForcesFrom*> collect(AreaId childArea, const Faction* filterFaction, const bool* filterHostile, bool restrictToArea) const;
+	std::vector<Conflict> potentialConflicts() const;
+	std::vector<Conflict> actualConflicts(const std::vector<Conflict>& potential, int storm) const;
 
 	std::vector<ForcesFrom> mForces;
 	std::vector<std::pair<AreaId, int>> spice;
@@ -107,6 +112,7 @@ private:
 	static bool sameTerritory(AreaId l, AreaId r) noexcept { return (l / 10) == (r / 10); }
     static void neighbors(AreaId from, int storm, const std::vector<AreaId>& exclude, std::vector<std::pair<AreaId, int>>& result);
     static const Area* getArea(AreaId id);
+    static const Area* getTerritorySector(AreaId childArea, int sector);
 };
 
 #endif /* ARRAKIS_H_ */

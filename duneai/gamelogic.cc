@@ -588,6 +588,11 @@ bool GameLogic::phaseShipmentMove(GameState& game, const Action& action)
 	return true;
 }
 
+bool GameLogic::phaseBattle(GameState& game, const Action& action)
+{
+	return false;
+}
+
 //
 //-- AUXILIARY
 //
@@ -680,6 +685,17 @@ int GameLogic::prepareAuction(GameState& game)
 	return eligible;
 }
 
+void GameLogic::prepareBattlePhase(GameState& game)
+{
+	game.conflicts = game.board.collectConflicts();
+
+	for (const auto& c : game.conflicts)
+		log->info("conflict in %s between %s",
+				Arrakis::areaName(c.forces().front().where), c.parties().label().c_str());
+
+	advance(game, PHASE_BATTLE);
+}
+
 void GameLogic::cleanupAuctionPool(GameState& game)
 {
 	if (game.biddingPool.empty())
@@ -766,7 +782,7 @@ void GameLogic::advanceToShipmentPhase(GameState& game)
 
 void GameLogic::advanceInShipmentPhase(GameState& game)
 {
-	if      (game.shipper.pendingGuildDecision())
+	if (game.shipper.pendingGuildDecision())
 		advance(game, PHASE_SHIPMENT_GUILD_DECISION);
 	else if (game.shipper.pendingIntrusionReaction())
 		advance(game, PHASE_SHIPMENT_INTRUSION_REACTION);
@@ -775,7 +791,7 @@ void GameLogic::advanceInShipmentPhase(GameState& game)
 	else if (game.shipper.pendingMovement())
 		advance(game, PHASE_SHIPMENT_MOVE, game.shipper.currentlyShipping());
 	else if (game.shipper.finished())
-		advance(game, PHASE_invalid); // TODO -> battle phase
+		prepareBattlePhase(game);
 	else
 		advance(game, PHASE_SHIPMENT_SHIP, game.shipper.currentlyShipping());
 }

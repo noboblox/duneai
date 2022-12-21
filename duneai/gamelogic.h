@@ -85,17 +85,18 @@ private:
 	bool phaseChoamCharity(GameState& game, const Action& action);
 	bool phaseBidding(GameState& game, const Action& action);
 
-
 	bool phaseShipmentGuildDecision(GameState& game, const Action& action);
 	bool phaseShipmentShip(GameState& game, const Action& action);
 	bool phaseShipmentIntrusionReaction(GameState& game, const Action& action);
 	bool phaseShipmentAccompanyDecision(GameState& game, const Action& action);
 	bool phaseShipmentMove(GameState& game, const Action& action);
+	bool phaseBattle(GameState& game, const Action& action);
 
 	void systemEvent(const SystemEvent& event);
 	bool isAllowedAction(GameState& game, const Action& action);
 	bool expected(GameState& game, Faction faction);
 	int prepareAuction(GameState& game);
+	void prepareBattlePhase(GameState& game);
 	void cleanupAuctionPool(GameState& game);
 	void auctionWinTransaction(GameState& game, Faction won, int spice, bool karama);
 	void advance(GameState& game, GamePhase next, Faction customFactions = Faction::none());
