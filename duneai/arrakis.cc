@@ -717,14 +717,18 @@ bool Arrakis::fremenInitArea(AreaId id)
 	}
 }
 
-bool Arrakis::fremenShipArea(AreaId id)
+static std::vector<AreaId> initFremenShipArea()
 {
 	static constexpr int STORM_OUTSIDE_FREMEN_AREA = 2;
-	static std::vector<AreaId> allowed;
+	std::vector<AreaId> allowed;
 
-	if (allowed.empty())
-		reachable(TheGreatFlat, STORM_OUTSIDE_FREMEN_AREA, 2, allowed);
+	Arrakis::reachable(TheGreatFlat, STORM_OUTSIDE_FREMEN_AREA, 2, allowed);
+	return allowed;
+}
 
+bool Arrakis::fremenShipArea(AreaId id)
+{
+	static const std::vector<AreaId> allowed = initFremenShipArea();
 	return std::find(allowed.cbegin(), allowed.cend(), id) != allowed.cend();
 }
 
