@@ -11,11 +11,11 @@ int main()
 
 	game.post(std::make_unique<ActionHarkonnenRedraw> (Faction::harkonnen(),    true));
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::emperor(),      Leader::ID_Irulan));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::spacingGuild(), Leader::ID_Burseg));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::fremen(),       Leader::ID_Alia));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::atreides(),     Leader::ID_Feyd));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::beneGesserit(), Leader::ID_Duncan));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::tleilaxu(),     Leader::ID_Wanna));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::spacingGuild(), Leader::ID_Otheym));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::fremen(),       Leader::ID_Gurney));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::atreides(),     Leader::ID_Margot));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::beneGesserit(), Leader::ID_Jessica));
+	game.post(std::make_unique<ActionTraitorSelection>(Faction::tleilaxu(),     Leader::ID_Aramsha));
 
 	// fail
 //	game.post(std::make_unique<ActionFremenPlacement>(Faction::fremen(), std::vector<Placement>{Placement{Arrakis::FalseWallSouth_5,105, 3},
