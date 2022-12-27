@@ -296,7 +296,8 @@ class Leader
 public:
 	enum Id
 	{
-		LEADERS_begin = 0,
+		ID_INVALID    = -1,
+		LEADERS_begin =  0,
 
 		ID_Yueh   = LEADERS_begin, //ATREIDES
 		ID_Duncan , //ATREIDES

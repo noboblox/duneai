@@ -114,7 +114,8 @@ class TreacheryCard
 public:
 	enum Id
 	{
-	    LASGUN         ,
+		INVALID = -1   ,
+	    LASGUN  = 0    ,
 	    CRYS_KNIFE     ,
 	    MAULA_PISTOL   ,
 	    SLIP_TIP       ,

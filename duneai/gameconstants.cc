@@ -37,7 +37,7 @@ const Leader Leader::leaders[] = {
 	Leader(ID_Wykk   ,  "Wykk",                 Faction::tleilaxu()),
 	Leader(ID_Blin   ,  "Blin",                 Faction::tleilaxu())};
 
-const Leader Leader::INVALID = Leader(Leader::LEADERS_end, "INVALID", Faction::none());
+const Leader Leader::INVALID = Leader(Leader::ID_INVALID, "INVALID", Faction::none());
 
 const std::vector<int> SeatConfig::INVALID      = {};
 const std::vector<int> SeatConfig::twoPlayers   = {2, 11};
