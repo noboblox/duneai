@@ -192,29 +192,29 @@ void round1Shipment(GameLogic& game)
 {
 	// 1. bene gesserit
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
-	game.post(std::make_unique<ActionShip>(Faction::beneGesserit(), Placement{AreaId::SietchTabr, 3, 0}));
-	game.post(std::make_unique<ActionMove>(Faction::beneGesserit(), AreaId::SietchTabr, Placement{AreaId::RockOutcroppings_14, 3, 0}));
+	game.post(std::make_unique<ActionShip>(Faction::beneGesserit(), Placement{AreaId::SietchTabr, 3}));
+	game.post(std::make_unique<ActionMove>(Faction::beneGesserit(), AreaId::SietchTabr, Placement{AreaId::RockOutcroppings_14, 3}));
 
 	// 2. fremen
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
-	game.post(std::make_unique<ActionShip>(Faction::fremen(), Placement{AreaId::FalseWallWest_18, 3, 0}));
-	game.post(std::make_unique<ActionMove>(Faction::fremen(), AreaId::FalseWallWest_18, Placement{AreaId::HabbanyaErg_16, 4, 0}));
+	game.post(std::make_unique<ActionShip>(Faction::fremen(), Placement{AreaId::FalseWallWest_18, 3}));
+	game.post(std::make_unique<ActionMove>(Faction::fremen(), AreaId::FalseWallWest_18, Placement{AreaId::HabbanyaErg_16, 4}));
 
 	// 3. tleilaxu
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
-	game.post(std::make_unique<ActionShip>(Faction::tleilaxu(), Placement{AreaId::Arrakeen, 2, 0}));
+	game.post(std::make_unique<ActionShip>(Faction::tleilaxu(), Placement{AreaId::Arrakeen, 2}));
 	game.post(std::make_unique<ActionAccompanyDecision>(Faction::beneGesserit(), ActionAccompanyDecision::ACCOMPANY_SHIPMENT));
 	game.post(std::make_unique<ActionMove>(Faction::tleilaxu(), AreaId::INVALID, Placement{}));
 
 	// 4. harkonnen
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
-	game.post(std::make_unique<ActionShip>(Faction::harkonnen(), Placement{AreaId::INVALID, 0, 0}));
-	game.post(std::make_unique<ActionMove>(Faction::harkonnen(), AreaId::Carthag, Placement{AreaId::RockOutcroppings_14, 3, 0}));
+	game.post(std::make_unique<ActionShip>(Faction::harkonnen(), Placement{AreaId::INVALID, 0}));
+	game.post(std::make_unique<ActionMove>(Faction::harkonnen(), AreaId::Carthag, Placement{AreaId::RockOutcroppings_14, 3}));
 	game.post(std::make_unique<ActionIntrusionReaction>(Faction::beneGesserit(), false));
 
 	// 5. areitdes
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
-	game.post(std::make_unique<ActionShip>(Faction::atreides(), Placement{AreaId::INVALID, 0, 0}));
+	game.post(std::make_unique<ActionShip>(Faction::atreides(), Placement{AreaId::INVALID, 0}));
 	game.post(std::make_unique<ActionMove>(Faction::atreides(), AreaId::INVALID, Placement{}));
 
 	// 6. emperor
@@ -224,7 +224,7 @@ void round1Shipment(GameLogic& game)
 	game.post(std::make_unique<ActionMove>(Faction::emperor(), AreaId::INVALID, Placement{}));
 
 	// 7. spacing guild out of turn
-	game.post(std::make_unique<ActionShip>(Faction::spacingGuild(), AreaId::TueksSietch, Placement{AreaId::SietchTabr, 5, 0}));
-	game.post(std::make_unique<ActionMove>(Faction::spacingGuild(), AreaId::SietchTabr, Placement{AreaId::RockOutcroppings_14, 5, 0}));
+	game.post(std::make_unique<ActionShip>(Faction::spacingGuild(), AreaId::TueksSietch, Placement{AreaId::SietchTabr, 5}));
+	game.post(std::make_unique<ActionMove>(Faction::spacingGuild(), AreaId::SietchTabr, Placement{AreaId::RockOutcroppings_14, 5}));
 	game.post(std::make_unique<ActionIntrusionReaction>(Faction::beneGesserit(), false));
 }
