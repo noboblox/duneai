@@ -124,6 +124,36 @@ bool ShipOrMove::pendingMovement() const noexcept
 	return phase == SP_MOVE;
 }
 
+static bool consumeHajr(GameState& game, PlayerState& player)
+{
+	auto it_hajr = std::find_if(player.hand.begin(), player.hand.end(),
+		[](const TreacheryCard& c) { return c.id() == TreacheryCard::HAJR; });
+
+	if (it_hajr == player.hand.end())
+		return false;
+
+	game.treacheryDeck.discard(*it_hajr);
+	player.hand.erase(it_hajr);
+	return true;
+}
+
+static bool isHostileInTargetArea(GameState& game, PlayerState& player, AreaId where, bool hostileRequested)
+{
+	ForcesFrom forces;
+	if (game.board.playerForcesInArea(player.faction, where, forces))
+		return forces.hostile;
+	else if (game.board.hostileEnemiesInTerritory(player.faction, where) == 0)
+		return true;
+	else
+		return hostileRequested;
+}
+
+static bool swapAloneAdvisors(GameState& game, AreaId where)
+{
+	return !game.board.hostileEnemiesInTerritory(Faction::beneGesserit(), where) && 
+		    game.board.setTerritoryHostility(Faction::beneGesserit(), where, true);
+}
+
 bool ShipOrMove::move(AreaId from, AreaId to, int normalAmount, int specialAmount, bool useHajr, bool advisor)
 {
 	const Faction who     = currentlyShipping();
@@ -132,38 +162,22 @@ bool ShipOrMove::move(AreaId from, AreaId to, int normalAmount, int specialAmoun
 	if (!verifyMovement(player, from, to, normalAmount, specialAmount, advisor))
 		return false;
 
-	if (useHajr)
+	if (useHajr && !consumeHajr(*game, *player))
 	{
-		auto it_hajr = std::find_if(player->hand.begin(), player->hand.end(),
-				[](const TreacheryCard& c) { return c.id() == TreacheryCard::HAJR; });
-
-		if (it_hajr == player->hand.end())
-		{
-			log->error("%s has no hajr card", who.label().c_str());
-			return false;
-		}
-
-		game->treacheryDeck.discard(*it_hajr);
-		player->hand.erase(it_hajr);
+		log->error("%s has no hajr card", who.label().c_str());
+		return false;
 	}
 
+	const bool hostile = isHostileInTargetArea(*game, *player, to, !advisor);
 	game->board.removeForces(who, Placement{from, normalAmount, specialAmount});
-
-	ForcesFrom forces;
-	if (game->board.playerForcesInArea(who, to, forces))
-		game->board.place(who, Placement{to, normalAmount, specialAmount}, forces.hostile);
-	else if (game->board.hostileEnemiesInTerritory(who, to) == 0)
-		game->board.placeHostile(who, Placement{to, normalAmount, specialAmount});
-	else
-		game->board.place(who, Placement{to, normalAmount, specialAmount}, !advisor);
+	game->board.place(who, Placement{ to, normalAmount, specialAmount }, hostile);
 
 	log->info("%s moves troops {%d, %d} from %s -> %s", who.label().c_str(),
               normalAmount, specialAmount, Arrakis::areaName(from), Arrakis::areaName(to));
 
-	if (!game->board.hostileEnemiesInTerritory(Faction::beneGesserit(), from))
+	if (swapAloneAdvisors(*game, from))
 	{
-		if (game->board.setTerritoryHostility(Faction::beneGesserit(), from, true))
-			log->info("swap bene gesserit troops in territory %s to fighter", Arrakis::areaName(from));
+		log->info("swap bene gesserit troops in territory %s to fighter", Arrakis::areaName(from));
 	}
 
 	advanceAfterMove(LastAction{who, to, useHajr ? LastAction::MOVE_PHASE_HAJR : LastAction::MOVE_PHASE});
