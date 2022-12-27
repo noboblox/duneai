@@ -148,7 +148,7 @@ static bool isHostileInTargetArea(GameState& game, PlayerState& player, AreaId w
 		return hostileRequested;
 }
 
-static bool swapAloneAdvisors(GameState& game, AreaId where)
+static bool swapLoneAdvisors(GameState& game, AreaId where)
 {
 	return !game.board.hostileEnemiesInTerritory(Faction::beneGesserit(), where) && 
 		    game.board.setTerritoryHostility(Faction::beneGesserit(), where, true);
@@ -175,7 +175,7 @@ bool ShipOrMove::move(AreaId from, AreaId to, int normalAmount, int specialAmoun
 	log->info("%s moves troops {%d, %d} from %s -> %s", who.label().c_str(),
               normalAmount, specialAmount, Arrakis::areaName(from), Arrakis::areaName(to));
 
-	if (swapAloneAdvisors(*game, from))
+	if (swapLoneAdvisors(*game, from))
 	{
 		log->info("swap bene gesserit troops in territory %s to fighter", Arrakis::areaName(from));
 	}
