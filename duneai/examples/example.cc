@@ -1,8 +1,6 @@
 #include "../gamelogic.h"
 #include "../forces.h"
 
-#if 1
-
 void round1AuctionPhase(GameLogic& game);
 void round1Shipment(GameLogic& game);
 
@@ -255,5 +253,3 @@ void round1Shipment(GameLogic& game)
 	game.post(std::make_unique<ActionMove>(Faction::emperor(),
 			  AreaId::INVALID, Placement{}));
 }
-
-#endif
