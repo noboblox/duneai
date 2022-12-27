@@ -137,7 +137,7 @@ static bool consumeHajr(GameState& game, PlayerState& player)
 	return true;
 }
 
-static bool isHostileInTargetArea(GameState& game, PlayerState& player, AreaId where, bool hostileRequested)
+static bool isHostileInTargetArea(GameState& game, PlayerState& player, AreaId where, bool hostileRequested = true)
 {
 	ForcesFrom forces;
 	if (game.board.playerForcesInArea(player.faction, where, forces))
@@ -390,11 +390,8 @@ void ShipOrMove::shipmentTransaction(PlayerState* player, int cost, AreaId* from
 
 	if (to)
 	{
-		ForcesFrom forces;
-		if (game->board.playerForcesInArea(who, *to, forces) && !forces.hostile)
-			game->board.placeNeutral(who, Placement{*to, normalAmount, specialAmount});
-		else
-			game->board.placeHostile(who, Placement{*to, normalAmount, specialAmount});
+		const bool hostile = isHostileInTargetArea(*game, *player, *to);
+		game->board.place(who, Placement{ *to, normalAmount, specialAmount }, hostile);
 	}
 	else
 	{
