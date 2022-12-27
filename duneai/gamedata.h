@@ -186,6 +186,8 @@ private:
 	int mProperties;
 };
 
+using TreacheryCardLabels = EnumLabels<TreacheryCard::Id>;
+
 class TreacheryDeck
 {
 public:

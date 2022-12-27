@@ -2,6 +2,44 @@
 
 #include "gameconstants.h"
 
+template<>
+std::unordered_map<TreacheryCard::Id, const char*> TreacheryCardLabels::labels =
+{
+	{ TreacheryCard::LASGUN         , "LASGUN"          },
+	{ TreacheryCard::CRYS_KNIFE     , "CRYS_KNIFE"      },
+	{ TreacheryCard::MAULA_PISTOL   , "MAULA_PISTOL"    },
+	{ TreacheryCard::SLIP_TIP       , "SLIP_TIP"        },
+	{ TreacheryCard::STUNNER        , "STUNNER"         },
+	{ TreacheryCard::CHAUMAS        , "CHAUMAS"         },
+	{ TreacheryCard::CHAUMURKY      , "CHAUMURKY"       },
+	{ TreacheryCard::ELLACA_DRUG    , "ELLACA_DRUG"     },
+	{ TreacheryCard::GOM_JABBAR     , "GOM_JABBAR"      },
+	{ TreacheryCard::SHIELD_2       , "SHIELD_2"        },
+	{ TreacheryCard::SHIELD_4       , "SHIELD_4"        },
+	{ TreacheryCard::SHIELD_3       , "SHIELD_3"        },
+	{ TreacheryCard::SHIELD_1       , "SHIELD_1"        },
+	{ TreacheryCard::SNOOPER_1      , "SNOOPER_1"       },
+	{ TreacheryCard::SNOOPER_2      , "SNOOPER_2"       },
+	{ TreacheryCard::SNOOPER_3      , "SNOOPER_3"       },
+	{ TreacheryCard::SNOOPER_4      , "SNOOPER_4"       },
+	{ TreacheryCard::CHEAP_HERO_1   , "CHEAP_HERO_1"    },
+	{ TreacheryCard::CHEAP_HERO_2   , "CHEAP_HERO_2"    },
+	{ TreacheryCard::CHEAP_HEROINE  , "CHEAP_HEROINE"   },
+	{ TreacheryCard::TLEILAXU_GHOLA , "TLEILAXU_GHOLA"  },
+	{ TreacheryCard::FAMILY_ATOMICS , "FAMILY_ATOMICS"  },
+	{ TreacheryCard::HAJR           , "HAJR"            },
+	{ TreacheryCard::WEATHER_CONTROL, "WEATHER_CONTROL" },
+	{ TreacheryCard::KARAMA_1       , "KARAMA_1"        },
+	{ TreacheryCard::KARAMA_2       , "KARAMA_2"        },
+	{ TreacheryCard::TRUTH_TRANCE_1 , "TRUTH_TRANCE_1"  },
+	{ TreacheryCard::TRUTH_TRANCE_2 , "TRUTH_TRANCE_2"  },
+	{ TreacheryCard::BALISET        , "BALISET"         },
+	{ TreacheryCard::JUBBA_CLOAK    , "JUBBA_CLOAK"     },
+	{ TreacheryCard::KULON          , "KULON"           },
+	{ TreacheryCard::LA_LA_LA       , "LA_LA_LA"        },
+	{ TreacheryCard::TRIP_TO_GAMONT , "TRIP_TO_GAMONT"  },
+};
+
 PlayerState PlayerState::create(int aSeat, Faction aFaction)
 {
 	if (aFaction == Faction::emperor())

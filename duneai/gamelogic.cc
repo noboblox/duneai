@@ -639,12 +639,12 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 	for (auto& p : mGame.players)
 	{
 		p.hand.push_back(mGame.treacheryDeck.draw());
-		log->info("starting card %d for %s", p.hand[0], p.faction.label().c_str());
+		log->info("starting card %s for %s", TreacheryCardLabels::label(p.hand[0].id()), p.faction.label().c_str());
 
 		if (p.faction == Faction::harkonnen())
 		{
 			p.hand.push_back(mGame.treacheryDeck.draw());
-			log->info("starting card %d for %s", p.hand[1], p.faction.label().c_str());
+			log->info("starting card %s for %s", TreacheryCardLabels::label(p.hand[1].id()), p.faction.label().c_str());
 		}
 	}
 
@@ -722,7 +722,7 @@ void GameLogic::auctionWinTransaction(GameState& game, Faction won, int spice, b
 		if (it == player->hand.end())
 			return;
 
-		log->info("%s discards karama card %d", player->faction.label().c_str(), it->id());
+		log->info("%s discards card %s", player->faction.label().c_str(), TreacheryCardLabels::label(it->id()));
 		game.treacheryDeck.discard(*it);
 		player->hand.erase(it);
 		game.auction.cardDiscarded();
@@ -739,7 +739,7 @@ void GameLogic::auctionWinTransaction(GameState& game, Faction won, int spice, b
 		}
 	}
 
-	log->info("%s receives card %d", player->faction.label().c_str(), game.biddingPool.back().id());
+	log->info("%s receives card %s", player->faction.label().c_str(), TreacheryCardLabels::label(game.biddingPool.back().id()));
 	player->hand.push_back(game.biddingPool.back());
 	game.biddingPool.pop_back();
 	game.auction.cardReceived();
@@ -747,7 +747,7 @@ void GameLogic::auctionWinTransaction(GameState& game, Faction won, int spice, b
 	if (player->faction == Faction::harkonnen() && ((int) player->hand.size() < player->maxHand))
 	{
 		auto card = game.treacheryDeck.draw();
-		log->info("%s receives additional card %d", player->faction.label().c_str(), card.id());
+		log->info("%s receives additional card %s", player->faction.label().c_str(), TreacheryCardLabels::label(card.id()));
 		player->hand.push_back(card);
 		game.auction.cardReceived();
 	}
