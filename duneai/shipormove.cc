@@ -261,7 +261,7 @@ bool ShipOrMove::passMovement()
 	if (phase != SP_MOVE)
 		return false;
 
-	log->info("%s passes shipment", currentlyShipping().label().c_str());
+	log->info("%s passes movement", currentlyShipping().label().c_str());
 	advanceAfterMove(LastAction{currentlyShipping(), AreaId::INVALID, LastAction::MOVE_PHASE});
 	return true;
 }

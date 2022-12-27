@@ -53,7 +53,7 @@ int main()
 	game.post(std::make_unique<ActionChoamCharity>(Faction::tleilaxu(),     false));
 
 	round1AuctionPhase(game);
-	//round1Shipment(game);
+	round1Shipment(game);
 
 	game.tick();
 	return 0;
@@ -126,7 +126,7 @@ void round1AuctionPhase(GameLogic& game)
 	game.post(std::make_unique<ActionBid>(Faction::beneGesserit(), 4));
 	game.post(std::make_unique<ActionBid>(Faction::fremen(),       ActionBid::PASS));
 	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     ActionBid::PASS));
-	
+
 	game.post(std::make_unique<ActionBid>(Faction::harkonnen(),    5));
 	game.post(std::make_unique<ActionBid>(Faction::atreides(),     ActionBid::PASS));
 	game.post(std::make_unique<ActionBid>(Faction::emperor(),      6));
@@ -144,57 +144,87 @@ void round1AuctionPhase(GameLogic& game)
 	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     ActionBid::PASS));
 	
 	// AUCTION CARD 6
+	game.post(std::make_unique<ActionBid>(Faction::atreides(),     1));
+	game.post(std::make_unique<ActionBid>(Faction::emperor(),      2));
+	game.post(std::make_unique<ActionBid>(Faction::spacingGuild(), ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::beneGesserit(), 3));
+	game.post(std::make_unique<ActionBid>(Faction::fremen(),       ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     4));
+	game.post(std::make_unique<ActionBid>(Faction::harkonnen(),    ActionBid::PASS));
+	
+	game.post(std::make_unique<ActionBid>(Faction::atreides(),     ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::emperor(),      5));
+	game.post(std::make_unique<ActionBid>(Faction::spacingGuild(), ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::beneGesserit(), 6));
+	game.post(std::make_unique<ActionBid>(Faction::fremen(),       ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::harkonnen(),    ActionBid::PASS));
+	
+	game.post(std::make_unique<ActionBid>(Faction::atreides(),     ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::emperor(),      7));
+	game.post(std::make_unique<ActionBid>(Faction::spacingGuild(), ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::beneGesserit(), ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::fremen(),       ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::harkonnen(),    ActionBid::PASS));
+
+	game.post(std::make_unique<ActionBid>(Faction::atreides(),     ActionBid::PASS));
 
 	// AUCTION CARD 7
+	game.post(std::make_unique<ActionBid>(Faction::emperor(),      1));
+	game.post(std::make_unique<ActionBid>(Faction::spacingGuild(), ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::beneGesserit(), 2));
+	game.post(std::make_unique<ActionBid>(Faction::fremen(),       3));
+	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     4));
+	game.post(std::make_unique<ActionBid>(Faction::harkonnen(),    ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::atreides(),     ActionBid::PASS));
+	
+	game.post(std::make_unique<ActionBid>(Faction::emperor(),      5));
+	game.post(std::make_unique<ActionBid>(Faction::spacingGuild(), ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::beneGesserit(), ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::fremen(),       ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::tleilaxu(),     ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::harkonnen(),    ActionBid::PASS));
+	game.post(std::make_unique<ActionBid>(Faction::atreides(),     ActionBid::PASS));
 }
 
 void round1Shipment(GameLogic& game)
 {
-	// 1. tleilaxu
+	// 1. bene gesserit
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
-	game.post(std::make_unique<ActionShip>(Faction::tleilaxu(),
-			  Placement{AreaId::HabbanyaSietch, 3, 0}));
-	game.post(std::make_unique<ActionAccompanyDecision>(Faction::beneGesserit(),
-			  ActionAccompanyDecision::ACCOMPANY_SHIPMENT));
-	game.post(std::make_unique<ActionMove>(Faction::tleilaxu(),
-			  AreaId::HabbanyaSietch, Placement{AreaId::HabbanyaRidgeFlat_18, 3, 0}));
+	game.post(std::make_unique<ActionShip>(Faction::beneGesserit(), Placement{AreaId::SietchTabr, 3, 0}));
+	game.post(std::make_unique<ActionMove>(Faction::beneGesserit(), AreaId::SietchTabr, Placement{AreaId::RockOutcroppings_14, 3, 0}));
 
-	// 2. harkonnen
+	// 2. fremen
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
-	game.post(std::make_unique<ActionShip>(Faction::harkonnen(), Placement{}));
-	game.post(std::make_unique<ActionMove>(Faction::harkonnen(),
-			  AreaId::Carthag, Placement{AreaId::TheMinorErg_8, 3, 0}));
+	game.post(std::make_unique<ActionShip>(Faction::fremen(), Placement{AreaId::FalseWallWest_18, 3, 0}));
+	game.post(std::make_unique<ActionMove>(Faction::fremen(), AreaId::FalseWallWest_18, Placement{AreaId::HabbanyaErg_16, 4, 0}));
 
-	// 3. fremen
+	// 3. tleilaxu
 	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
-	game.post(std::make_unique<ActionShip>(Faction::fremen(),
-			  Placement{AreaId::SietchTabr, 3, 0}));
-	game.post(std::make_unique<ActionMove>(Faction::fremen(),
-			  AreaId::FalseWallWest_18, Placement{AreaId::HabbanyaRidgeFlat_18, 1, 1}));
+	game.post(std::make_unique<ActionShip>(Faction::tleilaxu(), Placement{AreaId::Arrakeen, 2, 0}));
+	game.post(std::make_unique<ActionAccompanyDecision>(Faction::beneGesserit(), ActionAccompanyDecision::ACCOMPANY_SHIPMENT));
+	game.post(std::make_unique<ActionMove>(Faction::tleilaxu(), AreaId::INVALID, Placement{}));
 
-	// 4. spacing guild out of turn
-	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), true));
-	game.post(std::make_unique<ActionShip>(Faction::spacingGuild(),
-			  AreaId::TueksSietch, Placement{AreaId::Arrakeen, 5, 0}));
-	game.post(std::make_unique<ActionMove>(Faction::spacingGuild(),
-			  AreaId::INVALID, Placement{}));
+	// 4. harkonnen
+	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
+	game.post(std::make_unique<ActionShip>(Faction::harkonnen(), Placement{AreaId::INVALID, 0, 0}));
+	game.post(std::make_unique<ActionMove>(Faction::harkonnen(), AreaId::Carthag, Placement{AreaId::RockOutcroppings_14, 3, 0}));
+	game.post(std::make_unique<ActionIntrusionReaction>(Faction::beneGesserit(), false));
 
 	// 5. areitdes
-	game.post(std::make_unique<ActionShip>(Faction::atreides(), Placement{}));
-	game.post(std::make_unique<ActionMove>(Faction::atreides(),
-			  AreaId::INVALID, Placement{}));
+	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
+	game.post(std::make_unique<ActionShip>(Faction::atreides(), Placement{AreaId::INVALID, 0, 0}));
+	game.post(std::make_unique<ActionMove>(Faction::atreides(), AreaId::INVALID, Placement{}));
 
-	// 6. bene gesserit
-	game.post(std::make_unique<ActionShip>(Faction::beneGesserit(),
-			  Placement{AreaId::TueksSietch, 1, 0}));
-	game.post(std::make_unique<ActionMove>(Faction::beneGesserit(),
-			  AreaId::INVALID, Placement{}));
+	// 6. emperor
+	game.post(std::make_unique<ActionGuildShipmentDecision>(Faction::spacingGuild(), false));
+	game.post(std::make_unique<ActionShip>(Faction::emperor(), Placement{AreaId::TueksSietch, 2, 1}));
+	game.post(std::make_unique<ActionAccompanyDecision>(Faction::beneGesserit(), ActionAccompanyDecision::ACCOMPANY_SHIPMENT));
+	game.post(std::make_unique<ActionMove>(Faction::emperor(), AreaId::INVALID, Placement{}));
 
-	// 7. emperor
-	game.post(std::make_unique<ActionShip>(Faction::emperor(),
-			  Placement{AreaId::Carthag, 3, 3}));
-	game.post(std::make_unique<ActionAccompanyDecision>(Faction::beneGesserit(),
-			  ActionAccompanyDecision::ACCOMPANY_SHIPMENT));
-	game.post(std::make_unique<ActionMove>(Faction::emperor(),
-			  AreaId::INVALID, Placement{}));
+	// 7. spacing guild out of turn
+	game.post(std::make_unique<ActionShip>(Faction::spacingGuild(), AreaId::TueksSietch, Placement{AreaId::SietchTabr, 5, 0}));
+	game.post(std::make_unique<ActionMove>(Faction::spacingGuild(), AreaId::SietchTabr, Placement{AreaId::RockOutcroppings_14, 5, 0}));
+	game.post(std::make_unique<ActionIntrusionReaction>(Faction::beneGesserit(), false));
 }
