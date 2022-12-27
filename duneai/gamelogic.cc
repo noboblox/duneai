@@ -360,8 +360,17 @@ void GameLogic::phaseSpiceSpiceBlow(GameState& game)
 		else
 		{
 			++territoriesDrawn;
-			game.board.addSpice(card.area(), card.base());
-			log->info("add %d spice to %s", card.base(), Arrakis::areaName(card.area()));
+
+			if (game.board.insideStorm(card.area()))
+			{
+				log->info("ignore spice area %s inside storm", Arrakis::areaName(card.area()));
+			}
+			else
+			{
+				game.board.addSpice(card.area(), card.base());
+				log->info("add %d spice to %s", card.base(), Arrakis::areaName(card.area()));
+			}
+
 
 			if (territoriesDrawn == 1)
 				game.spiceDeck.discardA(card);

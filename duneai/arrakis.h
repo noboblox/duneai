@@ -64,12 +64,12 @@ public:
 	std::vector<Conflict> collectConflicts() const;
 
 	int getStorm() const noexcept;
+    bool insideStorm(AreaId id) const;
 
 	bool canShip(Faction who, AreaId where) const;
 	bool canMove(Faction who, AreaId from, AreaId to, bool moveAsHostiles = true);
 	bool isOccupied(Faction shipper, AreaId where, bool moveAsHostiles = true) const;
 	bool isReachable(AreaId from, AreaId to, int movement) const;
-	bool isSameBattleground(AreaId areaA, AreaId areaB) const noexcept;
 	int movementRange(Faction who) const noexcept;
 	bool hasMovementBonus(Faction who) const noexcept;
 

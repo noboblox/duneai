@@ -822,6 +822,11 @@ int Arrakis::getStorm() const noexcept
 	return storm;
 }
 
+bool Arrakis::insideStorm(AreaId id) const
+{
+	return Arrakis::insideStorm(id, storm);
+}
+
 static std::vector<Arrakis::FactionPosition>::iterator
 firstPlayer(std::vector<Arrakis::FactionPosition>& v, int storm) noexcept
 {
