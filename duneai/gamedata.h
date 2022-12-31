@@ -173,6 +173,16 @@ public:
 
 	bool isKarama() const noexcept { return mProperties & P_KARAMA; }
 	bool isWorthless() const noexcept { return mProperties & P_WORTHLESS; }
+	
+	bool isPoisonWeapon() const noexcept { return mProperties & P_POISON_WEAPON; }
+	bool isProjectileWeapon() const noexcept { return mProperties & P_PROJECTILE_WEAPON; }
+	bool isWeapon() const noexcept { return isPoisonWeapon() || isProjectileWeapon(); }
+
+	bool isPoisonDefense() const noexcept { return mProperties & P_POISON_DEFENSE; }
+	bool isProjectileDefense() const noexcept { return mProperties & P_PROJECTILE_DEFENSE; }
+	bool isDefense() const noexcept { return isPoisonDefense() || isProjectileDefense(); }
+
+	bool isCheapHero() const noexcept { return mProperties & P_HERO; }
 
 	static void swap(TreacheryCard& l, TreacheryCard& r) noexcept
 	{

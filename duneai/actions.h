@@ -7,6 +7,7 @@
 #include "event.h"
 
 #include "arrakis.h"
+#include "battleplan.h"
 #include "enumlabels.h"
 #include "gameconstants.h"
 #include "gamedata.h"
@@ -26,6 +27,8 @@ enum ActionType
 	ACTION_INTRUSION_RESPONSE,
 	ACTION_ACCOMPANY_SHIPMENT,
 	ACTION_MOVE,
+	ACTION_BATTLE_SELECTION,
+	ACTION_COMMIT_BATTLE_PLAN,
 };
 using ActionTypeLabels = EnumLabels<ActionType>;
 
@@ -56,7 +59,7 @@ private:
 class ActionPrediction : public Action
 {
 public:
-	explicit ActionPrediction(Faction aFrom, Faction aWinner, int aRound)
+	ActionPrediction(Faction aFrom, Faction aWinner, int aRound)
 	: Action(aFrom, ACTION_PREDICT),
 	  winner(aWinner),
 	  round(aRound)
@@ -72,7 +75,7 @@ public:
 class ActionTraitorSelection : public Action
 {
 public:
-	explicit ActionTraitorSelection(Faction aFrom, Leader::Id aSelection)
+	ActionTraitorSelection(Faction aFrom, Leader::Id aSelection)
 	: Action(aFrom, ACTION_TRAITOR_SELECTION),
 	  selection(aSelection)
 	{
@@ -85,7 +88,7 @@ public:
 class ActionFremenPlacement : public Action
 {
 public:
-	explicit ActionFremenPlacement(Faction aFrom, const std::vector<Placement>& aPlacements)
+	ActionFremenPlacement(Faction aFrom, const std::vector<Placement>& aPlacements)
 	: Action(aFrom, ACTION_FREMEN_PLACEMENT),
 	  placements(aPlacements)
 	{
@@ -98,7 +101,7 @@ public:
 class ActionHarkonnenRedraw : public Action
 {
 public:
-	explicit ActionHarkonnenRedraw(Faction aFrom, bool aValue)
+	ActionHarkonnenRedraw(Faction aFrom, bool aValue)
 	: Action(aFrom, ACTION_HARKONNEN_REDRAW),
 	  redraw(aValue)
 	{
@@ -111,7 +114,7 @@ public:
 class ActionBeneGesseritStartingForce : public Action
 {
 public:
-	explicit ActionBeneGesseritStartingForce(Faction aFrom, AreaId aWhere)
+	ActionBeneGesseritStartingForce(Faction aFrom, AreaId aWhere)
 	: Action(aFrom, ACTION_BENE_GESSERIT_START_FORCE),
 	  where(aWhere)
 	{
@@ -124,7 +127,7 @@ public:
 class ActionStormInitialDial : public Action
 {
 public:
-	explicit ActionStormInitialDial(Faction aFrom, int aDial)
+	ActionStormInitialDial(Faction aFrom, int aDial)
 	: Action(aFrom, ACTION_STORM_INITIAL_DIAL),
 	  dial(aDial)
 	{
@@ -137,7 +140,7 @@ public:
 class ActionChoamCharity : public Action
 {
 public:
-	explicit ActionChoamCharity(Faction aFrom, bool aNeed)
+	ActionChoamCharity(Faction aFrom, bool aNeed)
 	: Action(aFrom, ACTION_CHOAM_CHARITY),
 	  need(aNeed)
 	{
@@ -157,14 +160,14 @@ public:
 		KARAMA_BUY
 	};
 
-	explicit ActionBid(Faction aFrom, int aBid)
+	ActionBid(Faction aFrom, int aBid)
 	: Action(aFrom, ACTION_BID),
 	  type(RAISE),
 	  bid(aBid)
 	{
 	}
 
-	explicit ActionBid(Faction aFrom, Type aType)
+	ActionBid(Faction aFrom, Type aType)
 	: Action(aFrom, ACTION_BID),
 	  type(aType),
 	  bid(0)
@@ -179,7 +182,7 @@ public:
 class ActionGuildShipmentDecision : public Action
 {
 public:
-	explicit ActionGuildShipmentDecision(Faction aFrom, bool aShipNow)
+	ActionGuildShipmentDecision(Faction aFrom, bool aShipNow)
 	: Action(aFrom, ACTION_GUILD_SHIPMENT_DECISION),
 	  shipNow(aShipNow)
 	{
@@ -199,7 +202,7 @@ public:
 	 * forces are taken from reserve
 	 * @note this event is also applicable for fremen shipments
 	 */
-	explicit ActionShip(Faction aFaction, Placement aTo)
+	ActionShip(Faction aFaction, Placement aTo)
 	: Action(aFaction, ACTION_SHIP),
 	  to(aTo), fromArea(AreaId::INVALID), fromReserve(true), inverted(false)
 	{
@@ -209,7 +212,7 @@ public:
 	 * perform an on-planet shipment.
 	 * Usually this is allowed for the guild player only
 	 */
-	explicit ActionShip(Faction aFaction, AreaId aFrom, Placement aTo)
+	ActionShip(Faction aFaction, AreaId aFrom, Placement aTo)
 	: Action(aFaction, ACTION_SHIP),
 	  to(aTo), fromArea(aFrom), fromReserve(false), inverted(false)
 	{
@@ -219,7 +222,7 @@ public:
 	 * perform a very special FROM planet TO reserve shipment.
 	 * Usually this is allowed for the guild player only
 	 */
-	explicit ActionShip(Faction aFaction, Placement aFrom, InvertShipment)
+	ActionShip(Faction aFaction, Placement aFrom, InvertShipment)
 	: Action(aFaction, ACTION_SHIP),
 	  to(aFrom), fromArea(AreaId::INVALID), fromReserve(true), inverted(true)
 	{
@@ -236,7 +239,7 @@ public:
 class ActionIntrusionReaction : public Action
 {
 public:
-	explicit ActionIntrusionReaction(Faction aFrom, bool aDisengage)
+	ActionIntrusionReaction(Faction aFrom, bool aDisengage)
 	: Action(aFrom, ACTION_INTRUSION_RESPONSE),
 	  disengage(aDisengage)
 	{
@@ -256,7 +259,7 @@ public:
 		SEND_TO_POLAR_SINK = 2
 	};
 
-	explicit ActionAccompanyDecision(Faction aFrom, Decision aDecision)
+	ActionAccompanyDecision(Faction aFrom, Decision aDecision)
 	: Action(aFrom, ACTION_ACCOMPANY_SHIPMENT),
 	  decision(aDecision)
 	{
@@ -272,13 +275,13 @@ class ActionMove : public Action
 public:
 	enum AsAdvisor { TRUE };
 
-	explicit ActionMove(Faction aFaction, AreaId aFrom, Placement aTo, bool aUseHajr = false)
+	ActionMove(Faction aFaction, AreaId aFrom, Placement aTo, bool aUseHajr = false)
 	: Action(aFaction, ACTION_MOVE),
 	  to(aTo), fromArea(aFrom), useHajr(aUseHajr), asAdvisor(false)
 	{
 	}
 
-	explicit ActionMove(Faction aFaction, AreaId aFrom, Placement aTo, AsAdvisor, bool aUseHajr = false)
+	ActionMove(Faction aFaction, AreaId aFrom, Placement aTo, AsAdvisor, bool aUseHajr = false)
 	: Action(aFaction, ACTION_MOVE),
 	  to(aTo), fromArea(aFrom), useHajr(aUseHajr), asAdvisor(true)
 	{
@@ -292,5 +295,58 @@ public:
 	const bool asAdvisor;
 };
 
+class ActionBattleSelection : public Action
+{
+public:
+
+	/**
+	 * @brief Select whom and where to fight next.
+	 * Only the ambiguous portions are evaluated by the game logic. All other parts are ignored.
+	 */
+	ActionBattleSelection(Faction aFrom, Faction aEnemy, AreaId aWhere)
+	: Action(aFrom, ACTION_BATTLE_SELECTION),
+	  where(aWhere), who(aEnemy)
+	{
+	}
+
+	/**
+	 * Select whom to fight next.
+	 * This is only possible if the area is unambiguous.
+	 */
+	ActionBattleSelection(Faction aFrom, Faction aEnemy)
+	: Action(aFrom, ACTION_BATTLE_SELECTION),
+	  where(AreaId::INVALID), who(aEnemy)
+	{
+	}
+	
+	/**
+	 * Select where to fight next.
+	 * This is only possible if the enemy is unambiguous.
+	 */
+	ActionBattleSelection(Faction aFrom, AreaId aWhere)
+	: Action(aFrom, ACTION_BATTLE_SELECTION),
+	  where(aWhere), who(Faction::none())
+	{
+	}
+
+	virtual void serialize(std::ostream& out) const override;
+
+	const AreaId where;
+	const Faction who;
+};
+
+class ActionCommitBattlePlan : public Action
+{
+public:
+	ActionCommitBattlePlan(Faction aFrom, const BattlePlan& aPlan)
+		: Action(aFrom, ACTION_COMMIT_BATTLE_PLAN),
+		plan(aPlan.copyContent())
+	{
+	}
+
+	virtual void serialize(std::ostream& out) const override;
+
+	const BattlePlan::Data plan;
+};
 
 #endif /* ACTIONS_H_ */

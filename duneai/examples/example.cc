@@ -3,6 +3,7 @@
 
 void round1AuctionPhase(GameLogic& game);
 void round1Shipment(GameLogic& game);
+void round1Battle(GameLogic& game);
 
 int main()
 {
@@ -54,6 +55,7 @@ int main()
 
 	round1AuctionPhase(game);
 	round1Shipment(game);
+	round1Battle(game);
 
 	game.tick();
 	return 0;
@@ -227,4 +229,8 @@ void round1Shipment(GameLogic& game)
 	game.post(std::make_unique<ActionShip>(Faction::spacingGuild(), AreaId::TueksSietch, Placement{AreaId::SietchTabr, 5}));
 	game.post(std::make_unique<ActionMove>(Faction::spacingGuild(), AreaId::SietchTabr, Placement{AreaId::RockOutcroppings_14, 5}));
 	game.post(std::make_unique<ActionIntrusionReaction>(Faction::beneGesserit(), false));
+}
+
+void round1Battle(GameLogic& game)
+{
 }

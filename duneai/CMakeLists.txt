@@ -30,4 +30,4 @@ add_library ( dunecore
 	"savegame.h" "savegame.cc"
 	"shipormove.h" "shipormove.cc"
 	"systemevents.h"
-)
+    "statefunctions.h" "statefunctions.cc")

@@ -1,5 +1,6 @@
 #include "shipormove.h"
 #include "gamedata.h"
+#include "statefunctions.h"
 
 ShipOrMove::ShipOrMove()
 {
@@ -126,15 +127,7 @@ bool ShipOrMove::pendingMovement() const noexcept
 
 static bool consumeHajr(GameState& game, PlayerState& player)
 {
-	auto it_hajr = std::find_if(player.hand.begin(), player.hand.end(),
-		[](const TreacheryCard& c) { return c.id() == TreacheryCard::HAJR; });
-
-	if (it_hajr == player.hand.end())
-		return false;
-
-	game.treacheryDeck.discard(*it_hajr);
-	player.hand.erase(it_hajr);
-	return true;
+	return StateFunctions::discardCard(player, TreacheryCard::HAJR, game.treacheryDeck);
 }
 
 static bool isHostileInTargetArea(GameState& game, PlayerState& player, AreaId where, bool hostileRequested = true)
