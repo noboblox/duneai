@@ -1,7 +1,7 @@
 #include "actions.h"
 #include <iostream>
 
-#include "json/nlohmann/json.hpp"
+#include "thirdparty/nlohmann/json.hpp"
 using Json = nlohmann::json;
 
 template<>

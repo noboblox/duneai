@@ -39,7 +39,7 @@ add_library( dunecore STATIC
  "game.h")
 
  target_include_directories( dunecore
-	PRIVATE ${CMAKE_SOURCE_DIR}/json
+	PRIVATE ${CMAKE_SOURCE_DIR}/thirdparty
 )
 
 add_executable( duneserver
