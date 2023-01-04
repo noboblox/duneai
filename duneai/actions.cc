@@ -41,8 +41,8 @@ std::unique_ptr<Action> ActionFactory::create(Faction from, const std::string& j
 		return std::make_unique<ActionPrediction>(from, json);
 //	case ACTION_HARKONNEN_REDRAW:
 //		return std::make_unique<ActionHarkonnenRedraw>(from, json);
-//	case ACTION_TRAITOR_SELECTION:
-//		return std::make_unique<ActionTraitorSelection>(from, json);
+	case ACTION_TRAITOR_SELECTION:
+		return std::make_unique<ActionTraitorSelection>(from, json);
 //	case ACTION_FREMEN_PLACEMENT:
 //		return std::make_unique<ActionFremenPlacement>(from, json);
 //	case ACTION_BENE_GESSERIT_START_FORCE:
@@ -93,6 +93,10 @@ Faction ActionFactionSelection::parseFrom(const std::string& json)
 }
 
 //-- constructors
+ActionFactionSelection::ActionFactionSelection(const std::string& json)
+: Action(parseFrom(json), ACTION_FACTION_SELECTION)
+{
+}
 
 ActionPrediction::ActionPrediction(Faction aFrom, Faction aWinner, int aRound)
 : Action(aFrom, ACTION_PREDICT),
@@ -112,15 +116,16 @@ ActionPrediction::ActionPrediction(Faction aFrom, const std::string& json)
 
 ActionTraitorSelection::ActionTraitorSelection(Faction aFrom, Leader::Id aSelection)
 : Action(aFrom, ACTION_TRAITOR_SELECTION),
-  selection(aSelection)
+  mSelection(aSelection)
 {
-
 }
 
-//ActionTraitorSelection::ActionTraitorSelection(Faction aFrom, const std::string& json)
-//: Action(aFrom, ACTION_TRAITOR_SELECTION)
-//{
-//}
+ActionTraitorSelection::ActionTraitorSelection(Faction aFrom, const std::string& json)
+: Action(aFrom, ACTION_TRAITOR_SELECTION)
+{
+	Json doc(json);
+	mSelection = doc.getLeaderId("selection");
+}
 
 ActionFremenPlacement::ActionFremenPlacement(Faction aFrom, const std::vector<Placement>& aPlacements)
 : Action(aFrom, ACTION_FREMEN_PLACEMENT),

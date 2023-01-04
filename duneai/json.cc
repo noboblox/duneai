@@ -51,9 +51,7 @@ int Json::getInt(const char* key)
 
 ActionType Json::getActionType(const char* key)
 {
-    ActionType result = EnumActionType::value(getString(key));
-    Assert(result != ACTION_invalid);
-    return result;
+    return EnumActionType::value(getString(key));
 }
 
 Faction Json::getExactlyOneFaction(const char* key)
@@ -61,4 +59,9 @@ Faction Json::getExactlyOneFaction(const char* key)
     Faction result = Faction::fromString(getString(key));
     Assert(result.exactlyOne());
     return result;
+}
+
+Leader::Id Json::getLeaderId(const char* key)
+{
+    return EnumLeaderId::value(getString(key));
 }

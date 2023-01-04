@@ -227,7 +227,7 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 	bool found = false;
 	for (std::size_t i = 0; i < player->selectedTraitors.size(); ++i)
 	{
-		if (player->selectedTraitors[i] == selection->selection)
+		if (player->selectedTraitors[i] == selection->selection())
 		{
 			found = true;
 			break;
@@ -237,9 +237,9 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 	if (!found)
 		return false;
 
-	log->info("%s selected traitor %s", selection->from().label().c_str(), Leader::name(selection->selection));
+	log->info("%s selected traitor %s", selection->from().label().c_str(), EnumLeaderId::label(selection->selection()));
 	player->selectedTraitors.clear();
-	player->selectedTraitors.push_back(selection->selection);
+	player->selectedTraitors.push_back(selection->selection());
 
 	game.expectingInputFrom.clear(action.from());
 
@@ -872,10 +872,10 @@ void GameLogic::drawTraitors(GameState& game)
 		player.selectedTraitors.push_back(drawn[2]);
 		player.selectedTraitors.push_back(drawn[3]);
 		log->info("traitors drawn for %-12s: { %-20s, %-20s, %-20s, %-20s }", player.faction.label().c_str(),
-														  Leader::name(drawn[0]),
-														  Leader::name(drawn[1]),
-														  Leader::name(drawn[2]),
-														  Leader::name(drawn[3]));
+														  EnumLeaderId::label(drawn[0]),
+														  EnumLeaderId::label(drawn[1]),
+														  EnumLeaderId::label(drawn[2]),
+														  EnumLeaderId::label(drawn[3]));
 	}
 }
 

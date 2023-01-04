@@ -16,6 +16,7 @@ public:
     int getInt(const char* key);
     ActionType getActionType(const char* key);
     Faction getExactlyOneFaction(const char* key);
+    Leader::Id getLeaderId(const char* key);
 
 private:
     std::unique_ptr<JsonImpl> mpDoc;

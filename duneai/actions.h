@@ -133,10 +133,7 @@ class ActionFactionSelection : public Action
 {
 public:
 	/// @attention special case: this action is needed for the remote player to select a faction
-	explicit ActionFactionSelection(const std::string& json)
-	: Action(parseFrom(json), ACTION_FACTION_SELECTION)
-	{
-	}
+	explicit ActionFactionSelection(const std::string& json);
 
 private:
 	static Faction parseFrom(const std::string& json);
@@ -162,7 +159,10 @@ public:
 	ActionTraitorSelection(Faction aFrom, Leader::Id aSelection);
 	ActionTraitorSelection(Faction aFrom, const std::string& json);
 
-	const Leader::Id selection;
+	Leader::Id selection() const noexcept { return mSelection; }
+
+private:
+	Leader::Id mSelection;
 };
 
 class ActionFremenPlacement : public Action

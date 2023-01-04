@@ -5,8 +5,6 @@ void round1AuctionPhase(GameLogic& game);
 void round1Shipment(GameLogic& game);
 void round1Battle(GameLogic& game);
 
-#define JSON_EXAMPLE 1
-
 int main()
 {
 	GameLogic game;
@@ -21,15 +19,10 @@ int main()
 	game.addFaction(Faction::tleilaxu(),     false);
 	game.setup(4004030159);
 
-#if JSON_EXAMPLE
-	auto action = ActionFactory::create(Faction::beneGesserit(), "{\"type\":\"predict\", \"winner\":\"atreides\", \"round\":5}");
-	game.post(std::move(action));
-#else
-	game.post(std::make_unique<ActionPrediction>(Faction::beneGesserit(), Faction::atreides(), 5));
-#endif
-
+	game.post(ActionFactory::create(Faction::beneGesserit(), "{\"type\":\"predict\", \"winner\":\"atreides\", \"round\":5}"));
 	game.post(std::make_unique<ActionHarkonnenRedraw> (Faction::harkonnen(),    true));
-	game.post(std::make_unique<ActionTraitorSelection>(Faction::emperor(),      Leader::ID_Irulan));
+
+	game.post(ActionFactory::create(Faction::emperor(), "{\"type\":\"traitorSelection\", \"selection\":\"Princess Irulan\"}"));
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::spacingGuild(), Leader::ID_Otheym));
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::fremen(),       Leader::ID_Gurney));
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::atreides(),     Leader::ID_Margot));
