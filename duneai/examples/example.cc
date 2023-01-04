@@ -7,7 +7,17 @@ void round1Battle(GameLogic& game);
 
 int main()
 {
-	GameLogic game(Faction::any(), 4004030159);
+	GameLogic game;
+
+	game.addFaction(Faction::harkonnen(),    true);
+	game.addFaction(Faction::emperor(),      false);
+	game.addFaction(Faction::spacingGuild(), false);
+	game.addFaction(Faction::fremen(),       false);
+	game.addFaction(Faction::atreides(),     false);
+	game.addFaction(Faction::beneGesserit(), false);
+	game.addFaction(Faction::tleilaxu(),     false);
+	game.setup(4004030159);
+
 	game.post(std::make_unique<ActionPrediction>(Faction::beneGesserit(), Faction::atreides(), 5));
 
 	game.post(std::make_unique<ActionHarkonnenRedraw> (Faction::harkonnen(),    true));

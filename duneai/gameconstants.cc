@@ -64,7 +64,7 @@ const std::vector<int>* const SeatConfig::configs[] = {
 		&tenPlayers};
 
 template<>
-std::unordered_map<GamePhase, const char*> GamePhaseLabels::labels =
+GamePhaseLabels::Definition GamePhaseLabels::entries =
 {
 	{PHASE_INIT_PREDICTION,             "init.prediction"            },
 	{PHASE_INIT_HARKONNEN_REDRAW,       "init.harkonnenRedraw"       },
@@ -101,6 +101,26 @@ std::vector<Faction> Faction::expand(Faction mask)
 	}
 
 	return result;
+}
+
+//static
+Faction Faction::fromString(const std::string& label)
+{
+	if (label == "emperor"      )
+		return Faction::emperor();
+	if (label == "spacingGuild" )
+		return Faction::spacingGuild();
+	if (label == "fremen"       )
+		return Faction::fremen();
+	if (label == "atreides"     )
+		return Faction::atreides();
+	if (label == "harkonnen"    )
+		return Faction::harkonnen();
+	if (label == "beneGesserit" )
+		return Faction::beneGesserit();
+	if (label == "tleilaxu"     )
+		return Faction::tleilaxu();
+	return Faction::none();
 }
 
 std::vector<Leader::Id> Leader::of(Faction faction)

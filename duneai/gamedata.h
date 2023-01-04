@@ -196,7 +196,7 @@ private:
 	int mProperties;
 };
 
-using TreacheryCardLabels = EnumLabels<TreacheryCard::Id>;
+using TreacheryCardLabels = Enum<TreacheryCard::Id, TreacheryCard::INVALID>;
 
 class TreacheryDeck
 {

@@ -3,7 +3,7 @@
 #include "gameconstants.h"
 
 template<>
-std::unordered_map<TreacheryCard::Id, const char*> TreacheryCardLabels::labels =
+TreacheryCardLabels::Definition TreacheryCardLabels::entries =
 {
 	{ TreacheryCard::LASGUN         , "LASGUN"          },
 	{ TreacheryCard::CRYS_KNIFE     , "CRYS_KNIFE"      },

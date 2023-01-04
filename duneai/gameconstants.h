@@ -29,7 +29,7 @@ enum GamePhase
 	PHASE_SHIPMENT_MOVE,
 	PHASE_BATTLE,
 };
-using GamePhaseLabels = EnumLabels<GamePhase>;
+using GamePhaseLabels = Enum<GamePhase, PHASE_invalid>;
 
 enum AreaId
 {
@@ -164,11 +164,13 @@ public:
 	static constexpr Faction any()                       { return Faction(CODE_ANY); }
 	static constexpr Faction anyExcept(Faction excluded) { return Faction(any().mValue & (~excluded.mValue)); }
 	static std::vector<Faction> expand(Faction mask);
+	static Faction fromString(const std::string& label);
 
 	explicit operator int() const noexcept
     {
 		return mValue;
     }
+
 
 	std::string label() const
 	{
@@ -202,6 +204,7 @@ public:
 	{
 	}
 
+	constexpr explicit Faction():  mValue(CODE_NONE) {}
 	constexpr explicit Faction(int value):  mValue(value) {}
 
 	bool operator==(Faction other) const noexcept { return mValue == other.mValue; }

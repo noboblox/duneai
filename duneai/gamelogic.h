@@ -13,30 +13,50 @@
 class GameLogic
 {
 public:
-
-	/// create a game logic without executing the initial setup
+	/**
+	 * create a game logic without executing the initial setup
+	 * @post at least two factions should be added via @ref addFaction
+	 */
 	explicit GameLogic();
 
-	/// create a game logic an perform the initial setup
-	explicit GameLogic(Faction factionsInGame);
-	explicit GameLogic(Faction factionsInGame, unsigned aSeed);
+	/**
+	 * add a faction to the game.
+	 * @param faction faction to add
+	 * @param gameMaster the faction may send game master actions
+	 *
+	 * @retval true: faction added
+	 * @retval false: faction not added. This happens when the faction was already registered.
+	 *
+	 * @note can only be done before the game is set up
+	 * @post post an action @ref GMActionSetupGame or call @ref setup
+	 */
+	bool addFaction(Faction faction, bool gameMaster = false) noexcept;
 
 	/**
-	 * setup a new game.
-	 * @param factionsInGame
+	 * remove a faction from the game.
+	 * @param faction faction to remove
+	 *
+	 * @note can only be done before the game is set up
 	 */
-	void setup(Faction factionsInGame);
-	void setup(Faction factionsInGame, unsigned aSeed);
+	void removeFaction(Faction faction) noexcept;
+
+	/// setup the game with a random seed
+	void setup();
+
+	/// setup the game with a specified seed
+	void setup(unsigned seed);
 
 	/**
 	 * @brief update the game including evaluation of posted action
-	 * @pre the game needs to be set-up via call to @ref setup
+	 * @pre the game needs to be either be setup via call to @ref setup
+	 * or setup via a @ref post of the @ref GMActionSetupGame action
 	 */
 	void tick();
 
 	/**
 	 * @brief post an action to the game logic
 	 * the action will be evaluated during the next tick
+	 * @post call @ref tick to execute the posted actions
 	 */
 	void post(std::unique_ptr<Action>&& action);
 
@@ -74,7 +94,9 @@ public:
 private:
 	void Init(GameState& game, Faction factionsInGame, unsigned aSeed);
 
-	bool gameAction(GameState& game, const Action& action);
+	bool executeAction(GameState& game, const Action& action);
+	bool gameMasterAction(GameState& game, const Action& action);
+	bool playerAction(GameState& game, const Action& action);
 	bool phaseInitPrediction(GameState& game, const Action& action);
 	bool phaseInitHarkonnenRedraw(GameState& game, const Action& action);
 	bool phaseInitTraitorSelect(GameState& game, const Action& action);
@@ -121,6 +143,8 @@ private:
     std::unique_ptr<const Logger> log;
     std::queue<std::unique_ptr<Event>> mPending;
     std::vector<std::unique_ptr<const Action>> mRecorded;
+    Faction inGame = Faction::none();
+    Faction gameMasters = Faction::none();
 	GameState mGame;
 };
 

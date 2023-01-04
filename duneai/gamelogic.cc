@@ -27,30 +27,42 @@ GameLogic::GameLogic()
 {
 }
 
-GameLogic::GameLogic(Faction factionsInGame)
-: log(new StdoutLogger())
+bool GameLogic::addFaction(Faction faction, bool gameMaster) noexcept
 {
-	setup(factionsInGame);
+	if (initialized)
+		return false;
+
+	if (!faction.exactlyOne() || inGame.contains(faction))
+		return false;
+
+	inGame |= faction;
+
+	if (gameMaster)
+		gameMasters |= faction;
+
+	return true;
 }
 
-
-GameLogic::GameLogic(Faction factionsInGame, unsigned aSeed)
-: log(new StdoutLogger())
+void GameLogic::removeFaction(Faction faction) noexcept
 {
-	setup(factionsInGame, aSeed);
+	if (initialized || !faction.exactlyOne())
+		return;
+
+	inGame.clear(faction);
+	gameMasters.clear(faction);
 }
 
-void GameLogic::setup(Faction factionsInGame)
+void GameLogic::setup()
 {
 	std::random_device rd;
-	setup(factionsInGame,  rd());
+	setup(rd());
 }
 
-void GameLogic::setup(Faction factionsInGame, unsigned aSeed)
+void GameLogic::setup(unsigned aSeed)
 {
 	if (!initialized)
 	{
-		Init(mGame, factionsInGame, aSeed);
+		Init(mGame, inGame, aSeed);
 		initialized = true;
 	}
 }
@@ -68,7 +80,7 @@ void GameLogic::tick()
 		else if (ev.isAction())
 		{
 			auto& action = ev.get<Action>();
-			if (initialized && gameAction(mGame, action))
+			if (executeAction(mGame, action))
 				record(std::unique_ptr<Action>(static_cast<Action*> (mPending.front().release())));
 			else
 				log->info("discard event %s from %s", action.label(), action.from().label().c_str());
@@ -105,7 +117,29 @@ void GameLogic::requestSave(SaveGameReceiver receiver)
 //-- PHASES
 //
 
-bool GameLogic::gameAction(GameState& game, const Action& action)
+bool GameLogic::executeAction(GameState& game, const Action& action)
+{
+	if (action.isGMAction() && gameMasters.contains(action.from()))
+		return gameMasterAction(game, action);
+	else if (!action.isGMAction())
+		return playerAction(game, action);
+
+	return false;
+}
+
+bool GameLogic::gameMasterAction(GameState& game, const Action& action)
+{
+	switch (action.type())
+	{
+	case GM_ACTION_START_GAME:
+		setup();
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool GameLogic::playerAction(GameState& game, const Action& action)
 {
 	if (!isAllowedAction(game, action))
 		return false;
@@ -148,14 +182,14 @@ bool GameLogic::phaseInitPrediction(GameState& game, const Action& action)
 	auto prediction = expectedAction<ActionPrediction>(game, action, ACTION_PREDICT);
 	if (!prediction) return false;
 
-	if (!prediction->winner.exactlyOne())
+	if (!factionAvailable(game, prediction->winner()))
 		return false;
 
-	if (prediction->round < 1 || prediction->round > game.maxRound)
+	if (prediction->round() < 1 || prediction->round() > game.maxRound)
 		return false;
 
-	game.predictedFaction = prediction->winner;
-	game.predictedTurn = prediction->round;
+	game.predictedFaction = prediction->winner();
+	game.predictedTurn = prediction->round();
 	log->info("set prediction to %s in turn %d", game.predictedFaction.label().c_str(), game.predictedTurn);
 
 	if (harkonnenMayRedraw(game))
@@ -630,7 +664,7 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 	mGame.random = std::mt19937(mGame.seed);
 	log->info("set up game with seed %u", mGame.seed);
 
-	std::vector<int> seats = SeatConfig::getConfig(factions.size());
+	std::vector<int> seats = SeatConfig::getConfig((int) factions.size());
 	std::shuffle(seats.begin(), seats.end(), mGame.random);
 
 	for (size_t i = 0; i < factions.size(); ++i)

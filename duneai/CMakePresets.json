@@ -7,10 +7,13 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "installDir": "${sourceDir}/out/install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
-            },
+          "cacheVariables": {
+            "CMAKE_C_COMPILER": "cl.exe",
+            "CMAKE_CXX_COMPILER": "cl.exe",
+            "BOOST_LIBRARYDIR": "D:/Dev/boost_1_79_0/lib",
+            "BOOST_INCLUDEDIR": "D:/Dev/boost_1_79_0"
+
+          },
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
