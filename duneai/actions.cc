@@ -1,8 +1,7 @@
 #include "actions.h"
 #include <iostream>
 
-#include "thirdparty/nlohmann/json.hpp"
-using Json = nlohmann::json;
+#include "json.h"
 
 template<>
 EnumActionType::Definition EnumActionType::entries =
@@ -79,61 +78,18 @@ static void SuccessOrThrow(bool success)
 		throw std::invalid_argument("failed to parse the action correctly");
 }
 
-static Json parseJson(const std::string& json)
-{
-	auto begin = json.data();
-	auto end   = begin + json.size();
-	return nlohmann::json::parse(begin, end);
-}
-
-static bool getStringMember(const Json& doc, const char* key, std::string& result)
-{
-	if (!doc.is_object())
-		return false;
-
-	auto it = doc.find(key);
-
-	if (it == doc.end() || !it->is_string())
-		return false;
-	result = it->get<std::string>();
-	return true;
-}
-
-static bool getIntMember(const Json& doc, const char* key, int& result)
-{
-	if (!doc.is_object())
-		return false;
-
-	auto it = doc.find(key);
-
-	if (it == doc.end() || !it->is_number_integer())
-		return false;
-	result = it->get<int>();
-	return true;
-}
-
 // static
 ActionType Action::parseActionType(const std::string& json)
 {
-	auto doc = parseJson(json);
-	std::string v;
-
-	if (!getStringMember(doc, "type", v))
-		return ACTION_invalid;
-
-	return EnumActionType::value(v);
+    Json doc(json);
+    return doc.getActionType("type");
 }
 
 // static
 Faction ActionFactionSelection::parseFrom(const std::string& json)
 {
-	auto doc = parseJson(json);
-	std::string v;
-
-	if (!getStringMember(doc, "from", v))
-		return Faction::none();
-
-	return Faction::fromString(v);
+    Json doc(json);
+    return doc.getExactlyOneFaction("from");
 }
 
 //-- constructors
@@ -148,14 +104,10 @@ ActionPrediction::ActionPrediction(Faction aFrom, Faction aWinner, int aRound)
 ActionPrediction::ActionPrediction(Faction aFrom, const std::string& json)
 : Action(aFrom, ACTION_PREDICT)
 {
-	auto doc = parseJson(json);
+	Json doc(json);
 
-	std::string who;
-	SuccessOrThrow(getStringMember(doc, "winner", who));
-	mWinner = Faction::fromString(who);
-	SuccessOrThrow(mWinner != Faction::none());
-
-	SuccessOrThrow(getIntMember(doc, "round", mRound));
+	mWinner = doc.getExactlyOneFaction("winner");
+	mRound  = doc.getInt("round");
 }
 
 ActionTraitorSelection::ActionTraitorSelection(Faction aFrom, Leader::Id aSelection)

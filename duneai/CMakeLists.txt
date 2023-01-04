@@ -31,12 +31,13 @@ add_library( dunecore STATIC
 	"gameconstants.h" "gameconstants.cc"
 	"gamedata.h" "gamedata.cc"
 	"gamelogic.h" "gamelogic.cc"
+	"json.h" "json.cc"
 	"logger.h" "logger.cc"
 	"savegame.h" "savegame.cc"
 	"shipormove.h" "shipormove.cc"
 	"systemevents.h"
     "statefunctions.h" "statefunctions.cc"
- "game.h")
+    "game.h")
 
  target_include_directories( dunecore
 	PRIVATE ${CMAKE_SOURCE_DIR}/thirdparty

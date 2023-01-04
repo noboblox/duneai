@@ -5,9 +5,12 @@ void round1AuctionPhase(GameLogic& game);
 void round1Shipment(GameLogic& game);
 void round1Battle(GameLogic& game);
 
+#define JSON_EXAMPLE 1
+
 int main()
 {
 	GameLogic game;
+
 
 	game.addFaction(Faction::harkonnen(),    true);
 	game.addFaction(Faction::emperor(),      false);
@@ -18,7 +21,12 @@ int main()
 	game.addFaction(Faction::tleilaxu(),     false);
 	game.setup(4004030159);
 
+#if JSON_EXAMPLE
+	auto action = ActionFactory::create(Faction::beneGesserit(), "{\"type\":\"predict\", \"winner\":\"atreides\", \"round\":5}");
+	game.post(std::move(action));
+#else
 	game.post(std::make_unique<ActionPrediction>(Faction::beneGesserit(), Faction::atreides(), 5));
+#endif
 
 	game.post(std::make_unique<ActionHarkonnenRedraw> (Faction::harkonnen(),    true));
 	game.post(std::make_unique<ActionTraitorSelection>(Faction::emperor(),      Leader::ID_Irulan));
