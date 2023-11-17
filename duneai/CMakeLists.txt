@@ -8,7 +8,6 @@ set_property(GLOBAL PROPERTY CXX_STANDARD 14)
 
 find_package(Boost
     REQUIRED
-	COMPONENTS system
 )
 
 # Add source to this project's executable.
