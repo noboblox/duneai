@@ -38,6 +38,11 @@ enum ActionType
 	ACTION_MOVE,
 	ACTION_BATTLE_SELECTION,
 	ACTION_COMMIT_BATTLE_PLAN,
+
+	GM_ACTION_DIAL_TREACHERY_CARD,
+	GM_ACTION_PLACE_TROOPS,
+	GM_ACTION_SET_STORM,
+	GM_ACTION_SET_GAME_PHASE,
 };
 using EnumActionType = Enum<ActionType, ACTION_invalid>;
 
@@ -407,5 +412,53 @@ public:
 
 	const BattlePlan::Data plan;
 };
+
+
+class GmActionDialTreacheryCard : public GMAction
+{
+public:
+	
+	/**
+	 * Draw a specific card from the treachery deck and dial it to the player targeted
+	 */
+	explicit GmActionDialTreacheryCard(Faction aFrom, Faction aTarget, TreacheryCard::Id aCard)
+		: GMAction(aFrom, GM_ACTION_DIAL_TREACHERY_CARD),
+		who(aTarget),
+		card(aCard)
+	{
+	}
+
+	const Faction who;
+	const TreacheryCard::Id card;
+};
+
+//class GmAction : public GMAction
+//{
+//public:
+//	explicit GmActionStartGame(Faction aFrom)
+//		: GMAction(aFrom, GM_ACTION_)
+//	{
+//	}
+//};
+//
+//class GmAction : public GMAction
+//{
+//public:
+//	explicit GmActionStartGame(Faction aFrom)
+//		: GMAction(aFrom, GM_ACTION_)
+//	{
+//	}
+//
+//};
+//
+//class GmAction : public GMAction
+//{
+//public:
+//	explicit GmActionStartGame(Faction aFrom)
+//		: GMAction(aFrom, GM_ACTION_)
+//	{
+//	}
+//};
+
 
 #endif /* ACTIONS_H_ */

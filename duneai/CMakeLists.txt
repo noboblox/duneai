@@ -30,6 +30,7 @@ add_library( dunecore STATIC
 	"gameconstants.h" "gameconstants.cc"
 	"gamedata.h" "gamedata.cc"
 	"gamelogic.h" "gamelogic.cc"
+	"game.h" "game.cc"
 	"json.h" "json.cc"
 	"logger.h" "logger.cc"
 	"savegame.h" "savegame.cc"
