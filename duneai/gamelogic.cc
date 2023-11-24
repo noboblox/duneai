@@ -27,6 +27,11 @@ GameLogic::GameLogic()
 {
 }
 
+bool GameLogic::idle() noexcept 
+{
+	return mPending.empty();
+}
+
 bool GameLogic::addFaction(Faction faction, bool gameMaster) noexcept
 {
 	if (initialized)
@@ -70,24 +75,27 @@ void GameLogic::setup(unsigned aSeed)
 void GameLogic::tick()
 {
 	while (!mPending.empty())
+		executeOne();
+}
+
+void GameLogic::executeOne() 
+{
+	auto& ev = *mPending.front();
+
+	if (ev.isSystemEvent())
 	{
-		auto& ev = *mPending.front();
-
-		if (ev.isSystemEvent())
-		{
-			systemEvent(ev.get<SystemEvent>());
-		}
-		else if (ev.isAction())
-		{
-			auto& action = ev.get<Action>();
-			if (executeAction(mGame, action))
-				record(std::unique_ptr<Action>(static_cast<Action*> (mPending.front().release())));
-			else
-				log->info("discard event %s from %s", action.label(), action.from().label().c_str());
-		}
-
-		mPending.pop();
+		systemEvent(ev.get<SystemEvent>());
 	}
+	else if (ev.isAction())
+	{
+		auto& action = ev.get<Action>();
+		if (executeAction(mGame, action))
+			record(std::unique_ptr<Action>(static_cast<Action*> (mPending.front().release())));
+		else
+			log->info("discard event %s from %s", action.label(), action.from().label().c_str());
+	}
+
+	mPending.pop();
 }
 
 void GameLogic::post(std::unique_ptr<Action>&& action)

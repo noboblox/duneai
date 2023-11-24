@@ -1,5 +1,9 @@
 
-duneai/.cproject
-duneai/.project
-duneai/.settings/language.settings.xml
-duneai/.settings/language.settings.xml
+**/.cproject
+**/.project
+**/.settings
+**/*.vcxproj*
+**/*.sln
+**/cmake_install.cmake
+**/CMakeCache.txt
+**/CMakeFiles/

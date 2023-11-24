@@ -32,6 +32,8 @@ public:
 	 */
 	bool addFaction(Faction faction, bool gameMaster = false) noexcept;
 
+	bool idle() noexcept;
+
 	/**
 	 * remove a faction from the game.
 	 * @param faction faction to remove
@@ -52,6 +54,11 @@ public:
 	 * or setup via a @ref post of the @ref GMActionSetupGame action
 	 */
 	void tick();
+
+	/**
+	 * Like @see tick, but execute only one event
+	 */
+	void executeOne();
 
 	/**
 	 * @brief post an action to the game logic
