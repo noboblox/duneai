@@ -35,7 +35,7 @@ add_library( dunecore STATIC
 	"json.h" "json.cc"
 	"logger.h" "logger.cc"
 	"message.h"
-	"messagethread.h"
+	"messagethread.h" "messagethread.cc"
 	"savegame.h" "savegame.cc"
 	"shipormove.h" "shipormove.cc"
 	"systemevents.h"
