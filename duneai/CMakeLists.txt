@@ -26,7 +26,6 @@ add_library( dunecore STATIC
 	"battleplan.h"
 	"deletedefaults.h"
 	"enumlabels.h"
-	"event.h"
 	"forces.h" "forces.cc"
 	"gameconstants.h" "gameconstants.cc"
 	"gamedata.h" "gamedata.cc"
@@ -36,9 +35,7 @@ add_library( dunecore STATIC
 	"logger.h" "logger.cc"
 	"message.h"
 	"messagethread.h" "messagethread.cc"
-	"savegame.h" "savegame.cc"
 	"shipormove.h" "shipormove.cc"
-	"systemevents.h"
 	"statefunctions.h" "statefunctions.cc"
 	"game.h"
 )

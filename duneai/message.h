@@ -3,5 +3,5 @@
 class Message
 {
 public:
-	virtual ~Message() {}
+	virtual ~Message() = 0;
 };

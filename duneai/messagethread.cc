@@ -17,7 +17,7 @@ void MessageThread::post(std::unique_ptr<Message>&& msg) {
 	if (msg == nullptr)
 		return;
 
-	std::lock_guard<std::mutex> l(mQueueMutex);
+	std::lock_guard<std::mutex> l(mPendingMutex);
 	mPending.push_back(std::move(msg));
 }
 
@@ -41,7 +41,7 @@ void MessageThread::shutdown() noexcept
 
 std::unique_ptr<Message> MessageThread::popMessage()
 {
-	std::lock_guard<std::mutex> l(mQueueMutex);
+	std::lock_guard<std::mutex> l(mPendingMutex);
 
 	if (mPending.empty())
 		return nullptr;

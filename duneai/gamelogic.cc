@@ -80,20 +80,12 @@ void GameLogic::tick()
 
 void GameLogic::executeOne() 
 {
-	auto& ev = *mPending.front();
+	auto& ac = *mPending.front();
 
-	if (ev.isSystemEvent())
-	{
-		systemEvent(ev.get<SystemEvent>());
-	}
-	else if (ev.isAction())
-	{
-		auto& action = ev.get<Action>();
-		if (executeAction(mGame, action))
-			record(std::unique_ptr<Action>(static_cast<Action*> (mPending.front().release())));
-		else
-			log->info("discard event %s from %s", action.label(), action.from().label().c_str());
-	}
+	if (executeAction(mGame, ac))
+		record(std::unique_ptr<Action>(static_cast<Action*> (mPending.front().release())));
+	else
+		log->info("discard event %s from %s", ac.label(), ac.from().label().c_str());
 
 	mPending.pop();
 }
@@ -107,18 +99,6 @@ void GameLogic::post(std::unique_ptr<Action>&& action)
 void GameLogic::setLogger(std::unique_ptr<const Logger>&& aLogger)
 {
 	log = std::move(aLogger);
-}
-
-void GameLogic::requestGameState(GameStateReceiver receiver)
-{
-	if (receiver)
-		mPending.push(std::make_unique<SystemRequestGameState>(receiver));
-}
-
-void GameLogic::requestSave(SaveGameReceiver receiver)
-{
-	if (receiver)
-		mPending.push(std::make_unique<SystemRequestSaveGame>(receiver));
 }
 
 //
@@ -987,17 +967,3 @@ Faction GameLogic::initialStormDialFactions(GameState& game)
 	return result;
 }
 
-void GameLogic::systemEvent(const SystemEvent& event)
-{
-	switch (event.type())
-	{
-	case SystemEvent::T_GAMESTATE_REQUEST:
-		static_cast<const SystemRequestGameState&>(event).invokeTarget(mGame);
-		break;
-	case SystemEvent::T_SAVE_GAME:
-		static_cast<const SystemRequestSaveGame&>(event).invokeTarget(SaveGame(mGame, mRecorded));
-		break;
-	default:
-		break;
-	}
-}

@@ -28,7 +28,7 @@ private:
 
 private:
 	std::atomic<bool> mNeedStop = false;
-	std::mutex mQueueMutex;
+	std::mutex mPendingMutex;
 	std::vector<std::unique_ptr<Message>> mPending;
 };
 

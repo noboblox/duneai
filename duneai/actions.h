@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "event.h"
+#include "message.h"
 
 #include "arrakis.h"
 #include "battleplan.h"
@@ -70,21 +70,8 @@ public:
  * Especially the @ref from attribute needs special handling:
  * - Actions generated locally, can use the appropriate subclass-constructor directly.
  *   Thus, set any Faction without restrictions
- *
- * - Actions in JSON document form, possibly were send by a remote peer.
- *   The @ref ActionFactory is responsible for creating the right action.
- *
- *   If the document contains a "from" member, it is ignored.
- *   Instead, a dedicated parameter @ref aFrom takes priority.
- *   This is done because, a remote peer may have manipulated the @ref from attribute.
- *
- * @warning Subclass implementations of the JSON document constructor should <b>never use<b/> any "from" member from the document,
- * but instead require a dedicated constructor argument.
- * De-Serialized actions may be send from an untrusted source and may be manipulated.
- * Therefore the @ref mFrom member needs to be set by a local source
- *
  */
-class Action : public Event
+class Action : public Message
 {
 public:
 	static constexpr int VERSION = 1;
@@ -99,7 +86,7 @@ public:
 	const char* label() { return EnumActionType::label(mType); }
 protected:
 	Action(Faction aFrom, ActionType aType)
-	: Event(ET_ACTION),
+	: Message(),
 	  mFrom(aFrom), mType(aType)
 	{
 	}

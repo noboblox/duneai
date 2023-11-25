@@ -8,7 +8,6 @@
 #include "actions.h"
 #include "gameconstants.h"
 #include "logger.h"
-#include "systemevents.h"
 
 class GameLogic
 {
@@ -69,21 +68,6 @@ public:
 
 
 	/**
-	 * @brief request the logic to provide the game state to the @param receiver function
-	 * The receiver will be called by the thread running the logic @ref tick
-	 */
-	using GameStateReceiver = std::function<void(const GameState&)>;
-	void requestGameState(GameStateReceiver receiver);
-
-	/**
-	 * @brief request the logic to save the game
-	 * The receiver will be called by the thread running the logic @ref tick
-	 * The save game needs to be either processed or copied as it will be destroyed after the call returns
-	 */
-	using SaveGameReceiver = std::function<void(const SaveGame&)>;
-	void requestSave(SaveGameReceiver receiver);
-
-	/**
 	 * @brief set a new logger for this logic instance.
 	 * the default logger is @ref StdoutLogger
 	 * @param aLogger new logger instance to use
@@ -121,7 +105,6 @@ private:
 	bool phaseShipmentMove(GameState& game, const Action& action);
 	bool phaseBattle(GameState& game, const Action& action);
 
-	void systemEvent(const SystemEvent& event);
 	bool isAllowedAction(GameState& game, const Action& action);
 	bool expected(GameState& game, Faction faction);
 	int prepareAuction(GameState& game);
@@ -148,7 +131,7 @@ private:
 private:
     bool initialized = false;
     std::unique_ptr<const Logger> log;
-    std::queue<std::unique_ptr<Event>> mPending;
+    std::queue<std::unique_ptr<Action>> mPending;
     std::vector<std::unique_ptr<const Action>> mRecorded;
     Faction inGame = Faction::none();
     Faction gameMasters = Faction::none();
