@@ -244,5 +244,4 @@ void round1Shipment(GameLogic& game)
 
 void round1Battle(GameLogic& game)
 {
-
 }

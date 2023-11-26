@@ -19,25 +19,38 @@ target_link_libraries( example1
     PRIVATE dunecore
 )
 
+add_executable ( exampleDevClient
+	"examples/exampledevclient.cc" 
+)
+
+target_link_libraries( exampleDevClient 
+    PRIVATE dunecore
+)
+
 add_library( dunecore STATIC
 	"actions.h" "actions.cc"
 	"arrakis.h" "arrakis.cc"
 	"auction.h" "auction.cc"
 	"battleplan.h"
 	"deletedefaults.h"
+	"devgame.h"
+	"IDevActions.h"
 	"enumlabels.h"
 	"forces.h" "forces.cc"
+	"game.h"
 	"gameconstants.h" "gameconstants.cc"
 	"gamedata.h" "gamedata.cc"
 	"gamelogic.h" "gamelogic.cc"
 	"game.h" "game.cc"
+	"IPlayerActions.h"
 	"json.h" "json.cc"
 	"logger.h" "logger.cc"
 	"message.h"
 	"messagethread.h" "messagethread.cc"
+	"resultcode.h"
 	"shipormove.h" "shipormove.cc"
+	"standardplayerclient.h" "standardplayerclient.cpp"
 	"statefunctions.h" "statefunctions.cc"
-	"game.h"
 )
 
  target_include_directories( dunecore

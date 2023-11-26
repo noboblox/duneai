@@ -19,9 +19,10 @@ public:
 
 	void post(std::unique_ptr<Message>&& msg);
 
-private:
+protected:
 	virtual void executeMessage(std::unique_ptr<Message>&& msg) = 0;
 
+private:
 	void messageLoop();
 	void shutdown() noexcept;
 	std::unique_ptr<Message> popMessage();

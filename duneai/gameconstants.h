@@ -31,6 +31,17 @@ enum GamePhase
 };
 using GamePhaseLabels = Enum<GamePhase, PHASE_invalid>;
 
+enum BiddingAction
+{
+	BID_ACTION_invalid = -1,
+
+	PASS = 0,
+	BID,
+	KARAMA_BID,
+	KARAMA_BUY,
+};
+using EnumBiddingAction = Enum<BiddingAction, BID_ACTION_invalid>;
+
 enum AreaId
 {
 	INVALID                = 0,

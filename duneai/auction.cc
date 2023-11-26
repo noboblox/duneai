@@ -11,7 +11,7 @@
 Auction::Auction()
 : round(0), lastRound(0), indexBidder(0), indexHighestBidder(0), indexWinner(NO_WINNER)
 {
-	data.push_back(AuctionData{0, 0, 0, Faction::none()});
+	data.push_back(AuctionData{0, 0, 0, false, Faction::none()});
 }
 
 Auction::Auction(const GameState& state)
@@ -23,7 +23,7 @@ Auction::Auction(const GameState& state)
 	{
 		auto it = std::find_if(state.players.cbegin(), state.players.cend(),
 				[&position](const PlayerState& p) -> bool { return p.seat == position.seat; });
-		data.push_back(AuctionData{it->maxHand, (int) it->hand.size(), 0, it->faction});
+		data.push_back(AuctionData{it->maxHand, (int) it->hand.size(), 0, false, it->faction});
 	}
 
 	lastRound = eligible();
@@ -92,12 +92,15 @@ bool Auction::nextRound() noexcept
 	} while (hasFullHand(data[0]));
 
 	std::for_each(data.begin(), data.end(),
-			[](AuctionData& d){ d.bid = 0; });
+		[](AuctionData& d) { 
+			d.bid = 0; 
+			d.withKarama = false; 
+		});
 
 	return true;
 }
 
-void Auction::bid(int value) noexcept
+void Auction::bid(int value, bool withKarama) noexcept
 {
 	if (indexWinner != NO_WINNER)
 		return;
@@ -108,6 +111,7 @@ void Auction::bid(int value) noexcept
 	}
 
 	data[indexBidder].bid = value;
+	data[indexBidder].withKarama = withKarama;
 	indexHighestBidder = indexBidder;
 	nextIndex();
 }
@@ -118,7 +122,7 @@ void Auction::karamaWin() noexcept
 		return;
 
 	indexWinner = indexBidder;
-	data[indexBidder].bid = AuctionData::KARAMA;
+	data[indexBidder].bid = AuctionData::KARAMA_INSTANT_BUY;
 }
 
 void Auction::pass() noexcept
@@ -158,8 +162,11 @@ bool Auction::wasKaramaWin() const noexcept
 {
 	if (indexWinner == NO_WINNER)
 		return false;
+	else if (data[indexWinner].bid == AuctionData::KARAMA_INSTANT_BUY)
+		return true;
 	else
-		return data[indexWinner].bid == AuctionData::KARAMA;
+		return data[indexWinner].withKarama;
+
 }
 
 void Auction::cardReceived() noexcept

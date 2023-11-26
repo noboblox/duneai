@@ -18,7 +18,7 @@ public:
 	bool roundFinished() const noexcept;
 	bool nextRound() noexcept;
 
-	void bid(int value) noexcept;
+	void bid(int value, bool withKarama = false) noexcept;
 	void karamaWin() noexcept;
 	void pass() noexcept;
 
@@ -35,11 +35,12 @@ private:
 
 	struct AuctionData
 	{
-		static constexpr int KARAMA = -2;
+		static constexpr int KARAMA_INSTANT_BUY = -2;
 
 		int maxCards;
 		int cards;
 		int bid;
+		bool withKarama;
 		Faction faction;
 	};
 

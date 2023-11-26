@@ -3,6 +3,9 @@
 
 #include <stdarg.h>
 
+class Logger;
+extern const Logger* gLog;
+
 class Logger
 {
 public:

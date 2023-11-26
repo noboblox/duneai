@@ -38,6 +38,12 @@ EnumLeaderId::Definition EnumLeaderId::entries = {
     {Leader::ID_Blin     , "Blin"                },
 };
 
+EnumBiddingAction::Definition EnumBiddingAction::entries = {
+	{BiddingAction::PASS      , "pass"      },
+	{BiddingAction::BID       , "bid"       },
+	{BiddingAction::KARAMA_BID, "karamaBid" },
+	{BiddingAction::KARAMA_BUY, "karamaBuy" },
+};
 
 const Leader Leader::leaders[] = {
 	Leader(ID_Yueh   , Faction::atreides()),

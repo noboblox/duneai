@@ -12,7 +12,7 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 	{PHASE_INIT_TRAITOR_SELECTION,      true, Faction::anyExcept(Faction::harkonnen()), ACTION_TRAITOR_SELECTION},
 	{PHASE_INIT_FREMEN_PLACEMENT,       true, Faction::fremen(),                        ACTION_FREMEN_PLACEMENT},
 	{PHASE_INIT_BG_PLACEMENT,           true, Faction::beneGesserit(),                  ACTION_BENE_GESSERIT_START_FORCE},
-	{PHASE_STORM_INITAL_DIAL,           true, Faction::any(),                           ACTION_STORM_INITIAL_DIAL},
+	{PHASE_STORM_INITAL_DIAL,           true, Faction::any(),                           ACTION_STORM_DIAL},
 	{PHASE_CHOAM_CHARITY,               true, Faction::any(),                           ACTION_CHOAM_CHARITY},
 	{PHASE_AUCTION_BIDDING,             true, Faction::any(),                           ACTION_BID},
 	{PHASE_SHIPMENT_GUILD_DECISION,     true, Faction::spacingGuild(),                  ACTION_GUILD_SHIPMENT_DECISION},
@@ -22,8 +22,9 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 	{PHASE_SHIPMENT_MOVE,               true, Faction::any(),                           ACTION_MOVE},
 };
 
-GameLogic::GameLogic()
-: log(new StdoutLogger())
+GameLogic::GameLogic(bool developerActions)
+: mUseDevActions(developerActions),
+  log(new StdoutLogger())
 {
 }
 
@@ -107,10 +108,12 @@ void GameLogic::setLogger(std::unique_ptr<const Logger>&& aLogger)
 
 bool GameLogic::executeAction(GameState& game, const Action& action)
 {
-	if (action.isGMAction() && gameMasters.contains(action.from()))
+	if (action.isUserAction())
+		return userAction(game, action);
+	else if (action.isGMAction() && gameMasters.contains(action.from()))
 		return gameMasterAction(game, action);
-	else if (!action.isGMAction())
-		return playerAction(game, action);
+	else if (mUseDevActions && action.isDevAction())
+		return devAction(game, action);
 
 	return false;
 }
@@ -127,7 +130,24 @@ bool GameLogic::gameMasterAction(GameState& game, const Action& action)
 	}
 }
 
-bool GameLogic::playerAction(GameState& game, const Action& action)
+bool GameLogic::devAction(GameState& game, const Action& action)
+{
+	switch (action.type())
+	{
+	case DEV_ACTION_DIAL_TREACHERY_CARD:
+		return true; // TODO
+	case DEV_ACTION_PLACE_TROOPS:
+		return true; // TODO
+	case DEV_ACTION_SET_STORM:
+		return true; // TODO
+	case DEV_ACTION_SET_GAME_PHASE:
+		return true; // TODO
+	default:
+		return false;
+	}
+}
+
+bool GameLogic::userAction(GameState& game, const Action& action)
 {
 	if (!isAllowedAction(game, action))
 		return false;
@@ -331,7 +351,7 @@ bool GameLogic::phaseInitBeneGesseritPlacement(GameState& game, const Action& ac
 
 bool GameLogic::phaseStormInitialStormDial(GameState& game, const Action& action)
 {
-	auto ac = expectedAction<ActionStormInitialDial>(game, action, ACTION_STORM_INITIAL_DIAL);
+	auto ac = expectedAction<ActionStormDial>(game, action, ACTION_STORM_DIAL);
 	if (!ac) return false;
 
 	if (ac->dial < 0 || ac->dial > 20)
@@ -461,18 +481,18 @@ bool GameLogic::phaseBidding(GameState& game, const Action& action)
 		return false;
 	}
 
-	if (ac->type == ActionBid::RAISE)
+	if (ac->type == BiddingAction::BID)
 	{
-		if (ac->bid > player->spice || ac->bid <= auction.currentBid())
+		if (ac->amount > player->spice || ac->amount <= auction.currentBid())
 		{
-			log->info("bid %d is not allowed. Player spice: %d, Current bid: %d", ac->bid, player->spice, auction.currentBid());
+			log->info("bid %d is not allowed. Player spice: %d, Current bid: %d", ac->amount, player->spice, auction.currentBid());
 			return false;
 		}
 
-		log->info("%s bids %d", ac->from().label().c_str(), ac->bid);
-		auction.bid(ac->bid);
+		log->info("%s bids %d", ac->from().label().c_str(), ac->amount);
+		auction.bid(ac->amount);
 	}
-	else if (ac->type == ActionBid::KARAMA_BUY)
+	else if (ac->type == BiddingAction::KARAMA_BUY)
 	{
 		if (!hasKarama(game, ac->from()))
 		{
@@ -483,7 +503,23 @@ bool GameLogic::phaseBidding(GameState& game, const Action& action)
 		log->info("%s uses karama buy", ac->from().label().c_str());
 		auction.karamaWin();
 	}
-	else if (ac->type == ActionBid::PASS)
+	else if (ac->type == BiddingAction::KARAMA_BID)
+	{
+		if (!hasKarama(game, ac->from()))
+		{
+			log->info("no karama available for bid");
+			return false;
+		}
+		if (ac->amount <= auction.currentBid())
+		{
+			log->info("bid %d is too small. Current bid: %d", ac->amount, auction.currentBid());
+			return false;
+		}
+
+		log->info("%s bids %d using karama", ac->from().label().c_str(), ac->amount);
+		auction.bid(ac->amount, true);
+	}
+	else if (ac->type == BiddingAction::PASS)
 	{
 		log->info("%s passes", ac->from().label().c_str());
 		auction.pass();

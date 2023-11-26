@@ -28,7 +28,7 @@ enum ActionType
 	ACTION_TRAITOR_SELECTION,
 	ACTION_FREMEN_PLACEMENT,
 	ACTION_BENE_GESSERIT_START_FORCE,
-	ACTION_STORM_INITIAL_DIAL,
+	ACTION_STORM_DIAL,
 	ACTION_CHOAM_CHARITY,
 	ACTION_BID,
 	ACTION_GUILD_SHIPMENT_DECISION,
@@ -39,10 +39,10 @@ enum ActionType
 	ACTION_BATTLE_SELECTION,
 	ACTION_COMMIT_BATTLE_PLAN,
 
-	GM_ACTION_DIAL_TREACHERY_CARD,
-	GM_ACTION_PLACE_TROOPS,
-	GM_ACTION_SET_STORM,
-	GM_ACTION_SET_GAME_PHASE,
+	DEV_ACTION_DIAL_TREACHERY_CARD,
+	DEV_ACTION_PLACE_TROOPS,
+	DEV_ACTION_SET_STORM,
+	DEV_ACTION_SET_GAME_PHASE,
 };
 using EnumActionType = Enum<ActionType, ACTION_invalid>;
 
@@ -74,12 +74,11 @@ public:
 class Action : public Message
 {
 public:
-	static constexpr int VERSION = 1;
-
-	static ActionType parseActionType(const std::string& json);
-
 	virtual ~Action() {}
+
 	virtual bool isGMAction() const noexcept { return false; }
+	virtual bool isDevAction() const noexcept { return false; }
+	bool isUserAction() const noexcept{ return !isDevAction() && !isGMAction(); }
 
 	Faction from() const noexcept { return mFrom; }
 	ActionType type() const noexcept {return mType; }
@@ -104,7 +103,18 @@ protected:
 	{
 	}
 
-	virtual bool isGMAction() const noexcept { return true; }
+	bool isGMAction() const noexcept override { return true; }
+};
+ 
+class DevAction : public Action
+{
+protected:
+	DevAction(ActionType aType)
+	: Action(Faction::none(), aType)
+	{
+	}
+
+	bool isDevAction() const noexcept override { return true; }
 };
 
 class GmActionStartGame : public GMAction
@@ -135,7 +145,6 @@ class ActionPrediction : public Action
 {
 public:
 	ActionPrediction(Faction aFrom, Faction aWinner, int aRound);
-	ActionPrediction(Faction aFrom, const std::string& json);
 
 	Faction winner() const noexcept { return mWinner; }
 	int     round()  const noexcept { return mRound; }
@@ -149,7 +158,6 @@ class ActionTraitorSelection : public Action
 {
 public:
 	ActionTraitorSelection(Faction aFrom, Leader::Id aSelection);
-	ActionTraitorSelection(Faction aFrom, const std::string& json);
 
 	Leader::Id selection() const noexcept { return mSelection; }
 
@@ -161,7 +169,6 @@ class ActionFremenPlacement : public Action
 {
 public:
 	ActionFremenPlacement(Faction aFrom, const std::vector<Placement>& aPlacements);
-	ActionFremenPlacement(Faction aFrom, const std::string& json);
 
 	const std::vector<Placement> placements;
 };
@@ -190,11 +197,11 @@ public:
 	const AreaId where;
 };
 
-class ActionStormInitialDial : public Action
+class ActionStormDial : public Action
 {
 public:
-	ActionStormInitialDial(Faction aFrom, int aDial)
-	: Action(aFrom, ACTION_STORM_INITIAL_DIAL),
+	ActionStormDial(Faction aFrom, int aDial)
+	: Action(aFrom, ACTION_STORM_DIAL),
 	  dial(aDial)
 	{
 	}
@@ -217,29 +224,15 @@ public:
 class ActionBid : public Action
 {
 public:
-	enum Type
-	{
-		RAISE,
-		PASS,
-		KARAMA_BUY
-	};
-
-	ActionBid(Faction aFrom, int aBid)
-	: Action(aFrom, ACTION_BID),
-	  type(RAISE),
-	  bid(aBid)
-	{
-	}
-
-	ActionBid(Faction aFrom, Type aType)
+	ActionBid(Faction aFrom, BiddingAction aType, int aAmount)
 	: Action(aFrom, ACTION_BID),
 	  type(aType),
-	  bid(0)
+	  amount(aAmount)
 	{
 	}
 
-	const Type type;
-	const int bid;
+	const BiddingAction type;
+	const int amount;
 };
 
 class ActionGuildShipmentDecision : public Action
@@ -353,39 +346,13 @@ public:
 class ActionBattleSelection : public Action
 {
 public:
-
-	/**
-	 * @brief Select whom and where to fight next.
-	 * Only the ambiguous portions are evaluated by the game logic. All other parts are ignored.
-	 */
-	ActionBattleSelection(Faction aFrom, Faction aEnemy, AreaId aWhere)
+	ActionBattleSelection(Faction aFrom, int aId)
 	: Action(aFrom, ACTION_BATTLE_SELECTION),
-	  where(aWhere), who(aEnemy)
+	  id(aId)
 	{
 	}
 
-	/**
-	 * Select whom to fight next.
-	 * This is only possible if the area is unambiguous.
-	 */
-	ActionBattleSelection(Faction aFrom, Faction aEnemy)
-	: Action(aFrom, ACTION_BATTLE_SELECTION),
-	  where(AreaId::INVALID), who(aEnemy)
-	{
-	}
-	
-	/**
-	 * Select where to fight next.
-	 * This is only possible if the enemy is unambiguous.
-	 */
-	ActionBattleSelection(Faction aFrom, AreaId aWhere)
-	: Action(aFrom, ACTION_BATTLE_SELECTION),
-	  where(aWhere), who(Faction::none())
-	{
-	}
-
-	const AreaId where;
-	const Faction who;
+	const int id;
 };
 
 class ActionCommitBattlePlan : public Action
@@ -399,53 +366,4 @@ public:
 
 	const BattlePlan::Data plan;
 };
-
-
-class GmActionDialTreacheryCard : public GMAction
-{
-public:
-	
-	/**
-	 * Draw a specific card from the treachery deck and dial it to the player targeted
-	 */
-	explicit GmActionDialTreacheryCard(Faction aFrom, Faction aTarget, TreacheryCard::Id aCard)
-		: GMAction(aFrom, GM_ACTION_DIAL_TREACHERY_CARD),
-		who(aTarget),
-		card(aCard)
-	{
-	}
-
-	const Faction who;
-	const TreacheryCard::Id card;
-};
-
-//class GmAction : public GMAction
-//{
-//public:
-//	explicit GmActionStartGame(Faction aFrom)
-//		: GMAction(aFrom, GM_ACTION_)
-//	{
-//	}
-//};
-//
-//class GmAction : public GMAction
-//{
-//public:
-//	explicit GmActionStartGame(Faction aFrom)
-//		: GMAction(aFrom, GM_ACTION_)
-//	{
-//	}
-//
-//};
-//
-//class GmAction : public GMAction
-//{
-//public:
-//	explicit GmActionStartGame(Faction aFrom)
-//		: GMAction(aFrom, GM_ACTION_)
-//	{
-//	}
-//};
-
-
 #endif /* ACTIONS_H_ */

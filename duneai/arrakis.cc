@@ -969,7 +969,7 @@ int Arrakis::movementRange(Faction who) const noexcept
 bool Arrakis::hasMovementBonus(Faction who) const noexcept
 {
 	static constexpr bool HOSTILITY = true;
-	return !collectFromSameArea(AreaId::Carthag, &who, &HOSTILITY).empty() ||
+	return !collectFromSameArea(AreaId::Carthag, nullptr, &HOSTILITY).empty() ||
 		   !collectFromSameArea(AreaId::Arrakeen, &who, &HOSTILITY).empty();
 }
 

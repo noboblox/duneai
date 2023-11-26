@@ -16,7 +16,7 @@ public:
 	 * create a game logic without executing the initial setup
 	 * @post at least two factions should be added via @ref addFaction
 	 */
-	explicit GameLogic();
+	explicit GameLogic(bool developerActions = false);
 
 	/**
 	 * add a faction to the game.
@@ -87,7 +87,8 @@ private:
 
 	bool executeAction(GameState& game, const Action& action);
 	bool gameMasterAction(GameState& game, const Action& action);
-	bool playerAction(GameState& game, const Action& action);
+	bool devAction(GameState& game, const Action& action);
+	bool userAction(GameState& game, const Action& action);
 	bool phaseInitPrediction(GameState& game, const Action& action);
 	bool phaseInitHarkonnenRedraw(GameState& game, const Action& action);
 	bool phaseInitTraitorSelect(GameState& game, const Action& action);
@@ -129,6 +130,7 @@ private:
     static std::vector<AllowedAction> msAllowedActions;
 
 private:
+	bool mUseDevActions;
     bool initialized = false;
     std::unique_ptr<const Logger> log;
     std::queue<std::unique_ptr<Action>> mPending;

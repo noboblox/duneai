@@ -9,6 +9,9 @@
 #include <cstdarg>
 #include <cstdio>
 
+static const StdoutLogger sDefaultLogger;
+const Logger* gLog = &sDefaultLogger;
+
 void StdoutLogger::crit(const char* format, ...) const
 {
 	va_list args;
