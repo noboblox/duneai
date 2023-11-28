@@ -57,7 +57,7 @@ public:
 	/**
 	 * Like @see tick, but execute only one event
 	 */
-	void executeOne();
+	bool executeOne();
 
 	/**
 	 * @brief post an action to the game logic

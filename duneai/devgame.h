@@ -7,8 +7,8 @@ class DevGame : public Game
 public:
 	MACRO_DELETE_ALL_DEFAULTS(DevGame)
 
-	explicit DevGame()
-	: Game(GameLogic(true))
+	explicit DevGame(Broker& broker)
+	: Game(broker, GameLogic(true))
 	{
 	}
 };

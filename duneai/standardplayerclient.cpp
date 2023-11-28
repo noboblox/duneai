@@ -2,13 +2,16 @@
 #include "gamedata.h"
 
 #include "actions.h"
+#include "broker.h"
+#include "game.h"
 
-StandardPlayerClient::StandardPlayerClient(Faction own)
+StandardPlayerClient::StandardPlayerClient(Faction own, Broker& broker, const Game& game)
+: MessageThread(broker),
+  mFaction(own),
+  mGameId(game.actorId())
 {
 	if (!own.exactlyOne())
 		throw std::invalid_argument("StandardPlayerClient must represent exactly one faction");
-
-	mFaction = own;
 }
 
 std::future<ResultCode> StandardPlayerClient::predictWinner(Faction winner, int round)
@@ -23,6 +26,7 @@ std::future<ResultCode> StandardPlayerClient::selectTraitor(Leader::Id selection
 
 std::future<ResultCode> StandardPlayerClient::setupFremen(std::vector<Placement>&& placements)
 {
+	//throw std::invalid_argument("not implemented");
 	return sendAction(std::make_unique<ActionFremenPlacement>(mFaction, std::move(placements)));
 }
 
@@ -110,5 +114,10 @@ std::future<ResultCode> StandardPlayerClient::commitBattlePlan(BattlePlan&& batt
 
 std::future<ResultCode> StandardPlayerClient::sendAction(std::unique_ptr<Action>&& action)
 {
-	throw std::runtime_error("not implemented");
+	return broker().sendConfirmed(mGameId, std::move(action));
+}
+
+ResultCode StandardPlayerClient::executeMessage(std::unique_ptr<Message>&& msg)
+{
+	return ResultCode();
 }

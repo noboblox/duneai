@@ -79,16 +79,18 @@ void GameLogic::tick()
 		executeOne();
 }
 
-void GameLogic::executeOne() 
+bool GameLogic::executeOne() 
 {
 	auto& ac = *mPending.front();
 
-	if (executeAction(mGame, ac))
+	bool result = executeAction(mGame, ac);
+	if (result)
 		record(std::unique_ptr<Action>(static_cast<Action*> (mPending.front().release())));
 	else
 		log->info("discard event %s from %s", ac.label(), ac.from().label().c_str());
 
 	mPending.pop();
+	return result;
 }
 
 void GameLogic::post(std::unique_ptr<Action>&& action)

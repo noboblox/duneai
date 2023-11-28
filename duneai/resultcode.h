@@ -1,4 +1,5 @@
 #pragma once
+#include <climits>
 
 class ResultCode
 {
@@ -6,15 +7,20 @@ public:
 	enum Value
 	{
 		SUCCESS = 0,
-		NOT_IMPLEMENTED = 999999,
+		UNKNOWN_MESSAGE,
+		TARGET_NOT_REACHABLE,
+		TARGET_SHUTDOWN,
+
+		UNSPECIFIED_ERROR = INT_MAX
 	};
 
-	explicit ResultCode()
+
+	constexpr explicit ResultCode()
 	: mValue(Value::SUCCESS)
 	{
 	}
 
-	explicit ResultCode(Value aValue)
+	constexpr explicit ResultCode(Value aValue) 
 		: mValue(aValue)
 	{
 	}

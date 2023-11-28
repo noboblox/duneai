@@ -28,9 +28,11 @@ target_link_libraries( exampleDevClient
 )
 
 add_library( dunecore STATIC
+	"actor.h" "actor.cpp"
 	"actions.h" "actions.cc"
 	"arrakis.h" "arrakis.cc"
 	"auction.h" "auction.cc"
+	"broker.h" "broker.cpp"
 	"battleplan.h"
 	"deletedefaults.h"
 	"devgame.h"

@@ -3,5 +3,15 @@
 class Message
 {
 public:
-	virtual ~Message() = 0;
+	friend class Broker;
+
+	virtual ~Message() {};
+
+	const size_t requestId()
+	{
+		return mRequestId;
+	}
+
+private:
+	size_t mRequestId = 0;
 };

@@ -1,7 +1,8 @@
 #include "messagethread.h"
 #include <thread>
 
-MessageThread::MessageThread()
+MessageThread::MessageThread(Broker& broker)
+: Actor(broker)
 {
 	auto thread = std::thread([this]() { this->messageLoop(); });
 	thread.detach();
@@ -28,7 +29,11 @@ void MessageThread::messageLoop()
 		auto p_msg = popMessage();
 
 		if (p_msg)
-			executeMessage(std::move(p_msg));
+		{
+			auto request = p_msg->requestId();
+			auto result = executeMessage(std::move(p_msg));
+			finishRequest(request, result);
+		}
 		else
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}

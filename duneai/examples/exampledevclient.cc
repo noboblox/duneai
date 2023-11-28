@@ -1,31 +1,41 @@
 #include "../devgame.h"
+#include "../broker.h"
 #include "../forces.h"
-
-class MessageService
-{
-public:
-	static std::shared_ptr<MessageService> create()
-	{
-		return std::make_shared<MessageService>();
-	}
-
-};
-
+#include "../standardplayerclient.h"
 class DevClient
 {
 public:
-	explicit DevClient(std::shared_ptr<MessageService> broker, const Game& game)
+	explicit DevClient(Faction factions, Broker& broker, const Game& game)
 	{
+		auto neededFactions = Faction::expand(factions);
+
+		std::for_each(neededFactions.cbegin(), neededFactions.cend(), [&](const Faction& f){
+			mClients.emplace(f, std::make_unique<StandardPlayerClient>(f, broker, game));
+			});
 	}
+
+	StandardPlayerClient& as(Faction faction)
+	{
+		auto found = mClients.find(faction);
+
+		if (found == mClients.cend())
+			throw std::invalid_argument("faction is not available");
+
+		return *found->second;
+	}
+private:
+	std::map<Faction, std::unique_ptr<StandardPlayerClient>> mClients;
 };
 
 
 int main()
 {
-	auto broker = MessageService::create();
+	Broker broker;
 
-	DevGame game;
-	DevClient client(broker, game);
+	DevGame game(broker);
+	DevClient client(Faction::any(), broker, game);
+
+	client.as(Faction::beneGesserit()).predictWinner(Faction::fremen(), 3);
 
 	return 0;
 }

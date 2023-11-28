@@ -1,6 +1,8 @@
 #ifndef MESSAGE_THREAD_H_
 #define MESSAGE_THREAD_H_
 
+#include "actor.h"
+
 #include <atomic>
 #include <memory>
 #include <mutex>
@@ -8,19 +10,20 @@
 
 #include "deletedefaults.h"
 #include "message.h"
+#include "resultcode.h"
 
-class MessageThread
+class MessageThread : public Actor
 {
 public:
 	MACRO_DELETE_ALL_DEFAULTS(MessageThread)
 
-	explicit MessageThread();
+	explicit MessageThread(Broker& broker);
 	virtual ~MessageThread() noexcept;
 
-	void post(std::unique_ptr<Message>&& msg);
+	void post(std::unique_ptr<Message>&& msg) override;
 
 protected:
-	virtual void executeMessage(std::unique_ptr<Message>&& msg) = 0;
+	virtual ResultCode executeMessage(std::unique_ptr<Message>&& msg) = 0;
 
 private:
 	void messageLoop();

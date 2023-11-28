@@ -6,12 +6,14 @@
 #include <memory>
 
 class Action;
+class Broker;
+class Game;
 
-class StandardPlayerClient : public IPlayerActions
+class StandardPlayerClient : public MessageThread, IPlayerActions
 {
 public:
 	MACRO_DELETE_ALL_DEFAULTS(StandardPlayerClient)
-	explicit StandardPlayerClient(Faction own);
+	explicit StandardPlayerClient(Faction own, Broker& broker, const Game& game);
 
 	std::future<ResultCode> predictWinner(Faction winner, int round) override;
 	std::future<ResultCode> selectTraitor(Leader::Id selection) override;
@@ -32,9 +34,12 @@ public:
 	std::future<ResultCode> selectBattle(int id) override;
 	std::future<ResultCode> commitBattlePlan(BattlePlan&& battlePlan) override;
 
+
 private:
+	ResultCode executeMessage(std::unique_ptr<Message>&& msg) override;
+
 	std::future<ResultCode> sendAction(std::unique_ptr<Action>&& action);
 
-	Faction mFaction;
-
+	const Faction mFaction;
+	const size_t mGameId;
 };
