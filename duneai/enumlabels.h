@@ -1,9 +1,10 @@
 #ifndef ENUMLABELS_H_
 #define ENUMLABELS_H_
 
-#include <vector>
-#include <utility>
+#include <algorithm>
 #include <string>
+#include <utility>
+#include <vector>
 
 template <typename E, E invalidValue>
 class Enum

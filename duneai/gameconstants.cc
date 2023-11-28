@@ -1,5 +1,6 @@
 #include "gameconstants.h"
 
+template<>
 EnumLeaderId::Definition EnumLeaderId::entries = {
     {Leader::ID_Yueh     , "Dr. Wellington Yueh" },
     {Leader::ID_Duncan   , "Duncan Idaho"        },
@@ -38,6 +39,7 @@ EnumLeaderId::Definition EnumLeaderId::entries = {
     {Leader::ID_Blin     , "Blin"                },
 };
 
+template<>
 EnumBiddingAction::Definition EnumBiddingAction::entries = {
 	{BiddingAction::PASS      , "pass"      },
 	{BiddingAction::BID       , "bid"       },
