@@ -6,6 +6,7 @@
 
 class IGameMasterActions
 {
+public:
 	virtual ~IGameMasterActions() {}
 
 	virtual std::future<ResultCode> startGame() = 0;

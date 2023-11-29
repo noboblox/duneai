@@ -6,6 +6,11 @@
 #include "game.h"
 
 StandardPlayerClient::StandardPlayerClient(Faction own, Broker& broker, const Game& game)
+: StandardPlayerClient(own, broker, game, false)
+{
+}
+
+StandardPlayerClient::StandardPlayerClient(Faction own, Broker& broker, const Game& game, bool asGameMaster)
 : MessageThread(broker),
   mFaction(own),
   mGameId(game.actorId())
@@ -13,7 +18,7 @@ StandardPlayerClient::StandardPlayerClient(Faction own, Broker& broker, const Ga
 	if (!own.exactlyOne())
 		throw std::invalid_argument("StandardPlayerClient must represent exactly one faction");
 
-	connect(false);
+	connect(asGameMaster);
 }
 
 StandardPlayerClient::~StandardPlayerClient() noexcept

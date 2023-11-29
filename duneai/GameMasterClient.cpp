@@ -2,12 +2,11 @@
 #include "actions.h"
 
 GameMasterClient::GameMasterClient(Faction own, Broker& broker, const Game& game)
-: StandardPlayerClient(own, broker, game)
+: StandardPlayerClient(own, broker, game, true)
 {
-	connect(true);
 }
 
 std::future<ResultCode> GameMasterClient::startGame()
 {
-	return sendAction(std::make_unique<GmActionStartGame>(mFaction));
+	return sendAction(std::make_unique<GmActionStartGame>(faction()));
 }

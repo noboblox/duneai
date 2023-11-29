@@ -1,7 +1,7 @@
 #include "../devgame.h"
 #include "../broker.h"
 #include "../forces.h"
-#include "../standardplayerclient.h"
+#include "../GameMasterClient.h"
 class DevClient
 {
 public:
@@ -10,11 +10,11 @@ public:
 		auto neededFactions = Faction::expand(factions);
 
 		std::for_each(neededFactions.cbegin(), neededFactions.cend(), [&](const Faction& f){
-			mClients.emplace(f, std::make_unique<StandardPlayerClient>(f, broker, game));
+			mClients.emplace(f, std::make_unique<GameMasterClient>(f, broker, game));
 			});
 	}
 
-	StandardPlayerClient& as(Faction faction)
+	GameMasterClient& as(Faction faction)
 	{
 		auto found = mClients.find(faction);
 
@@ -24,7 +24,7 @@ public:
 		return *found->second;
 	}
 private:
-	std::map<Faction, std::unique_ptr<StandardPlayerClient>> mClients;
+	std::map<Faction, std::unique_ptr<GameMasterClient>> mClients;
 };
 
 

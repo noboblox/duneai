@@ -43,6 +43,7 @@ add_library( dunecore STATIC
 	"gameconstants.h" "gameconstants.cc"
 	"gamedata.h" "gamedata.cc"
 	"gamelogic.h" "gamelogic.cc"
+	"GameMasterClient.h" "GameMasterClient.cpp"
 	"game.h" "game.cc"
 	"IPlayerActions.h"
 	"json.h" "json.cc"

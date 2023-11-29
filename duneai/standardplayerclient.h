@@ -15,6 +15,9 @@ public:
 	explicit StandardPlayerClient(Faction own, Broker& broker, const Game& game);
 	virtual ~StandardPlayerClient() noexcept;
 
+	Faction faction() const noexcept { return mFaction;  }
+	size_t connectedGame() const noexcept { return mGameId;  }
+
 	std::future<ResultCode> predictWinner(Faction winner, int round) override;
 	std::future<ResultCode> selectTraitor(Leader::Id selection) override;
 	std::future<ResultCode> setupFremen(std::vector<Placement>&& placements) override;
@@ -34,11 +37,13 @@ public:
 	std::future<ResultCode> selectBattle(int id) override;
 	std::future<ResultCode> commitBattlePlan(BattlePlan&& battlePlan) override;
 
-
 protected:
+	explicit StandardPlayerClient(Faction own, Broker& broker, const Game& game, bool asGameMaster);
+	
+	std::future<ResultCode> sendAction(std::unique_ptr<Action>&& action);
 	ResultCode executeMessage(std::unique_ptr<Message>&& msg) override;
 
-	std::future<ResultCode> sendAction(std::unique_ptr<Action>&& action);
+private:
 	void connect(bool asGameMaster);
 	void disconnect() noexcept;
 

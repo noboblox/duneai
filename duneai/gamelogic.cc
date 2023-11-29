@@ -83,6 +83,12 @@ void GameLogic::tick()
 
 bool GameLogic::executeOne() 
 {
+	if (mPending.empty())
+	{
+		log->warn("called executeOne with empty queue");
+		return false;
+	}
+
 	auto& ac = *mPending.front();
 
 	bool result = executeAction(mGame, ac);
@@ -196,10 +202,13 @@ bool GameLogic::phaseInitJoin(const Action& action)
 	if (action.type() == ACTION_CONNECT)
 	{
 		auto ac = static_cast<const ActionConnect*> (&action);
+		log->info("faction %s connected as %s", ac->from().label().c_str(), ac->asGameMaster ? "game master" : "standard player");
+
 		return addFaction(ac->from(), ac->asGameMaster);
 	}
 	else if (action.type() == ACTION_DISCONNECT)
 	{
+		log->info("faction %s disconnected", action.from().label().c_str());
 		removeFaction(action.from());
 		return true;
 	}

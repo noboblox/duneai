@@ -6,6 +6,7 @@
 **/*.sln
 **/Debug
 **/Release
+**/RelWithDebInfo
 **/cmake_install.cmake
 **/CMakeCache.txt
 **/CMakeFiles/
