@@ -6,8 +6,9 @@ template<>
 EnumActionType::Definition EnumActionType::entries =
 {
 		{ACTION_invalid,                    "INVALID"},
-		{ACTION_FACTION_SELECTION,          "factionSelection"},
 		{GM_ACTION_START_GAME,              "startGame"},
+		{ACTION_CONNECT,                    "connect"},
+		{ACTION_DISCONNECT,                 "disconnect"},
 		{ACTION_PREDICT,                    "predict"},
 		{ACTION_HARKONNEN_REDRAW,           "harkonnenRedraw"},
 		{ACTION_TRAITOR_SELECTION,          "traitorSelection"},
@@ -28,12 +29,6 @@ EnumActionType::Definition EnumActionType::entries =
 		{DEV_ACTION_SET_STORM,              "Dev.setStorm"},
 		{DEV_ACTION_SET_GAME_PHASE,         "Dev.setGamePhase"},
 };
-
-static void SuccessOrThrow(bool success)
-{
-	if (!success)
-		throw std::invalid_argument("failed to parse the action correctly");
-}
 
 ActionPrediction::ActionPrediction(Faction aFrom, Faction aWinner, int aRound)
 : Action(aFrom, ACTION_PREDICT),

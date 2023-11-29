@@ -12,8 +12,8 @@ class Game;
 class StandardPlayerClient : public MessageThread, IPlayerActions
 {
 public:
-	MACRO_DELETE_ALL_DEFAULTS(StandardPlayerClient)
 	explicit StandardPlayerClient(Faction own, Broker& broker, const Game& game);
+	virtual ~StandardPlayerClient() noexcept;
 
 	std::future<ResultCode> predictWinner(Faction winner, int round) override;
 	std::future<ResultCode> selectTraitor(Leader::Id selection) override;
@@ -35,10 +35,12 @@ public:
 	std::future<ResultCode> commitBattlePlan(BattlePlan&& battlePlan) override;
 
 
-private:
+protected:
 	ResultCode executeMessage(std::unique_ptr<Message>&& msg) override;
 
 	std::future<ResultCode> sendAction(std::unique_ptr<Action>&& action);
+	void connect(bool asGameMaster);
+	void disconnect() noexcept;
 
 	const Faction mFaction;
 	const size_t mGameId;

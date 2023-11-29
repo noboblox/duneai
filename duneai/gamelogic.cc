@@ -7,6 +7,8 @@
 
 std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 {
+	{PHASE_INIT_JOIN,                   false,Faction::any(),                           ACTION_CONNECT},
+	{PHASE_INIT_JOIN,                   false,Faction::any(),                           ACTION_DISCONNECT},
 	{PHASE_INIT_PREDICTION,             true, Faction::beneGesserit(),                  ACTION_PREDICT},
 	{PHASE_INIT_HARKONNEN_REDRAW,       true, Faction::harkonnen(),                     ACTION_HARKONNEN_REDRAW},
 	{PHASE_INIT_TRAITOR_SELECTION,      true, Faction::anyExcept(Faction::harkonnen()), ACTION_TRAITOR_SELECTION},
@@ -156,6 +158,8 @@ bool GameLogic::userAction(GameState& game, const Action& action)
 
 	switch (game.phase)
 	{
+	case PHASE_INIT_JOIN:
+		return phaseInitJoin(action);
 	case PHASE_INIT_PREDICTION:
 		return phaseInitPrediction(game, action);
 	case PHASE_INIT_HARKONNEN_REDRAW:
@@ -185,6 +189,22 @@ bool GameLogic::userAction(GameState& game, const Action& action)
 	default:
 		return false;
 	}
+}
+
+bool GameLogic::phaseInitJoin(const Action& action)
+{
+	if (action.type() == ACTION_CONNECT)
+	{
+		auto ac = static_cast<const ActionConnect*> (&action);
+		return addFaction(ac->from(), ac->asGameMaster);
+	}
+	else if (action.type() == ACTION_DISCONNECT)
+	{
+		removeFaction(action.from());
+		return true;
+	}
+
+	return false;
 }
 
 bool GameLogic::phaseInitPrediction(GameState& game, const Action& action)

@@ -19,7 +19,8 @@ enum ActionType
 	ACTION_invalid = 0,
 
 	// pre-init
-	ACTION_FACTION_SELECTION,
+	ACTION_CONNECT,
+	ACTION_DISCONNECT,
 	GM_ACTION_START_GAME,
 
 	// in-game
@@ -124,12 +125,29 @@ public:
 	: GMAction(aFrom, GM_ACTION_START_GAME)
 	{
 	}
+};
 
-	GmActionStartGame(Faction aFrom, const std::string&)
-	: GMAction(aFrom, GM_ACTION_START_GAME)
+class ActionConnect : public Action
+{
+public:
+	explicit ActionConnect(Faction aFrom, bool aGameMaster)
+	: Action(aFrom, ACTION_CONNECT),
+	  asGameMaster(aGameMaster)
+	{
+	}
+
+	const bool asGameMaster;
+};
+
+class ActionDisconnect : public Action
+{
+public:
+	explicit ActionDisconnect(Faction aFrom)
+	: Action(aFrom, ACTION_DISCONNECT)
 	{
 	}
 };
+
 
 class ActionPrediction : public Action
 {

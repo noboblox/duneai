@@ -6,6 +6,7 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <vector>
 
 #include "deletedefaults.h"
@@ -15,8 +16,6 @@
 class MessageThread : public Actor
 {
 public:
-	MACRO_DELETE_ALL_DEFAULTS(MessageThread)
-
 	explicit MessageThread(Broker& broker);
 	virtual ~MessageThread() noexcept;
 
@@ -34,6 +33,7 @@ private:
 	std::atomic<bool> mNeedStop = false;
 	std::mutex mPendingMutex;
 	std::vector<std::unique_ptr<Message>> mPending;
+	std::thread mMessageThread;
 };
 
 #endif // !MESSAGE_THREAD_H_

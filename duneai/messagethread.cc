@@ -2,10 +2,9 @@
 #include <thread>
 
 MessageThread::MessageThread(Broker& broker)
-: Actor(broker)
+: Actor(broker),
+  mMessageThread([this]() { this->messageLoop(); })
 {
-	auto thread = std::thread([this]() { this->messageLoop(); });
-	thread.detach();
 }
 
 
@@ -42,6 +41,7 @@ void MessageThread::messageLoop()
 void MessageThread::shutdown() noexcept
 {
 	mNeedStop = true;
+	mMessageThread.join();
 }
 
 std::unique_ptr<Message> MessageThread::popMessage()

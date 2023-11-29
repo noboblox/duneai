@@ -251,7 +251,7 @@ struct PublicGameState
 {
 	int round = 1;
 	int maxRound = 10;
-	GamePhase phase = PHASE_invalid;
+	GamePhase phase = PHASE_INIT_JOIN;
 
 	Faction expectingInputFrom = Faction::none();
 	Arrakis board;

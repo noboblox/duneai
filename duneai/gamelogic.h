@@ -89,6 +89,7 @@ private:
 	bool gameMasterAction(GameState& game, const Action& action);
 	bool devAction(GameState& game, const Action& action);
 	bool userAction(GameState& game, const Action& action);
+	bool phaseInitJoin(const Action& action);
 	bool phaseInitPrediction(GameState& game, const Action& action);
 	bool phaseInitHarkonnenRedraw(GameState& game, const Action& action);
 	bool phaseInitTraitorSelect(GameState& game, const Action& action);

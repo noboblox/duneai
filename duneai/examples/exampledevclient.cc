@@ -35,7 +35,9 @@ int main()
 	DevGame game(broker);
 	DevClient client(Faction::any(), broker, game);
 
-	client.as(Faction::beneGesserit()).predictWinner(Faction::fremen(), 3);
+	auto result = client.as(Faction::beneGesserit()).predictWinner(Faction::fremen(), 3);
+	result.wait();
+	auto r = result.get();
 
 	return 0;
 }

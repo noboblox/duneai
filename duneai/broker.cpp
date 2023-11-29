@@ -45,7 +45,7 @@ void Broker::removeActor(size_t id)
 		if (data.targetActor == id)
 		{
 			data.pending.set_value(ResultCode(ResultCode::TARGET_SHUTDOWN));
-			mRequests.erase(it);
+			it = mRequests.erase(it);
 		}
 		else
 			++it;
@@ -91,7 +91,7 @@ std::future<ResultCode> Broker::sendConfirmed(size_t to, std::unique_ptr<Message
 
 void Broker::handleReply(size_t requestId, ResultCode result)
 {
-	if (requestId)
+	if (!requestId)
 		return;
 
 	std::lock_guard<std::mutex> l(mDataMutex);

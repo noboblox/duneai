@@ -12,6 +12,13 @@ StandardPlayerClient::StandardPlayerClient(Faction own, Broker& broker, const Ga
 {
 	if (!own.exactlyOne())
 		throw std::invalid_argument("StandardPlayerClient must represent exactly one faction");
+
+	connect(false);
+}
+
+StandardPlayerClient::~StandardPlayerClient() noexcept
+{
+	disconnect();
 }
 
 std::future<ResultCode> StandardPlayerClient::predictWinner(Faction winner, int round)
@@ -115,6 +122,24 @@ std::future<ResultCode> StandardPlayerClient::commitBattlePlan(BattlePlan&& batt
 std::future<ResultCode> StandardPlayerClient::sendAction(std::unique_ptr<Action>&& action)
 {
 	return broker().sendConfirmed(mGameId, std::move(action));
+}
+
+void StandardPlayerClient::connect(bool asGameMaster)
+{
+	auto result = sendAction(std::make_unique<ActionConnect>(mFaction, asGameMaster));
+	result.wait();
+
+	if (result.get().isError())
+		throw std::runtime_error("failed to connect client to the game");
+}
+
+void StandardPlayerClient::disconnect() noexcept
+{
+	try
+	{
+		sendAction(std::make_unique<ActionDisconnect>(mFaction));
+	}
+	catch (...) {}
 }
 
 ResultCode StandardPlayerClient::executeMessage(std::unique_ptr<Message>&& msg)

@@ -10,6 +10,9 @@ class Placement;
 
 class IPlayerActions
 {
+public:
+	virtual ~IPlayerActions() {}
+
 	virtual std::future<ResultCode> predictWinner(Faction winner, int round) = 0;
 	virtual std::future<ResultCode> selectTraitor(Leader::Id selection) = 0;
 	virtual std::future<ResultCode> setupFremen(std::vector<Placement>&& placements) = 0;
