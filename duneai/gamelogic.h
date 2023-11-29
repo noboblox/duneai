@@ -83,7 +83,8 @@ public:
 	};
 
 private:
-	void Init(GameState& game, Faction factionsInGame, unsigned aSeed);
+	void init(GameState& game, Faction factionsInGame, unsigned aSeed, bool aNoDraw = false);
+	void initCards(GameState& game);
 
 	bool executeAction(GameState& game, const Action& action);
 	bool gameMasterAction(GameState& game, const Action& action);
@@ -131,7 +132,7 @@ private:
     static std::vector<AllowedAction> msAllowedActions;
 
 private:
-	bool mUseDevActions;
+	bool mUseDevActions, mSetupWithoutDraw;
     bool initialized = false;
     std::unique_ptr<const Logger> log;
     std::queue<std::unique_ptr<Action>> mPending;

@@ -2,10 +2,14 @@
 #include "../broker.h"
 #include "../forces.h"
 #include "../GameMasterClient.h"
-class DevClient
+#include "../IDevActions.h"
+
+class DevClient : public IDevActions
 {
 public:
 	explicit DevClient(Faction factions, Broker& broker, const Game& game)
+	: mBroker(broker),
+	  mGame(game.actorId())
 	{
 		auto neededFactions = Faction::expand(factions);
 
@@ -23,10 +27,22 @@ public:
 
 		return *found->second;
 	}
+
+	GameMasterClient& asAny()
+	{
+		return *mClients.begin()->second;
+	}
+
+	std::future<ResultCode> startWithoutDraw() override
+	{
+		return mBroker.sendConfirmed(mGame, std::make_unique<DevActionStartWithoutDraw>());
+	}
+
 private:
 	std::map<Faction, std::unique_ptr<GameMasterClient>> mClients;
+	Broker& mBroker;
+	size_t mGame;
 };
-
 
 int main()
 {
@@ -35,9 +51,8 @@ int main()
 	DevGame game(broker);
 	DevClient client(Faction::any(), broker, game);
 
-	auto result = client.as(Faction::beneGesserit()).predictWinner(Faction::fremen(), 3);
-	result.wait();
-	auto r = result.get();
+	client.startWithoutDraw().wait();
+
 
 	return 0;
 }

@@ -40,6 +40,7 @@ enum ActionType
 	ACTION_BATTLE_SELECTION,
 	ACTION_COMMIT_BATTLE_PLAN,
 
+	DEV_ACTION_START_WITHOUT_DRAW,
 	DEV_ACTION_DIAL_TREACHERY_CARD,
 	DEV_ACTION_PLACE_TROOPS,
 	DEV_ACTION_SET_STORM,
@@ -92,8 +93,8 @@ protected:
 	}
 
 private:
-	Faction mFrom;     /// json member "from"
-	ActionType mType;  /// json member "type"
+	Faction mFrom;
+	ActionType mType;
 };
 
 class GMAction : public Action
@@ -123,6 +124,15 @@ class GmActionStartGame : public GMAction
 public:
 	explicit GmActionStartGame(Faction aFrom)
 	: GMAction(aFrom, GM_ACTION_START_GAME)
+	{
+	}
+};
+
+class DevActionStartWithoutDraw : public DevAction
+{
+public:
+	DevActionStartWithoutDraw()
+	: DevAction(DEV_ACTION_START_WITHOUT_DRAW)
 	{
 	}
 };

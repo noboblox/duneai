@@ -26,6 +26,7 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 
 GameLogic::GameLogic(bool developerActions)
 : mUseDevActions(developerActions),
+  mSetupWithoutDraw(false),
   log(new StdoutLogger())
 {
 }
@@ -59,7 +60,6 @@ void GameLogic::removeFaction(Faction faction) noexcept
 	inGame.clear(faction);
 	gameMasters.clear(faction);
 }
-
 void GameLogic::setup()
 {
 	std::random_device rd;
@@ -70,10 +70,11 @@ void GameLogic::setup(unsigned aSeed)
 {
 	if (!initialized)
 	{
-		Init(mGame, inGame, aSeed);
+		init(mGame, inGame, aSeed, mSetupWithoutDraw);
 		initialized = true;
 	}
 }
+
 
 void GameLogic::tick()
 {
@@ -144,6 +145,10 @@ bool GameLogic::devAction(GameState& game, const Action& action)
 {
 	switch (action.type())
 	{
+	case DEV_ACTION_START_WITHOUT_DRAW:
+		mSetupWithoutDraw = true;
+		setup();
+		return true;
 	case DEV_ACTION_DIAL_TREACHERY_CARD:
 		return true; // TODO
 	case DEV_ACTION_PLACE_TROOPS:
@@ -700,7 +705,7 @@ bool GameLogic::expected(GameState& game, Faction faction)
 	return game.expectingInputFrom.contains(faction);
 }
 
-void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
+void GameLogic::init(GameState& game, Faction factionsInGame, unsigned aSeed, bool aNoDraw)
 {
 	const auto factions = Faction::expand(factionsInGame);
 
@@ -730,9 +735,24 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 
 	mGame.board = Arrakis(seats, factions);
 	mGame.traitors = TraitorDeck(factionsInGame, mGame.random);
-	drawTraitors(mGame);
 	mGame.spiceDeck = SpiceDeck(mGame.random);
 	mGame.treacheryDeck = TreacheryDeck(mGame.random);
+
+	if (!aNoDraw)
+		initCards(mGame);
+
+	if (factionAvailable(mGame, Faction::beneGesserit()))
+		advance(mGame, PHASE_INIT_PREDICTION);
+	else if (harkonnenMayRedraw(mGame))
+		advance(mGame, PHASE_INIT_HARKONNEN_REDRAW);
+	else
+		advance(mGame, PHASE_INIT_TRAITOR_SELECTION);
+}
+
+
+void GameLogic::initCards(GameState& game)
+{
+	drawTraitors(mGame);
 
 	for (auto& p : mGame.players)
 	{
@@ -745,14 +765,9 @@ void GameLogic::Init(GameState& game, Faction factionsInGame, unsigned aSeed)
 			log->info("starting card %s for %s", TreacheryCardLabels::label(p.hand[1].id()), p.faction.label().c_str());
 		}
 	}
-
-	if (factionAvailable(mGame, Faction::beneGesserit()))
-		advance(mGame, PHASE_INIT_PREDICTION);
-	else if (harkonnenMayRedraw(mGame))
-		advance(mGame, PHASE_INIT_HARKONNEN_REDRAW);
-	else
-		advance(mGame, PHASE_INIT_TRAITOR_SELECTION);
 }
+
+
 
 void GameLogic::record(std::unique_ptr<const Action>&& action)
 {
