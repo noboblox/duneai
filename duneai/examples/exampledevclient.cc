@@ -44,6 +44,14 @@ private:
 	size_t mGame;
 };
 
+static void await(std::future<ResultCode>&& task)
+{
+	task.wait();
+	if (task.get().isError())
+		throw std::runtime_error("awaited task failed");
+}
+
+
 int main()
 {
 	Broker broker;
@@ -51,7 +59,7 @@ int main()
 	DevGame game(broker);
 	DevClient client(Faction::any(), broker, game);
 
-	client.startWithoutDraw().wait();
+	await(client.startWithoutDraw());
 
 
 	return 0;
