@@ -131,16 +131,6 @@ public:
 	}
 };
 
-class ActionFactionSelection : public Action
-{
-public:
-	/// @attention special case: this action is needed for the remote player to select a faction
-	explicit ActionFactionSelection(const std::string& json);
-
-private:
-	static Faction parseFrom(const std::string& json);
-};
-
 class ActionPrediction : public Action
 {
 public:
@@ -168,7 +158,11 @@ private:
 class ActionFremenPlacement : public Action
 {
 public:
-	ActionFremenPlacement(Faction aFrom, const std::vector<Placement>& aPlacements);
+	ActionFremenPlacement(Faction aFrom, const std::vector<Placement>& aPlacements)
+		: Action(aFrom, ACTION_FREMEN_PLACEMENT),
+		placements(aPlacements)
+	{
+	}
 
 	const std::vector<Placement> placements;
 };

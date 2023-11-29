@@ -48,8 +48,3 @@ ActionTraitorSelection::ActionTraitorSelection(Faction aFrom, Leader::Id aSelect
 {
 }
 
-ActionFremenPlacement::ActionFremenPlacement(Faction aFrom, const std::vector<Placement>& aPlacements)
-: Action(aFrom, ACTION_FREMEN_PLACEMENT),
-  placements(aPlacements)
-{
-}
