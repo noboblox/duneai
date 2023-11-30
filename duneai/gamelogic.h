@@ -128,7 +128,7 @@ private:
 	bool isAllowedAction(GameState& game, const Action& action);
 	bool expected(GameState& game, Faction faction);
 	int prepareAuction(GameState& game);
-	void prepareBattlePhase(GameState& game);
+	void phaseBattleCollectConflicts(GameState& game);
 	void cleanupAuctionPool(GameState& game);
 	void auctionWinTransaction(GameState& game, Faction won, int spice, bool karama);
 	void advance(GameState& game, GamePhase next, Faction customFactions = Faction::none());

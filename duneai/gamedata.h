@@ -9,6 +9,7 @@
 #include "auction.h"
 #include "gameconstants.h"
 #include "shipormove.h"
+#include "conflicts.h"
 
 class TraitorDeck
 {
@@ -277,7 +278,7 @@ struct GameState : public PublicGameState
 
 	std::pair<Faction, int> initialStormDial[2] = { {Faction::none(), 0}, {Faction::none(), 0}};
 	std::vector<TreacheryCard> biddingPool;
-	std::vector<Conflict> conflicts;
+	Conflicts conflicts;
 };
 
 PlayerState*

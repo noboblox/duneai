@@ -3,8 +3,9 @@
 
 #include <functional>
 #include <vector>
-#include "gameconstants.h"
+
 #include "forces.h"
+#include "gameconstants.h"
 
 class Arrakis
 {

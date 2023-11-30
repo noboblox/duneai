@@ -22,6 +22,7 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 	{PHASE_SHIPMENT_INTRUSION_REACTION, true, Faction::beneGesserit(),                  ACTION_INTRUSION_RESPONSE},
 	{PHASE_SHIPMENT_ACCOMPANY_DECISION, true, Faction::beneGesserit(),                  ACTION_ACCOMPANY_SHIPMENT},
 	{PHASE_SHIPMENT_MOVE,               true, Faction::any(),                           ACTION_MOVE},
+	{PHASE_BATTLE_SELECTION,            true, Faction::any(),                           ACTION_BATTLE_SELECTION},
 };
 
 std::vector<GameLogic::PhaseExecutionFunction> GameLogic::initPhaseFunctions(GameLogic& self)
@@ -29,7 +30,7 @@ std::vector<GameLogic::PhaseExecutionFunction> GameLogic::initPhaseFunctions(Gam
 	return
 	{
 		{PHASE_SPICE_SPICE_BLOW,       [](GameLogic& self, GameState& g){ self.phaseSpiceSpiceBlow(g); }},
-		{PHASE_BATTLE_COLLECT_BATTLES, [](GameLogic& self, GameState& g){ self.prepareBattlePhase(g); }},
+		{PHASE_BATTLE_COLLECT_BATTLES, [](GameLogic& self, GameState& g){ self.phaseBattleCollectConflicts(g); }},
 	};
 };
 
@@ -805,9 +806,9 @@ int GameLogic::prepareAuction(GameState& game)
 	return eligible;
 }
 
-void GameLogic::prepareBattlePhase(GameState& game)
+void GameLogic::phaseBattleCollectConflicts(GameState& game)
 {
-	game.conflicts = game.board.collectConflicts();
+	game.conflicts = Conflicts(game.board);
 
 	if (game.conflicts.empty())
 	{
@@ -816,10 +817,18 @@ void GameLogic::prepareBattlePhase(GameState& game)
 		return;
 	}
 
-	for (const auto& c : game.conflicts)
-		log->info("conflict in %s between %s",
-				Arrakis::areaName(c.forces().front().where), c.parties().label().c_str());
+	game.conflicts.forEach([this](const auto& c) {
+		log->info("conflict in %s between %s", Arrakis::areaName(c.forces().front().where), c.parties().label().c_str());
+	});
 
+	if (game.conflicts.needDecision())
+	{
+		advance(game, PHASE_BATTLE_SELECTION, game.conflicts.oppressor());
+	}
+	else
+	{
+		advance(game, PHASE_BATTLE_BATTLE, game.conflicts.competitors());
+	}
 }
 
 void GameLogic::cleanupAuctionPool(GameState& game)

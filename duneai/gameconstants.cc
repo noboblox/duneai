@@ -128,6 +128,8 @@ GamePhaseLabels::Definition GamePhaseLabels::entries =
 	{PHASE_SHIPMENT_ACCOMPANY_DECISION, "shipment.accompanyDecision" },
 	{PHASE_SHIPMENT_MOVE,               "shipment.move"              },
 	{PHASE_BATTLE_COLLECT_BATTLES,      "battle.collectBattles"      },
+	{PHASE_BATTLE_SELECTION,            "battle.selection"           },
+	{PHASE_BATTLE_BATTLE,               "battle.battle"              },
 	{PHASE_SPICE_HARVEST,               "spiceHarvest"               },
 };
 
