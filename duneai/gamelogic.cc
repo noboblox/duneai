@@ -28,8 +28,8 @@ std::vector<GameLogic::PhaseExecutionFunction> GameLogic::initPhaseFunctions(Gam
 {
 	return
 	{
-		{PHASE_SPICE_SPICE_BLOW,       [&](GameState& g){ self.phaseSpiceSpiceBlow(g); }},
-		{PHASE_BATTLE_COLLECT_BATTLES, [&](GameState& g){ self.prepareBattlePhase(g); }},
+		{PHASE_SPICE_SPICE_BLOW,       [](GameLogic& self, GameState& g){ self.phaseSpiceSpiceBlow(g); }},
+		{PHASE_BATTLE_COLLECT_BATTLES, [](GameLogic& self, GameState& g){ self.prepareBattlePhase(g); }},
 	};
 };
 
@@ -809,9 +809,17 @@ void GameLogic::prepareBattlePhase(GameState& game)
 {
 	game.conflicts = game.board.collectConflicts();
 
+	if (game.conflicts.empty())
+	{
+		log->info("no conflicts found");
+		advance(game, PHASE_SPICE_HARVEST);
+		return;
+	}
+
 	for (const auto& c : game.conflicts)
 		log->info("conflict in %s between %s",
 				Arrakis::areaName(c.forces().front().where), c.parties().label().c_str());
+
 }
 
 void GameLogic::cleanupAuctionPool(GameState& game)
@@ -899,7 +907,7 @@ void GameLogic::executeAutomaticTasks(GameState& game, GamePhase phase)
 	if (it != mPhaseFunc.cend())
 	{
 		log->info("execute automatic tasks for phase %s...", GamePhaseLabels::label(phase));
-		it->function(game);
+		it->function(*this, game);
 		log->info("... done ");
 	}
 }

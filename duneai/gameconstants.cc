@@ -128,6 +128,7 @@ GamePhaseLabels::Definition GamePhaseLabels::entries =
 	{PHASE_SHIPMENT_ACCOMPANY_DECISION, "shipment.accompanyDecision" },
 	{PHASE_SHIPMENT_MOVE,               "shipment.move"              },
 	{PHASE_BATTLE_COLLECT_BATTLES,      "battle.collectBattles"      },
+	{PHASE_SPICE_HARVEST,               "spiceHarvest"               },
 };
 
 std::vector<Faction> Faction::expand(Faction mask)

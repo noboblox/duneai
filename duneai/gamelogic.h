@@ -8,10 +8,13 @@
 #include "actions.h"
 #include "gameconstants.h"
 #include "logger.h"
+#include "deletedefaults.h"
 
 class GameLogic
 {
 public:
+	MACRO_DELETE_ALL_DEFAULTS(GameLogic)
+
 	/**
 	 * create a game logic without executing the initial setup
 	 * @post at least two factions should be added via @ref addFaction
@@ -93,7 +96,7 @@ public:
 	struct PhaseExecutionFunction
 	{
 		GamePhase phase;
-		std::function<void(GameState&)> function;
+		std::function<void(GameLogic&, GameState&)> function;
 	};
 
 private:

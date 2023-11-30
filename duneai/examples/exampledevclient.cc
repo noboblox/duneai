@@ -1,4 +1,4 @@
-#include "../devgame.h"
+#include "../game.h"
 #include "../broker.h"
 #include "../forces.h"
 #include "../GameMasterClient.h"
@@ -61,7 +61,7 @@ int main()
 {
 	Broker broker;
 
-	DevGame game(broker);
+	Game game(broker, true);
 	DevClient client(Faction::any(), broker, game);
 
 	await(client.startWithoutDraw());

@@ -1,14 +1,8 @@
 #include "game.h"
 
-Game::Game(Broker& broker)
+Game::Game(Broker& broker, bool withDevActions)
 : MessageThread(broker),
-  mLogic()
-{
-}
-
-Game::Game(Broker& broker, GameLogic&& logic)
-: MessageThread(broker),
-  mLogic(std::move(logic))
+  mLogic(withDevActions)
 {
 }
 

@@ -54,6 +54,7 @@ void StdoutLogger::debug(const char* format, ...) const
 
 void StdoutLogger::printConsole(const char* level, const char* format, va_list args) const noexcept
 {
+	std::lock_guard<std::mutex> l(mPrintMutex);
 	printf("[%5s] ", level);
 	vprintf(format, args);
 	putchar('\n');

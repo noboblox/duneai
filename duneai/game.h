@@ -8,10 +8,9 @@ class Game : public MessageThread
 {
 public:
 	MACRO_DELETE_ALL_DEFAULTS(Game)
-	explicit Game(Broker& broker);
+	explicit Game(Broker& broker, bool withDevActions = false);
 
 protected:
-	explicit Game(Broker& broker, GameLogic&& logic);
 	ResultCode executeMessage(std::unique_ptr<Message>&& msg) override;
 
 private:

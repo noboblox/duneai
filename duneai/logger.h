@@ -2,6 +2,7 @@
 #define LOGGER_H_
 
 #include <stdarg.h>
+#include <mutex>
 
 class Logger;
 extern const Logger* gLog;
@@ -32,6 +33,7 @@ public:
 	void debug(const char* format, ...) const override;
 
 private:
+	mutable std::mutex mPrintMutex;
 	void printConsole(const char* level, const char* format, va_list args) const noexcept;
 };
 
