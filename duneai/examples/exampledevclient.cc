@@ -38,6 +38,11 @@ public:
 		return mBroker.sendConfirmed(mGame, std::make_unique<DevActionStartWithoutDraw>());
 	}
 
+	std::future<ResultCode> setGamePhase(GamePhase phase) override
+	{
+		return mBroker.sendConfirmed(mGame, std::make_unique<DevActionSetPhase>(phase));
+	}
+
 private:
 	std::map<Faction, std::unique_ptr<GameMasterClient>> mClients;
 	Broker& mBroker;
@@ -60,6 +65,7 @@ int main()
 	DevClient client(Faction::any(), broker, game);
 
 	await(client.startWithoutDraw());
+	await(client.setGamePhase(GamePhase::PHASE_BATTLE_COLLECT_BATTLES));
 
 
 	return 0;

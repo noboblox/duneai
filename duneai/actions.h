@@ -131,10 +131,22 @@ public:
 class DevActionStartWithoutDraw : public DevAction
 {
 public:
-	DevActionStartWithoutDraw()
+	explicit DevActionStartWithoutDraw()
 	: DevAction(DEV_ACTION_START_WITHOUT_DRAW)
 	{
 	}
+};
+
+class DevActionSetPhase : public DevAction
+{
+public:
+	explicit DevActionSetPhase(GamePhase aPhase)
+	: DevAction(DEV_ACTION_SET_GAME_PHASE),
+	  phase(aPhase)
+	{
+	}
+
+	const GamePhase phase;
 };
 
 class ActionConnect : public Action

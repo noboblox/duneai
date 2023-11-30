@@ -82,6 +82,20 @@ public:
 		ActionType   what;
 	};
 
+	/**
+	 * @brief some phases are processed automatically by the game logic and don't require input.
+	 *
+	 * Nonetheless, these phases can be triggered directly by a dev event.
+	 *
+	 * So the corresponding logic function needs to run when the game advances into this phase,
+	 * whether it was reached internally or triggered by a dev event for testing purposes.
+	 */
+	struct PhaseExecutionFunction
+	{
+		GamePhase phase;
+		std::function<void(GameState&)> function;
+	};
+
 private:
 	void init(GameState& game, Faction factionsInGame, unsigned aSeed, bool aNoDraw = false);
 	void initCards(GameState& game);
@@ -115,6 +129,7 @@ private:
 	void cleanupAuctionPool(GameState& game);
 	void auctionWinTransaction(GameState& game, Faction won, int spice, bool karama);
 	void advance(GameState& game, GamePhase next, Faction customFactions = Faction::none());
+	void executeAutomaticTasks(GameState& game, GamePhase phase);
 	void advanceToShipmentPhase(GameState& game);
 	void advanceInShipmentPhase(GameState& game);
 	void discardTraitors(GameState& game);
@@ -128,12 +143,18 @@ private:
     Faction initialStormDialFactions(GameState& game);
     template <typename A> const A* expectedAction(GameState& game, const Action& action, ActionType type);
 
+
+    bool devActionSetupWithoutDraw(GameState& game, const Action& action);
+    bool devActionSetPhase(GameState& game, const Action& action);
+
 private:
     static std::vector<AllowedAction> msAllowedActions;
+    static std::vector<PhaseExecutionFunction> initPhaseFunctions(GameLogic& self);
 
 private:
 	bool mUseDevActions, mSetupWithoutDraw;
     bool initialized = false;
+    const std::vector<PhaseExecutionFunction> mPhaseFunc;
     std::unique_ptr<const Logger> log;
     std::queue<std::unique_ptr<Action>> mPending;
     std::vector<std::unique_ptr<const Action>> mRecorded;

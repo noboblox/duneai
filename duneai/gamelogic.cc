@@ -24,9 +24,19 @@ std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 	{PHASE_SHIPMENT_MOVE,               true, Faction::any(),                           ACTION_MOVE},
 };
 
+std::vector<GameLogic::PhaseExecutionFunction> GameLogic::initPhaseFunctions(GameLogic& self)
+{
+	return
+	{
+		{PHASE_SPICE_SPICE_BLOW,       [&](GameState& g){ self.phaseSpiceSpiceBlow(g); }},
+		{PHASE_BATTLE_COLLECT_BATTLES, [&](GameState& g){ self.prepareBattlePhase(g); }},
+	};
+};
+
 GameLogic::GameLogic(bool developerActions)
 : mUseDevActions(developerActions),
   mSetupWithoutDraw(false),
+  mPhaseFunc(initPhaseFunctions(*this)),
   log(new StdoutLogger())
 {
 }
@@ -146,9 +156,7 @@ bool GameLogic::devAction(GameState& game, const Action& action)
 	switch (action.type())
 	{
 	case DEV_ACTION_START_WITHOUT_DRAW:
-		mSetupWithoutDraw = true;
-		setup();
-		return true;
+		return devActionSetupWithoutDraw(game, action);
 	case DEV_ACTION_DIAL_TREACHERY_CARD:
 		return true; // TODO
 	case DEV_ACTION_PLACE_TROOPS:
@@ -156,7 +164,7 @@ bool GameLogic::devAction(GameState& game, const Action& action)
 	case DEV_ACTION_SET_STORM:
 		return true; // TODO
 	case DEV_ACTION_SET_GAME_PHASE:
-		return true; // TODO
+		return devActionSetPhase(game, action);
 	default:
 		return false;
 	}
@@ -414,7 +422,6 @@ bool GameLogic::phaseStormInitialStormDial(GameState& game, const Action& action
 
 
 	advance(game, PHASE_SPICE_SPICE_BLOW);
-	phaseSpiceSpiceBlow(game);
 	return true;
 }
 
@@ -805,8 +812,6 @@ void GameLogic::prepareBattlePhase(GameState& game)
 	for (const auto& c : game.conflicts)
 		log->info("conflict in %s between %s",
 				Arrakis::areaName(c.forces().front().where), c.parties().label().c_str());
-
-	advance(game, PHASE_BATTLE);
 }
 
 void GameLogic::cleanupAuctionPool(GameState& game)
@@ -882,6 +887,21 @@ void GameLogic::advance(GameState& game, GamePhase next, Faction customFactions)
 
 	mGame.phase = next;
 	log->info("advance game -> %s | input required from %s", GamePhaseLabels::label(game.phase), mGame.expectingInputFrom.label().c_str());
+	executeAutomaticTasks(game, mGame.phase);
+
+}
+
+void GameLogic::executeAutomaticTasks(GameState& game, GamePhase phase)
+{
+	auto it = std::find_if(mPhaseFunc.cbegin(), mPhaseFunc.cend(),
+				[phase](const PhaseExecutionFunction& el){ return el.phase ==  phase;});
+
+	if (it != mPhaseFunc.cend())
+	{
+		log->info("execute automatic tasks for phase %s...", GamePhaseLabels::label(phase));
+		it->function(game);
+		log->info("... done ");
+	}
 }
 
 void GameLogic::advanceToShipmentPhase(GameState& game)
@@ -904,7 +924,7 @@ void GameLogic::advanceInShipmentPhase(GameState& game)
 	else if (game.shipper.pendingMovement())
 		advance(game, PHASE_SHIPMENT_MOVE, game.shipper.currentlyShipping());
 	else if (game.shipper.finished())
-		prepareBattlePhase(game);
+		advance(game, PHASE_BATTLE_COLLECT_BATTLES);
 	else
 		advance(game, PHASE_SHIPMENT_SHIP, game.shipper.currentlyShipping());
 }
@@ -1047,5 +1067,22 @@ Faction GameLogic::initialStormDialFactions(GameState& game)
 
 	result |= stormOrder[second].faction;
 	return result;
+}
+
+bool GameLogic::devActionSetupWithoutDraw(GameState& game, const Action& action)
+{
+	log->info("received dev action setup");
+	mSetupWithoutDraw = true;
+	setup();
+	return true;
+}
+
+bool GameLogic::devActionSetPhase(GameState& game, const Action& action)
+{
+	auto ac = *static_cast<const DevActionSetPhase*> (&action);
+	log->info("received dev action set phase = %s", GamePhaseLabels::label(ac.phase));
+	advance(game, ac.phase);
+	return true;
+
 }
 
