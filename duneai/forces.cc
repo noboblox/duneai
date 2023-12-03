@@ -139,6 +139,9 @@ int ForcesInArea::countFactionIf(std::function<bool(const PlacedForces&)> f) con
 
 	for (const auto& el: placed)
 	{
+		if (el.empty())
+			continue;
+
 		if (f(el))
 			++result;
 	}

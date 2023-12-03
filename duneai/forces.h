@@ -20,6 +20,8 @@ struct PlacedForces
 	{
 	}
 
+	bool empty() const noexcept { return normal == 0 && special == 0;  }
+
 	Faction faction = Faction::none();
 	int normal      = 0;
 	int special     = 0;
