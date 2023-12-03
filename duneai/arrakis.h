@@ -41,7 +41,7 @@ public:
 
     static void reachable(AreaId from, int storm, int movement, std::vector<AreaId>& result);
     static bool insideStorm(AreaId id, int storm);
-    static bool isSietch(AreaId id);
+    static bool isStronghold(AreaId id);
     static bool fremenInitArea(AreaId id);
     static bool fremenShipArea(AreaId id);
     static int areaSector(AreaId id);
@@ -51,31 +51,33 @@ public:
 	Arrakis();
 	explicit Arrakis(const std::vector<int>& aSeats, const std::vector<Faction>& aFactions);
 
-	void place       (Faction from, Placement source, bool hostile);
-	void placeHostile(Faction from, Placement source);
-	void placeNeutral(Faction from, Placement source);
-	void removeForces(Faction from, Placement source);
+	void place       (Faction from, Placement what, bool hostile);
+	void placeHostile(Faction from, Placement what);
+	void placeNeutral(Faction from, Placement what);
+	void removeForces(Faction from, Placement what);
 
-	bool setTerritoryHostility(Faction from, AreaId where, bool value);
-	bool playerForcesInArea(Faction from, AreaId area, ForcesFrom& result) const;
-	bool playerForcesInTerritory(Faction from, AreaId childArea, ForcesFrom& result) const;
-	int hostileFactionsInTerritory(AreaId childArea) const;
-	int hostileEnemiesInTerritory(Faction own, AreaId childArea) const;
-	int neutralFactionsInTerritory(AreaId childArea) const;
-	std::vector<Conflict> collectConflicts() const;
+	bool setTerritoryHostility(Faction who, Territory where, bool value);
+	ForcesInArea forcesInArea(const PartialTerritory& where) const;
+	int hostileFactions(const PartialTerritory& where) const;
+	int hostileEnemies(Faction own, const PartialTerritory& where) const;
+	int neutralFactions(const PartialTerritory& where) const;
 
 	int getStorm() const noexcept;
     bool insideStorm(AreaId id) const;
 
 	bool canShip(Faction who, AreaId where) const;
 	bool canMove(Faction who, AreaId from, AreaId to, bool moveAsHostiles = true);
-	bool isOccupied(Faction shipper, AreaId where, bool moveAsHostiles = true) const;
+	bool isOccupied(Faction who, AreaId where, bool moveAsHostiles = true) const;
 	bool isReachable(AreaId from, AreaId to, int movement) const;
 	int movementRange(Faction who) const noexcept;
 	bool hasMovementBonus(Faction who) const noexcept;
 
 	FactionPosition firstByStormOrder() const noexcept;
 	FactionPosition lastByStormOrder() const noexcept;
+
+	Faction firstOf(Faction factions) const noexcept;
+	Faction lastOf(Faction factions) const noexcept;
+
 	std::vector<FactionPosition> stormOrder() const;
 	int advanceStorm(int count);
 	int addSpice(AreaId area, int amount);
@@ -85,15 +87,15 @@ public:
 	static const std::vector<Area>& allAreas() { return areas; }
 
 private:
-	void updateStormOrder();
-	void place(ForcesFrom&& source);
-	std::vector<const ForcesFrom*> collectFromSameTerritory(AreaId childArea, const Faction* filterFaction, const bool* filterHostile) const;
-	std::vector<const ForcesFrom*> collectFromSameArea(AreaId childArea, const Faction* filterFaction, const bool* filterHostile) const;
-	std::vector<const ForcesFrom*> collect(AreaId childArea, const Faction* filterFaction, const bool* filterHostile, bool restrictToArea) const;
-	std::vector<Conflict> potentialConflicts() const;
-	std::vector<Conflict> actualConflicts(const std::vector<Conflict>& potential, int storm) const;
+	ForcesInArea& getOrCreate(AreaId area);
 
-	std::vector<ForcesFrom> mForces;
+	void updateStormOrder();
+	void place(AreaId where, const PlacedForces& what);
+
+	ForcesInArea queryArea(PartialTerritory target) const;
+
+	std::vector<ForcesInArea> mPlacements;
+
 	std::vector<std::pair<AreaId, int>> spice;
 	std::vector<FactionPosition> mStormOrder;
 	int storm = 1;
@@ -110,9 +112,8 @@ private:
 	static const std::vector<Connection> connections;
 
 	static void searchReachableAreas(AreaId from, int storm, int movement, const std::function<bool(AreaId)>& client);
-	static bool sameTerritory(AreaId l, AreaId r) noexcept { return (l / 10) == (r / 10); }
-    static void neighbors(AreaId from, int storm, const std::vector<AreaId>& exclude, std::vector<std::pair<AreaId, int>>& result);
-    static const Area* getArea(AreaId id);
+	static void neighbors(AreaId from, int storm, const std::vector<AreaId>& exclude, std::vector<std::pair<AreaId, int>>& result);
+	static const Area* getArea(AreaId id);
     static const Area* getTerritorySector(AreaId childArea, int sector);
 };
 

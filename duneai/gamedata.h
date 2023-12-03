@@ -7,9 +7,10 @@
 
 #include "arrakis.h"
 #include "auction.h"
+#include "battle.h"
+#include "conflicts.h"
 #include "gameconstants.h"
 #include "shipormove.h"
-#include "conflicts.h"
 
 class TraitorDeck
 {
@@ -279,6 +280,7 @@ struct GameState : public PublicGameState
 	std::pair<Faction, int> initialStormDial[2] = { {Faction::none(), 0}, {Faction::none(), 0}};
 	std::vector<TreacheryCard> biddingPool;
 	Conflicts conflicts;
+	Battle battle;
 };
 
 PlayerState*

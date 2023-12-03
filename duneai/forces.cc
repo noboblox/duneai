@@ -1,54 +1,147 @@
 #include "forces.h"
-#include "arrakis.h"
+
 #include <algorithm>
+#include <stdexcept>
 
-bool Conflict::isValid() const noexcept
+#include "arrakis.h"
+
+ForcesInArea::ForcesInArea()
+: ForcesInArea(PartialTerritory())
 {
-	return mParties.count() >= 2;
 }
 
-void Conflict::add(const ForcesFrom& participant)
+ForcesInArea::ForcesInArea(const PartialTerritory& area)
+: placed{
+	PlacedForces(Faction::allFactions()[0], 0, 0, true),
+	PlacedForces(Faction::allFactions()[1], 0, 0, true),
+	PlacedForces(Faction::allFactions()[2], 0, 0, true),
+	PlacedForces(Faction::allFactions()[3], 0, 0, true),
+	PlacedForces(Faction::allFactions()[4], 0, 0, true),
+	PlacedForces(Faction::allFactions()[5], 0, 0, true),
+	PlacedForces(Faction::allFactions()[6], 0, 0, true),
+  },
+  mArea(area)
 {
-	mForces.push_back(participant);
-	mParties |= participant.from;
+	  static_assert(Faction::COUNT == 7, "please update ForcesInArea::placed after changes to factions");
+}
+const PlacedForces& ForcesInArea::getForces(Faction who) const
+{
+	const auto& forces = const_cast<ForcesInArea&> (*this).getForcesMutable(who);
+	return forces;
 }
 
-void Conflict::partition(Conflict source, int storm, std::vector<Conflict>& addTo)
+void ForcesInArea::setHostile(Faction who)
 {
-	Conflict left, right;
-
-	source.removeStormArea(storm);
-
-	std::for_each(source.mForces.cbegin(), source.mForces.cend(),
-			[&left, &right, &storm](const auto& f)
-			{
-				Arrakis::compareSector(Arrakis::areaSector(f.where), storm) > 0 ? left.add(f) : right.add(f);
-			});
-
-	if (left.isValid())
-		addTo.push_back(left);
-	if (right.isValid())
-		addTo.push_back(right);
+	auto& forces = getForcesMutable(who);
+	forces.hostile = true;
 }
 
-void Conflict::removeStormArea(int storm)
+void ForcesInArea::clearHostile(Faction who)
 {
-	auto it = std::find_if(mForces.begin(), mForces.end(),
-				[storm, this](const auto& f) {	return Arrakis::areaSector(f.where) == storm; });
+	auto& forces = getForcesMutable(who);
+		forces.hostile = false;
+}
 
-	if (it != mForces.end())
+
+PlacedForces& ForcesInArea::getForcesMutable(Faction who)
+{
+	auto it = std::find_if(placed.begin(), placed.end(), [&](const auto& el) {
+		return el.faction == who;
+	});
+
+	if (it == placed.end())
+		throw std::invalid_argument("faction is ambiguous");
+
+	return *it;
+}
+
+void ForcesInArea::setForces(const PlacedForces& value)
+{
+	auto& f = getForcesMutable(value.faction);
+	f = value;
+}
+
+void ForcesInArea::addForces(const PlacedForces& value)
+{
+	auto& f = getForcesMutable(value.faction);
+
+	f.normal += value.normal;
+	f.special += value.special;
+}
+
+void ForcesInArea::removeForces(const PlacedForces& value)
+{
+	auto& f = getForcesMutable(value.faction);
+
+	const int sub_normal = std::min(f.normal, value.normal);
+	const int sub_special = std::min(f.special, value.special);
+
+	f.normal -= sub_normal;
+	f.special -= sub_special;
+}
+
+
+
+int ForcesInArea::countForces(Faction faction) const noexcept
+{
+	auto& f = getForces(faction);
+	return f.normal + f.special;
+}
+
+bool ForcesInArea::hasForces(Faction faction) const noexcept
+{
+	return countForces(faction) != 0;
+}
+
+int ForcesInArea::countHostileForces(Faction faction) const noexcept
+{
+	auto& f = getForces(faction);
+	return f.hostile ? f.normal + f.special : 0;
+}
+
+bool ForcesInArea::hasHostileForces(Faction faction) const noexcept
+{
+	return countHostileForces(faction) != 0;
+}
+
+int ForcesInArea::countNonHostileForces(Faction faction) const noexcept
+{
+	auto& f = getForces(faction);
+	return f.hostile ? 0 : f.normal + f.special;
+}
+
+bool ForcesInArea::hasNonHostileForces(Faction faction) const noexcept
+{
+	return countNonHostileForces(faction) != 0;
+}
+
+const PartialTerritory& ForcesInArea::area() const noexcept
+{
+	return mArea;
+}
+
+ForcesInArea& ForcesInArea::merge(const ForcesInArea& other)
+{
+	for (int i = 0; i < Faction::COUNT; ++i)
 	{
-		mForces.erase(it);
-		updateParties();
+		placed[i].normal  += other.placed[i].normal;
+		placed[i].special += other.placed[i].special;
+		placed[i].hostile = other.placed[i].hostile;
 	}
+
+	mArea.merge(other.mArea);
+	return *this;
 }
 
-void Conflict::updateParties() noexcept
+int ForcesInArea::countFactionIf(std::function<bool(const PlacedForces&)> f) const
 {
-	mParties = Faction::none();
-	std::for_each(mForces.cbegin(), mForces.cend(),
-			[this](const auto& f) { mParties |= f.from; });
+	int result = 0;
+
+	for (const auto& el: placed)
+	{
+		if (f(el))
+			++result;
+	}
+
+	return result;
 }
-
-
-

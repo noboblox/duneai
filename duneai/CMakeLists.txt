@@ -30,8 +30,10 @@ target_link_libraries( exampleDevClient
 add_library( dunecore STATIC
 	"actor.h" "actor.cpp"
 	"actions.h" "actions.cc"
+	"areaid.h"
 	"arrakis.h" "arrakis.cc"
 	"auction.h" "auction.cc"
+	"battle.h" "battle.cpp"
 	"broker.h" "broker.cpp"
 	"battleplan.h"
 	"conflicts.h" "conflicts.cpp"
@@ -50,10 +52,12 @@ add_library( dunecore STATIC
 	"logger.h" "logger.cc"
 	"message.h"
 	"messagethread.h" "messagethread.cc"
+	"partialterritory.h" "partialterritory.cpp"
 	"resultcode.h"
 	"shipormove.h" "shipormove.cc"
 	"standardplayerclient.h" "standardplayerclient.cpp"
 	"statefunctions.h" "statefunctions.cc"
+	"territories.h" "territories.cpp"
 )
 
  target_include_directories( dunecore

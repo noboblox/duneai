@@ -1,13 +1,9 @@
-/*
- * arrakis.cc
- *
- *  Created on: 26.11.2022
- *      Author: Rene
- */
-
 #include "arrakis.h"
+
 #include <algorithm>
 #include <iterator>
+
+#include "territories.h"
 
 const std::vector<Arrakis::Area> Arrakis::areas = {
 		{ PolarSink              , "PolarSink"           , 0 },
@@ -686,7 +682,7 @@ bool Arrakis::insideStorm(AreaId id, int storm)
 	return p_area->sector == storm;
 }
 
-bool Arrakis::isSietch(AreaId id)
+bool Arrakis::isStronghold(AreaId id)
 {
 	switch (id)
 	{
@@ -777,44 +773,40 @@ const Arrakis::Area* Arrakis::getTerritorySector(AreaId childArea, int sector)
 	return nullptr;
 }
 
-void Arrakis::place(Faction from, Placement source, bool hostile)
+void Arrakis::place(Faction from, Placement what, bool hostile)
 {
-	place(ForcesFrom{from, source, hostile});
+	place(what.where, PlacedForces{from, what.normal, what.special, hostile});
 }
 
-void Arrakis::placeHostile(Faction from, Placement source)
+void Arrakis::placeHostile(Faction from, Placement what)
 {
-	place(ForcesFrom{from, source, true});
+	place(what.where, PlacedForces{from, what.normal, what.special});
 }
 
-void Arrakis::placeNeutral(Faction from, Placement source)
+void Arrakis::placeNeutral(Faction from, Placement what)
 {
-	place(ForcesFrom{from, source, false});
+	place(what.where, PlacedForces{from, what.normal, what.special, false});
 }
 
-void Arrakis::removeForces(Faction from, Placement source)
+void Arrakis::removeForces(Faction from, Placement what)
 {
-	auto it = std::find_if(mForces.begin(), mForces.end(),
-			[&source, &from](const ForcesFrom& f)
-			{ return f.from == from && f.where == source.where; });
-
-	if (it == mForces.end())
-		return;
-
-	it->normal  -= source.normal;
-	it->special -= source.special;
-
-	if (it->normal <= 0 && it->special <= 0)
-		mForces.erase(it);
+	auto& placements = getOrCreate(what.where);
+	placements.removeForces(PlacedForces{from, what.normal, what.special});
 }
 
-bool Arrakis::setTerritoryHostility(Faction from, AreaId where, bool value)
+bool Arrakis::setTerritoryHostility(Faction who, Territory where, bool value)
 {
-	auto found = collectFromSameTerritory(where, &from, nullptr);
+	bool changed = false;
 
-	if (!found.empty())
-		const_cast<ForcesFrom*> (found.front())->hostile = value;
-	return !found.empty();
+	where.forEach([&](AreaId area) {
+
+		auto& placements = getOrCreate(area);
+		placements.setHostile(who);
+
+		changed = true;
+	});
+
+	return true;
 }
 
 int Arrakis::getStorm() const noexcept
@@ -845,6 +837,30 @@ Arrakis::FactionPosition Arrakis::firstByStormOrder() const noexcept
 Arrakis::FactionPosition Arrakis::lastByStormOrder() const noexcept
 {
 	return mStormOrder.back();
+}
+
+Faction Arrakis::firstOf(Faction factions) const noexcept
+{
+	for (const auto& f: mStormOrder)
+	{
+		if (factions.contains(f.faction))
+			return f.faction;
+	}
+
+	return Faction::none();
+}
+
+Faction Arrakis::lastOf(Faction factions) const noexcept
+{
+	auto it = mStormOrder.crbegin();
+
+	for (; it != mStormOrder.crend(); ++it)
+	{
+		if (factions.contains(it->faction))
+			return it->faction;
+	}
+
+	return Faction::none();
 }
 
 std::vector<Arrakis::FactionPosition> Arrakis::stormOrder() const
@@ -915,45 +931,35 @@ int Arrakis::getSpice(AreaId area) const noexcept
 	return it == spice.end() ? 0 : it->second;
 }
 
-static bool FactionAndAreaEqual(const ForcesFrom& l, const ForcesFrom& r)
+ForcesInArea& Arrakis::getOrCreate(AreaId area)
 {
-	return l.where == r.where && l.from == r.from;
-}
-
-static bool FactionAndAreaLess(const ForcesFrom& l, const ForcesFrom& r)
-{
-	if (l.where == r.where)
-		return l.from < r.from;
-	return l.where < r.where;
-}
-
-void Arrakis::place(ForcesFrom&& source)
-{
-	auto it = std::lower_bound(mForces.begin(), mForces.end(), source, FactionAndAreaLess);
-
-	if (it == mForces.end() || !FactionAndAreaEqual(source, *it))
+	auto it = std::find_if(mPlacements.begin(), mPlacements.end(), [&](const ForcesInArea& el)
 	{
-		mForces.insert(it, source);
-	}
-	else
-	{
-		it->normal += source.normal;
-		it->special += source.special;
-	}
+		return el.area().contains(area);
+	});
+
+	if (it != mPlacements.end())
+		return *it;
+
+	mPlacements.push_back(ForcesInArea(PartialTerritory(area)));
+	return mPlacements.back();
 }
 
-bool Arrakis::isOccupied(Faction shipper, AreaId where, bool moveAsHostiles) const
+void Arrakis::place(AreaId where, const PlacedForces& what)
 {
-	if (!isSietch(where))
+	auto& placements = getOrCreate(where);
+	placements.addForces(what);
+}
+
+bool Arrakis::isOccupied(Faction who, AreaId where, bool moveAsHostiles) const
+{
+	if (!isStronghold(where))
 		return false;
 
 	if (!moveAsHostiles)
 		return false;
 
-	static constexpr bool hostility = true;
-	static const Faction enemies = Faction::anyExcept(shipper);
-
-	return collectFromSameTerritory(where, &enemies, &hostility).size() >= 2;
+	return hostileEnemies(who, Territories::of(where)) >= 2;
 }
 
 int Arrakis::movementRange(Faction who) const noexcept
@@ -968,10 +974,10 @@ int Arrakis::movementRange(Faction who) const noexcept
 
 bool Arrakis::hasMovementBonus(Faction who) const noexcept
 {
-	static constexpr bool HOSTILITY = true;
-	return !collectFromSameArea(AreaId::Carthag, nullptr, &HOSTILITY).empty() ||
-		   !collectFromSameArea(AreaId::Arrakeen, &who, &HOSTILITY).empty();
+	return queryArea(Territories::carthag).hasHostileForces(who) ||
+		   queryArea(Territories::arrakeen).hasHostileForces(who);
 }
+
 
 bool Arrakis::canShip(Faction who, AreaId where) const
 {
@@ -993,150 +999,45 @@ bool Arrakis::canMove(Faction who, AreaId from, AreaId to, bool moveAsHostiles)
 	return true;
 }
 
-bool
-Arrakis::playerForcesInArea(Faction from, AreaId area, ForcesFrom& result) const
+ForcesInArea Arrakis::forcesInArea(const PartialTerritory& where) const
 {
-	auto forces = collectFromSameArea(area, &from, nullptr);
-
-	if (!forces.empty())
-	{
-		result = *forces.front();
-		return true;
-	}
-
-	return false;
+	return queryArea(where);
 }
 
-bool
-Arrakis::playerForcesInTerritory(Faction from, AreaId childArea, ForcesFrom& result) const
+int Arrakis::hostileFactions(const PartialTerritory& where) const
 {
-	auto forces = collectFromSameTerritory(childArea, &from, nullptr);
+	auto forces = queryArea(where);
 
-	if (!forces.empty())
-	{
-		result = *forces.front();
-		return true;
-	}
-
-	return false;
+	return forces.countFactionIf([](const PlacedForces& el){
+		return el.hostile;
+	});
 }
 
-std::vector<const ForcesFrom*>
-Arrakis::collectFromSameTerritory(AreaId childArea, const Faction* filterFaction, const bool* filterHostile) const
+int Arrakis::hostileEnemies(Faction own, const PartialTerritory& where) const
 {
-	return collect(childArea, filterFaction, filterHostile, false);
+	auto forces = queryArea(where);
+
+	return forces.countFactionIf([own](const PlacedForces& el){
+		return el.hostile && el.faction != own;
+	});
 }
 
-std::vector<const ForcesFrom*>
-Arrakis::collectFromSameArea(AreaId childArea, const Faction* filterFaction, const bool* filterHostile) const
+int Arrakis::neutralFactions(const PartialTerritory& where) const
 {
-	return collect(childArea, filterFaction, filterHostile, true);
+	auto forces = queryArea(where);
+
+	return forces.countFactionIf([](const PlacedForces& el){
+		return !el.hostile;
+	});
 }
 
-std::vector<const ForcesFrom*>
-Arrakis::collect(AreaId childArea, const Faction* filterFaction, const bool* filterHostile, bool restrictToArea) const
+ForcesInArea Arrakis::queryArea(PartialTerritory target) const
 {
-	std::vector<const ForcesFrom*> result;
-
-	for (auto& forces : mForces)
-	{
-		if (!sameTerritory(childArea, forces.where))
-			continue;
-		if (restrictToArea && childArea != forces.where)
-			continue;
-		if (filterFaction && !(filterFaction->contains(forces.from)))
-			continue;
-		if (filterHostile && ((*filterHostile) != forces.hostile))
-			continue;
-
-		result.push_back(&forces);
-	}
+	ForcesInArea result;
+	std::for_each(mPlacements.cbegin(), mPlacements.cend(), [&](const ForcesInArea& el){
+		if (target.containsAllOf(el.area()))
+			result.merge(el);
+	});
 
 	return result;
 }
-
-int Arrakis::hostileFactionsInTerritory(AreaId childArea) const
-{
-	static constexpr bool HOSTILITY = true;
-	return (int) collectFromSameTerritory(childArea, nullptr, &HOSTILITY).size();
-}
-
-int Arrakis::hostileEnemiesInTerritory(Faction own, AreaId childArea) const
-{
-	static constexpr bool HOSTILITY = true;
-	const Faction enemies = Faction::anyExcept(own);
-	return (int) collectFromSameTerritory(childArea, &enemies, &HOSTILITY).size();
-}
-
-
-int Arrakis::neutralFactionsInTerritory(AreaId childArea) const
-{
-	static constexpr bool HOSTILITY = false;
-	return (int) collectFromSameTerritory(childArea, nullptr, &HOSTILITY).size();
-}
-
-std::vector<Conflict> Arrakis::collectConflicts() const
-{
-	return actualConflicts(potentialConflicts(), storm);
-}
-
-std::vector<Conflict> Arrakis::potentialConflicts() const
-{
-	if (mForces.size() < 2)
-		return std::vector<Conflict>();
-
-	std::vector<Conflict> potential;
-
-	Conflict* current = nullptr;
-	auto l =   mForces.cbegin();
-	auto r = ++mForces.cbegin();
-
-	for (; r != mForces.cend(); ++r)
-	{
-		if (!sameTerritory(l->where, r->where))
-		{
-			current = nullptr;
-			l = r;
-			continue;
-		}
-
-		if (!l->hostile)
-		{
-			++l;
-			continue;
-		}
-
-		if (!r->hostile)
-		{
-			continue;
-		}
-
-		if (!current)
-		{
-			potential.emplace_back();
-			current = &potential.back();
-			current->add(*l);
-			current->add(*r);
-		}
-		else
-		{
-			current->add(*r);
-		}
-	}
-
-	return potential;
-}
-
-std::vector<Conflict> Arrakis::actualConflicts(const std::vector<Conflict>& potential, int storm) const
-{
-	std::vector<Conflict> actual;
-	for (auto& conflict : potential)
-	{
-		Conflict::partition(conflict, storm, actual);
-	}
-	return actual;
-}
-
-
-
-

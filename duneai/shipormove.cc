@@ -2,8 +2,10 @@
 #include "gamedata.h"
 #include "statefunctions.h"
 
+#include "territories.h"
 ShipOrMove::ShipOrMove()
 {
+	Territories::cielagoSouth.contains(AreaId::INVALID);
 }
 
 ShipOrMove::ShipOrMove(GameState& aGame, const Logger& aLog)
@@ -68,7 +70,7 @@ void ShipOrMove::disengageIntrusion() noexcept
 		return;
 
 	log->info("beneGesserit swaps to advisor in %s", Arrakis::areaName(last.where));
-	game->board.setTerritoryHostility(Faction::beneGesserit(), last.where, false);
+	game->board.setTerritoryHostility(Faction::beneGesserit(), Territories::of(last.where), false);
 
 	if (beneGesseritCanAccompany())
 		phase = SP_ACCOMPANY;
@@ -132,10 +134,13 @@ static bool consumeHajr(GameState& game, PlayerState& player)
 
 static bool isHostileInTargetArea(GameState& game, PlayerState& player, AreaId where, bool hostileRequested = true)
 {
-	ForcesFrom forces;
-	if (game.board.playerForcesInArea(player.faction, where, forces))
-		return forces.hostile;
-	else if (game.board.hostileEnemiesInTerritory(player.faction, where) == 0)
+	auto forces = game.board.forcesInArea(where);
+
+	if (forces.hasHostileForces(player.faction))
+		return true;
+	else if (forces.hasNonHostileForces(player.faction))
+		return false;
+	else if (game.board.hostileEnemies(player.faction, Territories::of(where)) == 0)
 		return true;
 	else
 		return hostileRequested;
@@ -143,8 +148,8 @@ static bool isHostileInTargetArea(GameState& game, PlayerState& player, AreaId w
 
 static bool swapLoneAdvisors(GameState& game, AreaId where)
 {
-	return !game.board.hostileEnemiesInTerritory(Faction::beneGesserit(), where) && 
-		    game.board.setTerritoryHostility(Faction::beneGesserit(), where, true);
+	return !game.board.hostileEnemies(Faction::beneGesserit(), Territories::of(where)) &&
+		    game.board.setTerritoryHostility(Faction::beneGesserit(), Territories::of(where), true);
 }
 
 bool ShipOrMove::move(AreaId from, AreaId to, int normalAmount, int specialAmount, bool useHajr, bool advisor)
@@ -195,7 +200,7 @@ int ShipOrMove::shipmentCost(Faction who, AreaId where, int amount) const
 	if (who == Faction::fremen())
 		return 0;
 
-	const int base10 = Arrakis::isSietch(where) ? 10 : 20;
+	const int base10 = Arrakis::isStronghold(where) ? 10 : 20;
 	int cost10 = base10 * amount;
 
 	if (who == Faction::spacingGuild())
@@ -214,11 +219,7 @@ bool ShipOrMove::beneGesseritCanReact() const noexcept
 	if (last.who == Faction::beneGesserit())
 		return false;
 
-	ForcesFrom forces;
-	if (game->board.playerForcesInTerritory(Faction::beneGesserit(), last.where, forces))
-		return forces.hostile;
-
-	return false;
+	return game->board.forcesInArea(last.where).hasHostileForces(Faction::beneGesserit());
 }
 
 bool ShipOrMove::beneGesseritCanAccompany() const noexcept
@@ -231,10 +232,8 @@ bool ShipOrMove::beneGesseritCanAccompany() const noexcept
 		return false;
 	if (getPlayerState(*game, Faction::beneGesserit())->reserve == 0)
 		return false;
-
-	ForcesFrom forces;
-	if (game->board.playerForcesInTerritory(Faction::beneGesserit(), last.where, forces))
-		return !forces.hostile;
+	if (game->board.forcesInArea(last.where).hasHostileForces(Faction::beneGesserit()))
+		return false;
 
 	return true;
 }
@@ -347,12 +346,14 @@ bool ShipOrMove::verifyCommon(const PlayerState* player, AreaId* from, AreaId* t
 
 	if (from)
 	{
-		ForcesFrom forces;
-		if (!game->board.playerForcesInArea(player->faction, *from, forces))
+		auto forces = game->board.forcesInArea(*from);
+
+		if (!forces.hasForces(player->faction))
 			return false;
 
-		normalsFrom  = forces.normal;
-		specialsFrom = forces.special;
+		const auto playerForces = forces.getForces(player->faction);
+		normalsFrom  = playerForces.normal;
+		specialsFrom = playerForces.special;
 	}
 
 	if (normalsFrom < normalAmount || specialsFrom < specialAmount)

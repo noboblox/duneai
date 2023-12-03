@@ -107,6 +107,8 @@ private:
 	bool gameMasterAction(GameState& game, const Action& action);
 	bool devAction(GameState& game, const Action& action);
 	bool userAction(GameState& game, const Action& action);
+
+	// active phases
 	bool phaseInitJoin(const Action& action);
 	bool phaseInitPrediction(GameState& game, const Action& action);
 	bool phaseInitHarkonnenRedraw(GameState& game, const Action& action);
@@ -114,21 +116,23 @@ private:
 	bool phaseInitFremenPlacement(GameState& game, const Action& action);
 	bool phaseInitBeneGesseritPlacement(GameState& game, const Action& action);
 	bool phaseStormInitialStormDial(GameState& game, const Action& action);
-	void phaseSpiceSpiceBlow(GameState& game);
 	bool phaseChoamCharity(GameState& game, const Action& action);
 	bool phaseBidding(GameState& game, const Action& action);
-
 	bool phaseShipmentGuildDecision(GameState& game, const Action& action);
 	bool phaseShipmentShip(GameState& game, const Action& action);
 	bool phaseShipmentIntrusionReaction(GameState& game, const Action& action);
 	bool phaseShipmentAccompanyDecision(GameState& game, const Action& action);
 	bool phaseShipmentMove(GameState& game, const Action& action);
-	bool phaseBattle(GameState& game, const Action& action);
+	bool phaseBattleSelection(GameState& game, const Action& action);
+
+	// passive phases
+	void phaseSpiceSpiceBlow(GameState& game);
+	void phaseBattleCollectConflicts(GameState& game);
+	void phaseBattleBegin(GameState& game);
 
 	bool isAllowedAction(GameState& game, const Action& action);
 	bool expected(GameState& game, Faction faction);
 	int prepareAuction(GameState& game);
-	void phaseBattleCollectConflicts(GameState& game);
 	void cleanupAuctionPool(GameState& game);
 	void auctionWinTransaction(GameState& game, Faction won, int spice, bool karama);
 	void advance(GameState& game, GamePhase next, Faction customFactions = Faction::none());

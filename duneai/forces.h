@@ -1,7 +1,10 @@
 #ifndef FORCES_H_
 #define FORCES_H_
 
+#include <array>
+
 #include "gameconstants.h"
+#include "partialterritory.h"
 
 struct Placement
 {
@@ -10,42 +13,52 @@ struct Placement
 	int special = 0;
 };
 
-struct ForcesFrom : public Placement
+struct PlacedForces
 {
-	explicit ForcesFrom()
-	: Placement{AreaId::INVALID, 0, 0}
+	PlacedForces(Faction aFaction, int aNormal, int aSpecial, bool aHostile = true)
+	: faction(aFaction), normal(aNormal), special(aSpecial), hostile(aHostile)
 	{
 	}
 
-	ForcesFrom(Faction aFrom, const Placement& aPlacement, bool aHostile)
-	: Placement{aPlacement.where, aPlacement.normal, aPlacement.special}, from(aFrom), hostile(aHostile)
-	{
-	}
-	Faction from = Faction::none();
-	bool hostile = true;
+	Faction faction = Faction::none();
+	int normal      = 0;
+	int special     = 0;
+	bool hostile    = true;
 };
 
-class Conflict
+class ForcesInArea
 {
 public:
-	explicit Conflict() : mParties(Faction::none()) {}
+	ForcesInArea();
+	ForcesInArea(const PartialTerritory& area);
 
-	bool isValid() const noexcept;
-	void add(const ForcesFrom& participant);
-	void removeStormArea(int storm);
+	const PlacedForces& getForces(Faction who) const;
+	void setForces(const PlacedForces& value);
+	void addForces(const PlacedForces& value);
+	void removeForces(const PlacedForces& value);
+	void setHostile(Faction who);
+	void clearHostile(Faction who);
 
-	const std::vector<ForcesFrom>& forces() const noexcept { return mForces; }
-	const Faction parties() const noexcept { return mParties; }
+	int countHostileForces(Faction faction) const noexcept;
+	bool hasHostileForces(Faction faction) const noexcept;
 
-	static void partition(Conflict source, int storm, std::vector<Conflict>& addTo);
+	int countNonHostileForces(Faction faction) const noexcept;
+	bool hasNonHostileForces(Faction faction) const noexcept;
+
+	int countForces(Faction faction) const noexcept;
+	bool hasForces(Faction faction) const noexcept;
+
+	const PartialTerritory& area() const noexcept;
+
+	ForcesInArea& merge(const ForcesInArea& other);
+
+	int countFactionIf(std::function<bool(const PlacedForces&)> f) const;
 
 private:
-	void updateParties() noexcept;
-
-	Faction mParties;
-	std::vector<ForcesFrom> mForces;
+	PlacedForces& getForcesMutable(Faction who);
+	std::array<PlacedForces, Faction::COUNT> placed;
+	PartialTerritory mArea;
 };
-
 
 #endif
 

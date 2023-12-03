@@ -4,6 +4,7 @@
 #include <map>
 #include "arrakis.h"
 #include "gamedata.h"
+#include "territories.h"
 
 std::vector<GameLogic::AllowedAction> GameLogic::msAllowedActions =
 {
@@ -31,6 +32,7 @@ std::vector<GameLogic::PhaseExecutionFunction> GameLogic::initPhaseFunctions(Gam
 	{
 		{PHASE_SPICE_SPICE_BLOW,       [](GameLogic& self, GameState& g){ self.phaseSpiceSpiceBlow(g); }},
 		{PHASE_BATTLE_COLLECT_BATTLES, [](GameLogic& self, GameState& g){ self.phaseBattleCollectConflicts(g); }},
+		{PHASE_BATTLE_BEGIN,           [](GameLogic& self, GameState& g){ self.phaseBattleBegin(g); }},
 	};
 };
 
@@ -206,6 +208,8 @@ bool GameLogic::userAction(GameState& game, const Action& action)
 		return phaseShipmentAccompanyDecision(game, action);
 	case PHASE_SHIPMENT_MOVE:
 		return phaseShipmentMove(game, action);
+	case PHASE_BATTLE_SELECTION:
+		return phaseBattleSelection(game, action);
 	default:
 		return false;
 	}
@@ -377,7 +381,7 @@ bool GameLogic::phaseInitBeneGesseritPlacement(GameState& game, const Action& ac
 	auto player = getPlayerState(game, action.from());
 	if (!player) return false;
 
-	if (game.board.hostileFactionsInTerritory(ac->where) > 0)
+	if (game.board.hostileFactions(Territories::of(ac->where)) > 0)
 	{
 		game.board.placeNeutral(player->faction, Placement{ac->where, 1, 0});
 		player->reserve -= 1;
@@ -699,11 +703,6 @@ bool GameLogic::phaseShipmentMove(GameState& game, const Action& action)
 	return true;
 }
 
-bool GameLogic::phaseBattle(GameState& game, const Action& action)
-{
-	return false;
-}
-
 //
 //-- AUXILIARY
 //
@@ -817,18 +816,36 @@ void GameLogic::phaseBattleCollectConflicts(GameState& game)
 		return;
 	}
 
-	game.conflicts.forEach([this](const auto& c) {
-		log->info("conflict in %s between %s", Arrakis::areaName(c.forces().front().where), c.parties().label().c_str());
-	});
 
 	if (game.conflicts.needDecision())
 	{
-		advance(game, PHASE_BATTLE_SELECTION, game.conflicts.oppressor());
+		advance(game, PHASE_BATTLE_SELECTION, game.conflicts.aggressor());
 	}
 	else
 	{
-		advance(game, PHASE_BATTLE_BATTLE, game.conflicts.competitors());
+		game.battle = game.conflicts.createNextBattle();
+		game.conflicts.clear();
+
+		advance(game, PHASE_BATTLE_BEGIN);
 	}
+}
+
+bool GameLogic::phaseBattleSelection(GameState& game, const Action& action)
+{
+	auto ac = expectedAction<ActionBattleSelection>(game, action, ACTION_BATTLE_SELECTION);
+	if (!ac) return false;
+
+	if (!game.conflicts.selectBattle(ac->id))
+		return false;
+
+	game.battle = game.conflicts.createNextBattle();
+	game.conflicts.clear();
+	advance(game, PHASE_BATTLE_BEGIN);
+	return true;
+}
+
+void GameLogic::phaseBattleBegin(GameState& game)
+{
 }
 
 void GameLogic::cleanupAuctionPool(GameState& game)

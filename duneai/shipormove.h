@@ -1,6 +1,7 @@
 #ifndef SHIPORMOVE_H_
 #define SHIPORMOVE_H_
 
+#include "areaid.h"
 #include "gameconstants.h"
 #include "logger.h"
 

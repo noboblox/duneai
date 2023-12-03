@@ -2,6 +2,7 @@
 
 #include <future>
 
+#include "areaid.h"
 #include "gameconstants.h"
 #include "resultcode.h"
 

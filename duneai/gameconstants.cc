@@ -129,7 +129,7 @@ GamePhaseLabels::Definition GamePhaseLabels::entries =
 	{PHASE_SHIPMENT_MOVE,               "shipment.move"              },
 	{PHASE_BATTLE_COLLECT_BATTLES,      "battle.collectBattles"      },
 	{PHASE_BATTLE_SELECTION,            "battle.selection"           },
-	{PHASE_BATTLE_BATTLE,               "battle.battle"              },
+	{PHASE_BATTLE_BEGIN,                "battle.begin"               },
 	{PHASE_SPICE_HARVEST,               "spiceHarvest"               },
 };
 
@@ -172,6 +172,25 @@ Faction Faction::fromString(const std::string& label)
 		return Faction::tleilaxu();
 	return Faction::none();
 }
+
+// static
+const std::array<Faction, Faction::COUNT>& Faction::allFactions()
+{
+	static_assert(Faction::COUNT == 7, "after a change to factions the ALL_FACTIONS array must be updated!");
+
+	static const std::array<Faction, Faction::COUNT> ALL_FACTIONS = {
+		Faction::emperor(),
+		Faction::spacingGuild(),
+		Faction::fremen(),
+		Faction::atreides(),
+		Faction::harkonnen(),
+		Faction::beneGesserit(),
+		Faction::tleilaxu()
+	};
+
+	return ALL_FACTIONS;
+};
+
 
 std::vector<Leader::Id> Leader::of(Faction faction)
 {
