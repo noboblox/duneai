@@ -14,8 +14,6 @@ public:
 	explicit StormPosition(int position)
 	: mPosition(guardRange(position))
 	{
-		if (position <= 0)
-			throw std::invalid_argument("storm position must be greater than 0");
 	}
 
 	int advanceBy(int value) noexcept
@@ -24,6 +22,8 @@ public:
 		mPosition = guardRange(newPosition);
 		return mPosition;
 	}
+
+	bool valid() const noexcept { return mPosition != 0; }
 
 	int value() const noexcept { return mPosition; }
 
@@ -34,7 +34,7 @@ public:
 
 	bool operator==(StormPosition other) const noexcept
 	{
-		if (other.mPosition == 0 || mPosition == 0)
+		if (!valid() || !other.valid())
 			return false;
 
 		return mPosition == other.mPosition;
@@ -42,7 +42,7 @@ public:
 
 	bool operator<(StormPosition other) const noexcept
 	{
-		if (other.mPosition == 0 || mPosition == 0)
+		if (!valid() || !other.valid())
 			return false;
 
 		int distance = advanceDistance(other);
