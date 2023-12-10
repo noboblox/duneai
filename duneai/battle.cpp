@@ -1,9 +1,11 @@
 #include "battle.h"
 
-Battle::Battle()
+Battle::Battle() noexcept
+: mConflict()
 {
 }
 
-Battle::Battle(const GameState& state, Faction aggressor, Faction defender, PartialTerritory battleArea)
+Battle::Battle(Conflict&& c)
+: mConflict(std::move(c))
 {
 }

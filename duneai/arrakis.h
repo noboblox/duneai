@@ -4,41 +4,15 @@
 #include <functional>
 #include <vector>
 
+#include "factionposition.h"
 #include "forces.h"
 #include "gameconstants.h"
+
+class Conflicts;
 
 class Arrakis
 {
 public:
-	struct Area
-	{
-		const AreaId id;
-		const char* name;
-		const int sector;
-	};
-
-	struct FactionPosition
-	{
-		int seat;
-		Faction faction;
-
-		FactionPosition(int aSeat, Faction aFaction) : seat(aSeat), faction(aFaction) {}
-
-		const bool operator!=(const FactionPosition& o) const noexcept { return !operator==(o); }
-		const bool operator==(const FactionPosition& o) const noexcept { return seat == o.seat && faction == o.faction; }
-
-		const bool operator>=(const FactionPosition& o) const noexcept { return !operator<(o); }
-		const bool operator<(const FactionPosition& o) const noexcept
-		{
-			if (seat == o.seat)
-				return faction < o.faction;
-			return seat < o.seat;
-		}
-
-		const bool operator>(const FactionPosition& o) const noexcept { return o.operator<(*this); }
-		const bool operator<=(const FactionPosition& o) const noexcept { return !(o.operator<(*this)); }
-	};
-
     static void reachable(AreaId from, int storm, int movement, std::vector<AreaId>& result);
     static bool insideStorm(AreaId id, int storm);
     static bool isStronghold(AreaId id);
@@ -46,7 +20,6 @@ public:
     static bool fremenShipArea(AreaId id);
     static int areaSector(AreaId id);
     static int compareSector(int l, int r);
-    static const char* areaName(AreaId id);
 
 	Arrakis();
 	explicit Arrakis(const std::vector<int>& aSeats, const std::vector<Faction>& aFactions);
@@ -78,16 +51,18 @@ public:
 	Faction firstOf(Faction factions) const noexcept;
 	Faction lastOf(Faction factions) const noexcept;
 
+	Conflicts createConflicts() const;
+
 	std::vector<FactionPosition> stormOrder() const;
 	int advanceStorm(int count);
 	int addSpice(AreaId area, int amount);
 	int removeSpice(AreaId area, int amount) noexcept;
 	int getSpice(AreaId area) const noexcept;
 
-	static const std::vector<Area>& allAreas() { return areas; }
-
 private:
 	ForcesInArea& getOrCreate(AreaId area);
+	std::vector<PartialTerritory> dividedTerritories() const;
+	std::vector<ForcesInArea> contestedTerritories(const std::vector<PartialTerritory>& areas) const;
 
 	void updateStormOrder();
 	void place(AreaId where, const PlacedForces& what);
@@ -108,13 +83,10 @@ private:
 		const AreaId to;
 	};
 
-	static const std::vector<Area> areas;
 	static const std::vector<Connection> connections;
 
 	static void searchReachableAreas(AreaId from, int storm, int movement, const std::function<bool(AreaId)>& client);
 	static void neighbors(AreaId from, int storm, const std::vector<AreaId>& exclude, std::vector<std::pair<AreaId, int>>& result);
-	static const Area* getArea(AreaId id);
-    static const Area* getTerritorySector(AreaId childArea, int sector);
 };
 
 #endif /* ARRAKIS_H_ */

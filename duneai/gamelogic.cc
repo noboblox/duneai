@@ -334,7 +334,7 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 	{
 		if (!Arrakis::fremenInitArea(p.where))
 		{
-			log->warn("area %s is not a fremen init area", Arrakis::areaName(p.where));
+			log->warn("area %s is not a fremen init area", EnumAreaId::label(p.where));
 			return false;
 		}
 
@@ -359,7 +359,7 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 		game.board.placeHostile(ac->from(), p);
 		player->reserve -= p.normal;
 		player->specialForcesReserve -= p.special;
-		log->info("add %u normals and %u fedaykin to area %s", p.normal, p.special, Arrakis::areaName(p.where));
+		log->info("add %u normals and %u fedaykin to area %s", p.normal, p.special, EnumAreaId::label(p.where));
 		log->info("fremen now has %u normals and %u fedaykin in reserve", player->reserve, player->specialForcesReserve);
 	}
 
@@ -385,13 +385,13 @@ bool GameLogic::phaseInitBeneGesseritPlacement(GameState& game, const Action& ac
 	{
 		game.board.placeNeutral(player->faction, Placement{ac->where, 1, 0});
 		player->reserve -= 1;
-		log->info("place beneGesserit force in %s as advisor", Arrakis::areaName(ac->where));
+		log->info("place beneGesserit force in %s as advisor", EnumAreaId::label(ac->where));
 	}
 	else
 	{
 		game.board.placeHostile(player->faction, Placement{ac->where, 1, 0});
 		player->reserve -= 1;
-		log->info("place beneGesserit force in %s as fighter", Arrakis::areaName(ac->where));
+		log->info("place beneGesserit force in %s as fighter", EnumAreaId::label(ac->where));
 	}
 
 	advance(game, PHASE_STORM_INITAL_DIAL, initialStormDialFactions(game));
@@ -453,12 +453,12 @@ void GameLogic::phaseSpiceSpiceBlow(GameState& game)
 
 			if (game.board.insideStorm(card.area()))
 			{
-				log->info("ignore spice area %s inside storm", Arrakis::areaName(card.area()));
+				log->info("ignore spice area %s inside storm", EnumAreaId::label(card.area()));
 			}
 			else
 			{
 				game.board.addSpice(card.area(), card.base());
-				log->info("add %d spice to %s", card.base(), Arrakis::areaName(card.area()));
+				log->info("add %d spice to %s", card.base(), EnumAreaId::label(card.area()));
 			}
 
 
@@ -807,7 +807,7 @@ int GameLogic::prepareAuction(GameState& game)
 
 void GameLogic::phaseBattleCollectConflicts(GameState& game)
 {
-	game.conflicts = Conflicts(game.board);
+	game.conflicts = game.board.createConflicts();
 
 	if (game.conflicts.empty())
 	{
@@ -816,16 +816,20 @@ void GameLogic::phaseBattleCollectConflicts(GameState& game)
 		return;
 	}
 
+	int index = 0;
+	for (const auto& c : game.conflicts.list())
+	{
+		log->info("conflict %u: %s -> %s in %s", index, c.attacker().label().c_str(),
+				  c.defender().label().c_str(), c.forces().area().print().c_str());
+		++index;
+	}
 
 	if (game.conflicts.needDecision())
 	{
-		advance(game, PHASE_BATTLE_SELECTION, game.conflicts.aggressor());
+		advance(game, PHASE_BATTLE_SELECTION, game.conflicts.attacker());
 	}
 	else
 	{
-		game.battle = game.conflicts.createNextBattle();
-		game.conflicts.clear();
-
 		advance(game, PHASE_BATTLE_BEGIN);
 	}
 }
@@ -835,11 +839,14 @@ bool GameLogic::phaseBattleSelection(GameState& game, const Action& action)
 	auto ac = expectedAction<ActionBattleSelection>(game, action, ACTION_BATTLE_SELECTION);
 	if (!ac) return false;
 
-	if (!game.conflicts.selectBattle(ac->id))
+	if (!game.conflicts.select(ac->id))
+	{
+		log->info("ignore invalid selection %u", ac->id);
 		return false;
+	}
 
-	game.battle = game.conflicts.createNextBattle();
-	game.conflicts.clear();
+	log->info("%s selected conflict %u", ac->from().label().c_str(), ac->id);
+	game.battle = Battle(game.conflicts.selected());
 	advance(game, PHASE_BATTLE_BEGIN);
 	return true;
 }

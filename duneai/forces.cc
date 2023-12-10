@@ -5,7 +5,7 @@
 
 #include "arrakis.h"
 
-ForcesInArea::ForcesInArea()
+ForcesInArea::ForcesInArea() noexcept
 : ForcesInArea(PartialTerritory())
 {
 }
@@ -24,6 +24,18 @@ ForcesInArea::ForcesInArea(const PartialTerritory& area)
 {
 	  static_assert(Faction::COUNT == 7, "please update ForcesInArea::placed after changes to factions");
 }
+
+bool ForcesInArea::empty() const noexcept
+{
+	for (const auto& el: placed)
+	{
+		if (!el.empty())
+			return false;
+	}
+
+	return true;
+}
+
 const PlacedForces& ForcesInArea::getForces(Faction who) const
 {
 	const auto& forces = const_cast<ForcesInArea&> (*this).getForcesMutable(who);
@@ -133,18 +145,40 @@ ForcesInArea& ForcesInArea::merge(const ForcesInArea& other)
 	return *this;
 }
 
+int ForcesInArea::countHostileFactions(Faction except) const
+{
+	return countFactionIf([&](const PlacedForces& f){
+		return f.hostile && !except.contains(f.faction);
+	});
+}
+
+int ForcesInArea::countFactions(Faction except) const
+{
+	return countFactionIf([&](const PlacedForces& f){
+			return !except.contains(f.faction);
+	});
+}
+
 int ForcesInArea::countFactionIf(std::function<bool(const PlacedForces&)> f) const
 {
 	int result = 0;
 
+	forEach([&](const PlacedForces& el) {
+
+		if (f(el))
+			++result;
+	});
+
+	return result;
+}
+
+void ForcesInArea::forEach(std::function<void(const PlacedForces&)> f) const
+{
 	for (const auto& el: placed)
 	{
 		if (el.empty())
 			continue;
 
-		if (f(el))
-			++result;
+		f(el);
 	}
-
-	return result;
 }

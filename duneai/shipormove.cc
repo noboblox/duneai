@@ -69,7 +69,7 @@ void ShipOrMove::disengageIntrusion() noexcept
 	if (phase != SP_INTRUSION)
 		return;
 
-	log->info("beneGesserit swaps to advisor in %s", Arrakis::areaName(last.where));
+	log->info("beneGesserit swaps to advisor in %s", EnumAreaId::label(last.where));
 	game->board.setTerritoryHostility(Faction::beneGesserit(), Territories::of(last.where), false);
 
 	if (beneGesseritCanAccompany())
@@ -85,7 +85,7 @@ void ShipOrMove::engageIntrusion() noexcept
 	if (phase != SP_INTRUSION)
 		return;
 
-	log->info("beneGesserit stays fighter in %s", Arrakis::areaName(last.where));
+	log->info("beneGesserit stays fighter in %s", EnumAreaId::label(last.where));
 
 	if (last.origin != LastAction::MOVE_PHASE)
 		phase = SP_MOVE;
@@ -104,7 +104,7 @@ void ShipOrMove::sendAdvisor(bool toPolarSink)
 		return;
 
 	log->info("beneGesserit sends advisor -> %s",
-			  toPolarSink ? Arrakis::areaName(AreaId::PolarSink) : Arrakis::areaName(last.where));
+			  toPolarSink ? EnumAreaId::label(AreaId::PolarSink) : EnumAreaId::label(last.where));
 	auto player = getPlayerState(*game, Faction::beneGesserit());
 	--(player->reserve);
 
@@ -171,11 +171,11 @@ bool ShipOrMove::move(AreaId from, AreaId to, int normalAmount, int specialAmoun
 	game->board.place(who, Placement{ to, normalAmount, specialAmount }, hostile);
 
 	log->info("%s moves troops {%d, %d} from %s -> %s", who.label().c_str(),
-              normalAmount, specialAmount, Arrakis::areaName(from), Arrakis::areaName(to));
+              normalAmount, specialAmount, EnumAreaId::label(from), EnumAreaId::label(to));
 
 	if (swapLoneAdvisors(*game, from))
 	{
-		log->info("swap bene gesserit troops in territory %s to fighter", Arrakis::areaName(from));
+		log->info("swap bene gesserit troops in territory %s to fighter", EnumAreaId::label(from));
 	}
 
 	advanceAfterMove(LastAction{who, to, useHajr ? LastAction::MOVE_PHASE_HAJR : LastAction::MOVE_PHASE});
@@ -367,8 +367,8 @@ void ShipOrMove::shipmentTransaction(PlayerState* player, int cost, AreaId* from
 	const Faction who = player->faction;
 	payShipment(player, cost);
 
-	const char* logNameFrom = from ? Arrakis::areaName(*from) : "reserve";
-	const char* logNameTo   = to   ? Arrakis::areaName(*to)   : "reserve";
+	const char* logNameFrom = from ? EnumAreaId::label(*from) : "reserve";
+	const char* logNameTo   = to   ? EnumAreaId::label(*to)   : "reserve";
 	log->info("%s deploys {%d, %d} from %s -> %s", player->faction.label().c_str(),
 			  normalAmount, specialAmount, logNameFrom, logNameTo);
 

@@ -36,10 +36,12 @@ add_library( dunecore STATIC
 	"battle.h" "battle.cpp"
 	"broker.h" "broker.cpp"
 	"battleplan.h"
+	"conflict.h"
 	"conflicts.h" "conflicts.cpp"
 	"deletedefaults.h"
 	"IDevActions.h"
 	"enumlabels.h"
+	"factionposition.h"
 	"forces.h" "forces.cc"
 	"game.h"
 	"gameconstants.h" "gameconstants.cc"
@@ -57,6 +59,7 @@ add_library( dunecore STATIC
 	"shipormove.h" "shipormove.cc"
 	"standardplayerclient.h" "standardplayerclient.cpp"
 	"statefunctions.h" "statefunctions.cc"
+	"stormposition.h"
 	"territories.h" "territories.cpp"
 )
 

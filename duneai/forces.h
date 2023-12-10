@@ -2,6 +2,7 @@
 #define FORCES_H_
 
 #include <array>
+#include <functional>
 
 #include "gameconstants.h"
 #include "partialterritory.h"
@@ -31,8 +32,11 @@ struct PlacedForces
 class ForcesInArea
 {
 public:
-	ForcesInArea();
+	ForcesInArea() noexcept;
 	ForcesInArea(const PartialTerritory& area);
+
+	bool empty() const noexcept;
+	bool hasNoHostileForces() const noexcept;
 
 	const PlacedForces& getForces(Faction who) const;
 	void setForces(const PlacedForces& value);
@@ -54,7 +58,11 @@ public:
 
 	ForcesInArea& merge(const ForcesInArea& other);
 
+	void forEach(std::function<void(const PlacedForces&)> f) const;
+
 	int countFactionIf(std::function<bool(const PlacedForces&)> f) const;
+	int countHostileFactions(Faction except = Faction::none()) const;
+	int countFactions(Faction except = Faction::none()) const;
 
 private:
 	PlacedForces& getForcesMutable(Faction who);

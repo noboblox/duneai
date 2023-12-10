@@ -4,94 +4,468 @@
 #include <iterator>
 
 #include "territories.h"
+#include "conflicts.h"
+#include "stormposition.h"
 
-const std::vector<Arrakis::Area> Arrakis::areas = {
-		{ PolarSink              , "PolarSink"           , 0 },
-		{ FalseWallEast_5        , "FalseWallEast.5"     , 5 },
-		{ FalseWallEast_6        , "FalseWallEast.6"     , 6 },
-		{ FalseWallEast_7        , "FalseWallEast.7"     , 7 },
-		{ FalseWallEast_8        , "FalseWallEast.8"     , 8 },
-		{ FalseWallEast_9        , "FalseWallEast.9"     , 9 },
-		{ TheMinorErg_5          , "TheMinorErg.5"       , 5 },
-		{ TheMinorErg_6          , "TheMinorErg.6"       , 6 },
-		{ TheMinorErg_7          , "TheMinorErg.7"       , 7 },
-		{ TheMinorErg_8          , "TheMinorErg.8"       , 8 },
-		{ PastyMesa_5            , "PastyMesa.5"         , 5 },
-		{ PastyMesa_6            , "PastyMesa.6"         , 6 },
-		{ PastyMesa_7            , "PastyMesa.7"         , 7 },
-		{ PastyMesa_8            , "PastyMesa.8"         , 8 },
-		{ RedChasm               , "RedChasm"            , 7 },
-		{ ShieldWall_8           , "ShieldWall.8"        , 8 },
-		{ ShieldWall_9           , "ShieldWall.9"        , 9 },
-		{ SihayaRidge            , "SihayaRidge"         , 9 },
-		{ HoleInTheRock          , "HoleInTheRock"       , 9 },
-		{ Basin                  , "Basin"               , 9 },
-		{ RimWallWest            , "RimWallWest"         , 9 },
-		{ ImperialBasin_9        , "ImperialBasin.9"     , 9 },
-		{ ImperialBasin_10       , "ImperialBasin.10"    , 10},
-		{ ImperialBasin_11       , "ImperialBasin.11"    , 11},
-		{ GaraKulon              , "GaraKulon"           , 8 },
-		{ Arrakeen               , "Arrakeen"            , 10},
-		{ OldGap_9               , "OldGap.9"            , 9 },
-		{ OldGap_10              , "OldGap.10"           , 10},
-		{ OldGap_11              , "OldGap.11"           , 11},
-		{ Carthag                , "Carthag"             , 11},
-		{ Tsimpo_11              , "Tsimpo.11"           , 11},
-		{ Tsimpo_12              , "Tsimpo.12"           , 12},
-		{ Tsimpo_13              , "Tsimpo.13"           , 13},
-		{ BrokenLand_11          , "BrokenLand.11"       , 11},
-		{ BrokenLand_12          , "BrokenLand.12"       , 12},
-		{ Arsunt_11              , "Arsunt.11"           , 11},
-		{ Arsunt_12              , "Arsunt.12"           , 12},
-		{ PlasticBasin_12        , "PlasticBasin.12"     , 12},
-		{ PlasticBasin_13        , "PlasticBasin.13"     , 13},
-		{ PlasticBasin_14        , "PlasticBasin.14"     , 14},
-		{ HaggaBasin_12          , "HaggaBasin.12"       , 12},
-		{ HaggaBasin_13          , "HaggaBasin.13"       , 13},
-		{ RockOutcroppings_13    , "RockOutcroppings.13" , 13},
-		{ RockOutcroppings_14    , "RockOutcroppings.14" , 14},
-		{ WindPass_14            , "WindPass.14"         , 14},
-		{ WindPass_15            , "WindPass.15"         , 15},
-		{ WindPass_16            , "WindPass.16"         , 16},
-		{ WindPass_17            , "WindPass.17"         , 17},
-		{ SietchTabr             , "SietchTabr"          , 14},
-		{ BightOfTheCliff_14     , "BightOfTheCliff.14"  , 14},
-		{ BightOfTheCliff_15     , "BightOfTheCliff.15"  , 15},
-		{ FuneralPlain           , "FuneralPlain"        , 15},
-		{ TheGreatFlat           , "TheGreatFlat"        , 15},
-		{ TheGreaterFlat         , "TheGreaterFlat"      , 16},
-		{ HabbanyaErg_16         , "HabbanyaErg.16"      , 16},
-		{ HabbanyaErg_17         , "HabbanyaErg.17"      , 17},
-		{ FalseWallWest_16       , "FalseWallWest.16"    , 16},
-		{ FalseWallWest_17       , "FalseWallWest.17"    , 17},
-		{ FalseWallWest_18       , "FalseWallWest.18"    , 18},
-		{ HabbanyaRidgeFlat_17   , "HabbanyaRidgeFlat.17", 17},
-		{ HabbanyaRidgeFlat_18   , "HabbanyaRidgeFlat.18", 18},
-		{ CielagoWest_18         , "CielagoWest.18"      , 18},
-		{ CielagoWest_1          , "CielagoWest.1"       , 1 },
-		{ WindPassNorth_17       , "WindPassNorth.17"    , 17},
-		{ WindPassNorth_18       , "WindPassNorth.18"    , 18},
-		{ CielagoNorth_1         , "CielagoNorth.1"      , 1 },
-		{ CielagoNorth_2         , "CielagoNorth.2"      , 2 },
-		{ CielagoNorth_3         , "CielagoNorth.3"      , 3 },
-		{ HargPass_4             , "HargPass.4"          , 4 },
-		{ HargPass_5             , "HargPass.5"          , 5 },
-		{ HabbanyaSietch         , "HabbanyaSietch"      , 17},
-		{ FalseWallSouth_4       , "FalseWallSouth.4"    , 4 },
-		{ FalseWallSouth_5       , "FalseWallSouth.5"    , 5 },
-		{ Meridian_1             , "Meridian.1"          , 1 },
-		{ Meridian_2             , "Meridian.2"          , 2 },
-		{ CielagoDepression_1    , "CielagoDepression.1" , 1 },
-		{ CielagoDepression_2    , "CielagoDepression.2" , 2 },
-		{ CielagoDepression_3    , "CielagoDepression.3" , 3 },
-		{ CielagoSouth_2         , "CielagoSouth.2"      , 2 },
-		{ CielagoSouth_3         , "CielagoSouth.3"      , 3 },
-		{ CielagoEast_3          , "CielagoEast.3"       , 3 },
-		{ CielagoEast_4          , "CielagoEast.4"       , 4 },
-		{ SouthMesa_4            , "SouthMesa.4"         , 4 },
-		{ SouthMesa_5            , "SouthMesa.5"         , 5 },
-		{ SouthMesa_6            , "SouthMesa.6"         , 6 },
-		{ TueksSietch            , "TueksSietch"		 , 5 }};
+Arrakis::Arrakis()
+{
+}
+
+Arrakis::Arrakis(const std::vector<int>& aSeats, const std::vector<Faction>& aFactions)
+: mStormOrder()
+{
+	mStormOrder.reserve(aSeats.size());
+	for (std::size_t i = 0; i < aSeats.size(); ++i)
+	{
+		mStormOrder.emplace_back(FactionPosition{aSeats[i], aFactions[i]});
+	}
+
+	std::sort(mStormOrder.begin(), mStormOrder.end());
+	updateStormOrder();
+}
+
+bool Arrakis::isReachable(AreaId from, AreaId to, int movement) const
+{
+	bool reachable = false;
+	searchReachableAreas(from, storm, movement, [&reachable, &to](AreaId a)
+			{
+				if (a != to)
+					return true;
+				reachable = true;
+				return false;
+			});
+	return reachable;
+}
+
+void Arrakis::reachable(AreaId from, int storm, int movement, std::vector<AreaId>& result)
+{
+	result.clear();
+	searchReachableAreas(from,storm, movement, [&result](AreaId a)
+	    {
+			if (std::find(result.cbegin(), result.cend(), a) == result.cend())
+				result.push_back(a);
+			return true;
+		});
+
+}
+
+void Arrakis::searchReachableAreas(AreaId from, int storm, int movement, const std::function<bool(AreaId)>& client)
+{
+	if (insideStorm(from, storm))
+		return;
+
+	std::vector<AreaId> visited;
+	std::vector<std::pair<AreaId, int>> current, next;
+	visited.reserve(20);
+	current.reserve(10);
+	next.reserve(10);
+
+	current.emplace_back(from, 0);
+	visited.push_back(from);
+
+	while (!current.empty())
+	{
+		const auto from = current.front().first;
+		neighbors(from, storm, visited, next);
+
+		for (const auto& dest : next)
+		{
+			const int totalCost = current.front().second + dest.second;
+
+			if (totalCost <= movement)
+			{
+				current.emplace_back(dest.first, totalCost);
+
+				if (!client(dest.first))
+					return;
+			}
+		}
+
+		visited.push_back(from);
+		current.erase(current.begin());
+	}
+}
+
+void Arrakis::neighbors(AreaId from, int storm, const std::vector<AreaId>& exclude, std::vector<std::pair<AreaId, int>>& result)
+{
+	result.clear();
+
+	auto it = std::find_if(connections.cbegin(), connections.cend(),
+			[from](const Connection& c) -> bool { return c.from == from; });
+
+	for (; it != connections.cend() && it->from == from; ++it)
+	{
+		if (insideStorm(it->to, storm))
+			continue;
+		if (std::find(exclude.cbegin(), exclude.cend(), it->to) != exclude.cend())
+			continue;
+
+		if (sameTerritory(it->from, it->to))
+			result.emplace_back(it->to, 0);
+		else
+			result.emplace_back(it->to, 1);
+	}
+}
+
+bool Arrakis::insideStorm(AreaId area, int storm)
+{
+	if (storm == 0)
+		return false;
+
+	return Territories::sectorOf(area) == storm;
+}
+
+bool Arrakis::isStronghold(AreaId area)
+{
+	switch (area)
+	{
+	case SietchTabr:
+	case Arrakeen:
+	case Carthag:
+	case HabbanyaSietch:
+	case TueksSietch:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool Arrakis::fremenInitArea(AreaId area)
+{
+	switch (area)
+	{
+	case SietchTabr:
+	case FalseWallSouth_4:
+	case FalseWallSouth_5:
+	case FalseWallWest_16:
+	case FalseWallWest_17:
+	case FalseWallWest_18:
+		return true;
+	default:
+		return false;
+	}
+}
+
+static std::vector<AreaId> initFremenShipArea()
+{
+	static constexpr int STORM_OUTSIDE_FREMEN_AREA = 2;
+	std::vector<AreaId> allowed;
+
+	Arrakis::reachable(TheGreatFlat, STORM_OUTSIDE_FREMEN_AREA, 2, allowed);
+	return allowed;
+}
+
+bool Arrakis::fremenShipArea(AreaId id)
+{
+	static const std::vector<AreaId> allowed = initFremenShipArea();
+	return std::find(allowed.cbegin(), allowed.cend(), id) != allowed.cend();
+}
+
+void Arrakis::place(Faction from, Placement what, bool hostile)
+{
+	place(what.where, PlacedForces{from, what.normal, what.special, hostile});
+}
+
+void Arrakis::placeHostile(Faction from, Placement what)
+{
+	place(what.where, PlacedForces{from, what.normal, what.special});
+}
+
+void Arrakis::placeNeutral(Faction from, Placement what)
+{
+	place(what.where, PlacedForces{from, what.normal, what.special, false});
+}
+
+void Arrakis::removeForces(Faction from, Placement what)
+{
+	auto& placements = getOrCreate(what.where);
+	placements.removeForces(PlacedForces{from, what.normal, what.special});
+}
+
+bool Arrakis::setTerritoryHostility(Faction who, Territory where, bool value)
+{
+	bool changed = false;
+
+	where.forEach([&](AreaId area) {
+
+		auto& placements = getOrCreate(area);
+		placements.setHostile(who);
+
+		changed = true;
+	});
+
+	return true;
+}
+
+int Arrakis::getStorm() const noexcept
+{
+	return storm;
+}
+
+bool Arrakis::insideStorm(AreaId id) const
+{
+	return Arrakis::insideStorm(id, storm);
+}
+
+static std::vector<FactionPosition>::iterator
+firstPlayer(std::vector<FactionPosition>& v, int storm) noexcept
+{
+	const auto it = std::upper_bound(v.begin(), v.end(), FactionPosition{storm, Faction::any()});
+	if (it == v.cend())
+		return v.begin();
+	else
+		return it;
+}
+
+FactionPosition Arrakis::firstByStormOrder() const noexcept
+{
+	return mStormOrder.front();
+}
+
+FactionPosition Arrakis::lastByStormOrder() const noexcept
+{
+	return mStormOrder.back();
+}
+
+Faction Arrakis::firstOf(Faction factions) const noexcept
+{
+	for (const auto& f: mStormOrder)
+	{
+		if (factions.contains(f.faction))
+			return f.faction;
+	}
+
+	return Faction::none();
+}
+
+Faction Arrakis::lastOf(Faction factions) const noexcept
+{
+	auto it = mStormOrder.crbegin();
+
+	for (; it != mStormOrder.crend(); ++it)
+	{
+		if (factions.contains(it->faction))
+			return it->faction;
+	}
+
+	return Faction::none();
+}
+
+Conflicts Arrakis::createConflicts() const
+{
+	auto areas = dividedTerritories();
+	auto conflicted = contestedTerritories(areas);
+	return Conflicts(std::move(conflicted), firstByStormOrder().faction);
+}
+
+std::vector<FactionPosition> Arrakis::stormOrder() const
+{
+	return std::vector<FactionPosition>(mStormOrder.cbegin(), mStormOrder.cend());
+}
+
+void Arrakis::updateStormOrder()
+{
+	std::rotate(mStormOrder.begin(), firstPlayer(mStormOrder, storm), mStormOrder.end());
+}
+
+int Arrakis::advanceStorm(int count)
+{
+	storm += count;
+	storm = ((storm - 1) % 18) + 1;
+	updateStormOrder();
+	return storm;
+}
+
+static std::vector<std::pair<AreaId, int>>::iterator findSpice(AreaId id,
+		std::vector<std::pair<AreaId, int>>& source) noexcept
+{
+	return std::find_if(source.begin(), source.end(),
+			[id](const auto& v) { return v.first == id; });
+}
+
+
+int Arrakis::addSpice(AreaId area, int amount)
+{
+	auto it = findSpice(area, spice);
+	if (it != spice.end())
+	{
+		(it->second) += amount;
+		return it->second;
+	}
+	else
+	{
+		spice.emplace_back(area, amount);
+		return amount;
+	}
+}
+
+int Arrakis::removeSpice(AreaId area, int amount) noexcept
+{
+	auto it = findSpice(area, spice);
+
+	if (it == spice.end())
+		return 0;
+
+	int& available = it->second;
+
+	if (available <= amount)
+	{
+		spice.erase(it);
+		return 0;
+	}
+	else
+	{
+		available -= amount;
+		return available;
+	}
+}
+
+int Arrakis::getSpice(AreaId area) const noexcept
+{
+	auto it = findSpice(area, const_cast<std::vector<std::pair<AreaId, int>>&> (spice));
+	return it == spice.end() ? 0 : it->second;
+}
+
+ForcesInArea& Arrakis::getOrCreate(AreaId area)
+{
+	auto it = std::find_if(mPlacements.begin(), mPlacements.end(), [&](const ForcesInArea& el)
+	{
+		return el.area().contains(area);
+	});
+
+	if (it != mPlacements.end())
+		return *it;
+
+	mPlacements.push_back(ForcesInArea(PartialTerritory(area)));
+	return mPlacements.back();
+}
+
+std::vector<PartialTerritory> Arrakis::dividedTerritories() const
+{
+	std::vector<PartialTerritory> result;
+	result.reserve(Territories::all().size() + 5);
+
+	std::for_each(Territories::all().cbegin(), Territories::all().cend(), [&](const Territory& t) {
+
+		auto pair = t.divideBy(StormPosition(storm));
+		result.push_back(pair.first);
+
+		if (!pair.second.empty())
+			result.push_back(pair.second);
+	});
+
+	return result;
+}
+
+std::vector<ForcesInArea> Arrakis::contestedTerritories(const std::vector<PartialTerritory>& areas) const
+{
+	std::vector<ForcesInArea> result;
+
+	std::for_each(areas.cbegin(), areas.cend(), [&](const PartialTerritory& t){
+
+		if (hostileFactions(t) > 1)
+			result.push_back(queryArea(t));
+	});
+
+	return result;
+}
+
+void Arrakis::place(AreaId where, const PlacedForces& what)
+{
+	auto& placements = getOrCreate(where);
+	placements.addForces(what);
+}
+
+bool Arrakis::isOccupied(Faction who, AreaId where, bool moveAsHostiles) const
+{
+	if (!isStronghold(where))
+		return false;
+
+	if (!moveAsHostiles)
+		return false;
+
+	return hostileEnemies(who, Territories::of(where)) >= 2;
+}
+
+int Arrakis::movementRange(Faction who) const noexcept
+{
+	if (hasMovementBonus(who))
+		return 3;
+	else if (who == Faction::fremen())
+		return 2;
+	else
+		return 1;
+}
+
+bool Arrakis::hasMovementBonus(Faction who) const noexcept
+{
+	return queryArea(Territories::carthag).hasHostileForces(who) ||
+		   queryArea(Territories::arrakeen).hasHostileForces(who);
+}
+
+
+bool Arrakis::canShip(Faction who, AreaId where) const
+{
+	if (who == Faction::fremen() && !fremenShipArea(where))
+		return false;
+	if (insideStorm(where, storm))
+		return false;
+	if (isOccupied(who, where))
+		return false;
+	return true;
+}
+
+bool Arrakis::canMove(Faction who, AreaId from, AreaId to, bool moveAsHostiles)
+{
+	if (!isReachable(from, to, movementRange(who)))
+		return false;
+	if (isOccupied(who, to, moveAsHostiles))
+		return false;
+	return true;
+}
+
+ForcesInArea Arrakis::forcesInArea(const PartialTerritory& where) const
+{
+	return queryArea(where);
+}
+
+int Arrakis::hostileFactions(const PartialTerritory& where) const
+{
+	auto forces = queryArea(where);
+
+	return forces.countFactionIf([](const PlacedForces& el){
+		return el.hostile;
+	});
+}
+
+int Arrakis::hostileEnemies(Faction own, const PartialTerritory& where) const
+{
+	auto forces = queryArea(where);
+
+	return forces.countFactionIf([own](const PlacedForces& el){
+		return el.hostile && el.faction != own;
+	});
+}
+
+int Arrakis::neutralFactions(const PartialTerritory& where) const
+{
+	auto forces = queryArea(where);
+
+	return forces.countFactionIf([](const PlacedForces& el){
+		return !el.hostile;
+	});
+}
+
+ForcesInArea Arrakis::queryArea(PartialTerritory target) const
+{
+	ForcesInArea result;
+	std::for_each(mPlacements.cbegin(), mPlacements.cend(), [&](const ForcesInArea& el){
+		if (target.containsAllOf(el.area()))
+			result.merge(el);
+	});
+
+	return result;
+}
 
 
 const std::vector<Arrakis::Connection> Arrakis::connections = {
@@ -558,486 +932,3 @@ const std::vector<Arrakis::Connection> Arrakis::connections = {
 		{ TueksSietch            , FalseWallSouth_5     },
 		{ TueksSietch            , PastyMesa_5          },
 		{ TueksSietch            , SouthMesa_5          }};
-
-Arrakis::Arrakis()
-{
-}
-
-Arrakis::Arrakis(const std::vector<int>& aSeats, const std::vector<Faction>& aFactions)
-: mStormOrder()
-{
-	mStormOrder.reserve(aSeats.size());
-	for (std::size_t i = 0; i < aSeats.size(); ++i)
-	{
-		mStormOrder.emplace_back(FactionPosition{aSeats[i], aFactions[i]});
-	}
-
-	std::sort(mStormOrder.begin(), mStormOrder.end());
-	updateStormOrder();
-}
-
-const char* Arrakis::areaName(AreaId id)
-{
-	const auto* pArea = getArea(id);
-
-	if (!pArea)
-		return "INVALID";
-	else
-		return pArea->name;
-}
-
-bool Arrakis::isReachable(AreaId from, AreaId to, int movement) const
-{
-	bool reachable = false;
-	searchReachableAreas(from, storm, movement, [&reachable, &to](AreaId a)
-			{
-				if (a != to)
-					return true;
-				reachable = true;
-				return false;
-			});
-	return reachable;
-}
-
-void Arrakis::reachable(AreaId from, int storm, int movement, std::vector<AreaId>& result)
-{
-	result.clear();
-	searchReachableAreas(from,storm, movement, [&result](AreaId a)
-	    {
-			if (std::find(result.cbegin(), result.cend(), a) == result.cend())
-				result.push_back(a);
-			return true;
-		});
-
-}
-
-void Arrakis::searchReachableAreas(AreaId from, int storm, int movement, const std::function<bool(AreaId)>& client)
-{
-	if (insideStorm(from, storm))
-		return;
-
-	std::vector<AreaId> visited;
-	std::vector<std::pair<AreaId, int>> current, next;
-	visited.reserve(20);
-	current.reserve(10);
-	next.reserve(10);
-
-	current.emplace_back(from, 0);
-	visited.push_back(from);
-
-	while (!current.empty())
-	{
-		const auto from = current.front().first;
-		neighbors(from, storm, visited, next);
-
-		for (const auto& dest : next)
-		{
-			const int totalCost = current.front().second + dest.second;
-
-			if (totalCost <= movement)
-			{
-				current.emplace_back(dest.first, totalCost);
-
-				if (!client(dest.first))
-					return;
-			}
-		}
-
-		visited.push_back(from);
-		current.erase(current.begin());
-	}
-}
-
-void Arrakis::neighbors(AreaId from, int storm, const std::vector<AreaId>& exclude, std::vector<std::pair<AreaId, int>>& result)
-{
-	result.clear();
-
-	auto it = std::find_if(connections.cbegin(), connections.cend(),
-			[from](const Connection& c) -> bool { return c.from == from; });
-
-	for (; it != connections.cend() && it->from == from; ++it)
-	{
-		if (insideStorm(it->to, storm))
-			continue;
-		if (std::find(exclude.cbegin(), exclude.cend(), it->to) != exclude.cend())
-			continue;
-
-		if (sameTerritory(it->from, it->to))
-			result.emplace_back(it->to, 0);
-		else
-			result.emplace_back(it->to, 1);
-	}
-}
-
-bool Arrakis::insideStorm(AreaId id, int storm)
-{
-	if (storm == 0)
-		return false;
-
-	auto p_area = getArea(id);
-
-	if (!p_area)
-		return true; // default true -> no movement into invalid areas
-
-	return p_area->sector == storm;
-}
-
-bool Arrakis::isStronghold(AreaId id)
-{
-	switch (id)
-	{
-	case SietchTabr:
-	case Arrakeen:
-	case Carthag:
-	case HabbanyaSietch:
-	case TueksSietch:
-		return true;
-	default:
-		return false;
-	}
-}
-
-bool Arrakis::fremenInitArea(AreaId id)
-{
-	switch (id)
-	{
-	case SietchTabr:
-	case FalseWallSouth_4:
-	case FalseWallSouth_5:
-	case FalseWallWest_16:
-	case FalseWallWest_17:
-	case FalseWallWest_18:
-		return true;
-	default:
-		return false;
-	}
-}
-
-static std::vector<AreaId> initFremenShipArea()
-{
-	static constexpr int STORM_OUTSIDE_FREMEN_AREA = 2;
-	std::vector<AreaId> allowed;
-
-	Arrakis::reachable(TheGreatFlat, STORM_OUTSIDE_FREMEN_AREA, 2, allowed);
-	return allowed;
-}
-
-bool Arrakis::fremenShipArea(AreaId id)
-{
-	static const std::vector<AreaId> allowed = initFremenShipArea();
-	return std::find(allowed.cbegin(), allowed.cend(), id) != allowed.cend();
-}
-
-int Arrakis::areaSector(AreaId id)
-{
-	auto area = getArea(id);
-	return area ? area->sector : 0;
-}
-
-int Arrakis::compareSector(int l, int r)
-{
-	if (l == r)
-		return 0;
-
-	int greaterFrom = ++r;
-	if (greaterFrom > 18)  greaterFrom -= 18;
-
-	int greaterUntil = r + 9;
-	if (greaterUntil > 18)  greaterUntil -= 18;
-
-	return l >= greaterFrom || l <= greaterUntil ? 1 : -1;
-}
-
-const Arrakis::Area* Arrakis::getArea(AreaId id)
-{
-	auto it = std::find_if(areas.cbegin(), areas.cend(),
-			[id](const Area& a) { return a.id == id; });
-
-	if (it == areas.cend())
-		return nullptr;
-	else
-		return &(*it);
-}
-
-const Arrakis::Area* Arrakis::getTerritorySector(AreaId childArea, int sector)
-{
-	for (const auto& a : areas)
-	{
-		if (!sameTerritory(childArea, a.id))
-			continue;
-		if (a.sector != sector)
-			continue;
-
-		return &a;
-	}
-	return nullptr;
-}
-
-void Arrakis::place(Faction from, Placement what, bool hostile)
-{
-	place(what.where, PlacedForces{from, what.normal, what.special, hostile});
-}
-
-void Arrakis::placeHostile(Faction from, Placement what)
-{
-	place(what.where, PlacedForces{from, what.normal, what.special});
-}
-
-void Arrakis::placeNeutral(Faction from, Placement what)
-{
-	place(what.where, PlacedForces{from, what.normal, what.special, false});
-}
-
-void Arrakis::removeForces(Faction from, Placement what)
-{
-	auto& placements = getOrCreate(what.where);
-	placements.removeForces(PlacedForces{from, what.normal, what.special});
-}
-
-bool Arrakis::setTerritoryHostility(Faction who, Territory where, bool value)
-{
-	bool changed = false;
-
-	where.forEach([&](AreaId area) {
-
-		auto& placements = getOrCreate(area);
-		placements.setHostile(who);
-
-		changed = true;
-	});
-
-	return true;
-}
-
-int Arrakis::getStorm() const noexcept
-{
-	return storm;
-}
-
-bool Arrakis::insideStorm(AreaId id) const
-{
-	return Arrakis::insideStorm(id, storm);
-}
-
-static std::vector<Arrakis::FactionPosition>::iterator
-firstPlayer(std::vector<Arrakis::FactionPosition>& v, int storm) noexcept
-{
-	const auto it = std::upper_bound(v.begin(), v.end(), Arrakis::FactionPosition{storm, Faction::any()});
-	if (it == v.cend())
-		return v.begin();
-	else
-		return it;
-}
-
-Arrakis::FactionPosition Arrakis::firstByStormOrder() const noexcept
-{
-	return mStormOrder.front();
-}
-
-Arrakis::FactionPosition Arrakis::lastByStormOrder() const noexcept
-{
-	return mStormOrder.back();
-}
-
-Faction Arrakis::firstOf(Faction factions) const noexcept
-{
-	for (const auto& f: mStormOrder)
-	{
-		if (factions.contains(f.faction))
-			return f.faction;
-	}
-
-	return Faction::none();
-}
-
-Faction Arrakis::lastOf(Faction factions) const noexcept
-{
-	auto it = mStormOrder.crbegin();
-
-	for (; it != mStormOrder.crend(); ++it)
-	{
-		if (factions.contains(it->faction))
-			return it->faction;
-	}
-
-	return Faction::none();
-}
-
-std::vector<Arrakis::FactionPosition> Arrakis::stormOrder() const
-{
-	return std::vector<FactionPosition>(mStormOrder.cbegin(), mStormOrder.cend());
-}
-
-void Arrakis::updateStormOrder()
-{
-	std::rotate(mStormOrder.begin(), firstPlayer(mStormOrder, storm), mStormOrder.end());
-}
-
-int Arrakis::advanceStorm(int count)
-{
-	storm += count;
-	storm = ((storm - 1) % 18) + 1;
-	updateStormOrder();
-	return storm;
-}
-
-static std::vector<std::pair<AreaId, int>>::iterator findSpice(AreaId id,
-		std::vector<std::pair<AreaId, int>>& source) noexcept
-{
-	return std::find_if(source.begin(), source.end(),
-			[id](const auto& v) { return v.first == id; });
-}
-
-
-int Arrakis::addSpice(AreaId area, int amount)
-{
-	auto it = findSpice(area, spice);
-	if (it != spice.end())
-	{
-		(it->second) += amount;
-		return it->second;
-	}
-	else
-	{
-		spice.emplace_back(area, amount);
-		return amount;
-	}
-}
-
-int Arrakis::removeSpice(AreaId area, int amount) noexcept
-{
-	auto it = findSpice(area, spice);
-
-	if (it == spice.end())
-		return 0;
-
-	int& available = it->second;
-
-	if (available <= amount)
-	{
-		spice.erase(it);
-		return 0;
-	}
-	else
-	{
-		available -= amount;
-		return available;
-	}
-}
-
-int Arrakis::getSpice(AreaId area) const noexcept
-{
-	auto it = findSpice(area, const_cast<std::vector<std::pair<AreaId, int>>&> (spice));
-	return it == spice.end() ? 0 : it->second;
-}
-
-ForcesInArea& Arrakis::getOrCreate(AreaId area)
-{
-	auto it = std::find_if(mPlacements.begin(), mPlacements.end(), [&](const ForcesInArea& el)
-	{
-		return el.area().contains(area);
-	});
-
-	if (it != mPlacements.end())
-		return *it;
-
-	mPlacements.push_back(ForcesInArea(PartialTerritory(area)));
-	return mPlacements.back();
-}
-
-void Arrakis::place(AreaId where, const PlacedForces& what)
-{
-	auto& placements = getOrCreate(where);
-	placements.addForces(what);
-}
-
-bool Arrakis::isOccupied(Faction who, AreaId where, bool moveAsHostiles) const
-{
-	if (!isStronghold(where))
-		return false;
-
-	if (!moveAsHostiles)
-		return false;
-
-	return hostileEnemies(who, Territories::of(where)) >= 2;
-}
-
-int Arrakis::movementRange(Faction who) const noexcept
-{
-	if (hasMovementBonus(who))
-		return 3;
-	else if (who == Faction::fremen())
-		return 2;
-	else
-		return 1;
-}
-
-bool Arrakis::hasMovementBonus(Faction who) const noexcept
-{
-	return queryArea(Territories::carthag).hasHostileForces(who) ||
-		   queryArea(Territories::arrakeen).hasHostileForces(who);
-}
-
-
-bool Arrakis::canShip(Faction who, AreaId where) const
-{
-	if (who == Faction::fremen() && !fremenShipArea(where))
-		return false;
-	if (insideStorm(where, storm))
-		return false;
-	if (isOccupied(who, where))
-		return false;
-	return true;
-}
-
-bool Arrakis::canMove(Faction who, AreaId from, AreaId to, bool moveAsHostiles)
-{
-	if (!isReachable(from, to, movementRange(who)))
-		return false;
-	if (isOccupied(who, to, moveAsHostiles))
-		return false;
-	return true;
-}
-
-ForcesInArea Arrakis::forcesInArea(const PartialTerritory& where) const
-{
-	return queryArea(where);
-}
-
-int Arrakis::hostileFactions(const PartialTerritory& where) const
-{
-	auto forces = queryArea(where);
-
-	return forces.countFactionIf([](const PlacedForces& el){
-		return el.hostile;
-	});
-}
-
-int Arrakis::hostileEnemies(Faction own, const PartialTerritory& where) const
-{
-	auto forces = queryArea(where);
-
-	return forces.countFactionIf([own](const PlacedForces& el){
-		return el.hostile && el.faction != own;
-	});
-}
-
-int Arrakis::neutralFactions(const PartialTerritory& where) const
-{
-	auto forces = queryArea(where);
-
-	return forces.countFactionIf([](const PlacedForces& el){
-		return !el.hostile;
-	});
-}
-
-ForcesInArea Arrakis::queryArea(PartialTerritory target) const
-{
-	ForcesInArea result;
-	std::for_each(mPlacements.cbegin(), mPlacements.cend(), [&](const ForcesInArea& el){
-		if (target.containsAllOf(el.area()))
-			result.merge(el);
-	});
-
-	return result;
-}

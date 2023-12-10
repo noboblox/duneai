@@ -1,15 +1,18 @@
 #ifndef PARTIALTERRITORY_H_
 #define PARTIALTERRITORY_H_
 
-#include <array>
 #include <functional>
+#include <string>
+#include <vector>
 
 #include "areaid.h"
+
+class StormPosition;
 
 class PartialTerritory
 {
 public:
-	PartialTerritory();
+	PartialTerritory() noexcept;
 	PartialTerritory(AreaId a);
 	PartialTerritory(AreaId a, AreaId b);
 	PartialTerritory(AreaId a, AreaId b, AreaId c);
@@ -17,16 +20,25 @@ public:
 	PartialTerritory(AreaId a, AreaId b, AreaId c, AreaId d, AreaId e);
 
 	bool containsAllOf(const PartialTerritory& other) const;
-	bool containsSomeOf(const PartialTerritory& other) const;
+	bool containsSomeOf(const PartialTerritory& other) const { return overlaps(other); }
 	bool contains(AreaId area) const;
 	void add(AreaId area);
 
 	void forEach(std::function<void(AreaId)> f) const;
+	int count() const noexcept { return mAreas.size(); }
+	bool empty() const noexcept { return mAreas.empty(); }
 
 	PartialTerritory& merge(const PartialTerritory& other);
 
+	std::pair<PartialTerritory, PartialTerritory> divideBy(StormPosition storm) const;
+	bool overlaps(const PartialTerritory& other) const;
+
+	static bool overlaps(const PartialTerritory& l, const PartialTerritory& r);
+	std::string print() const;
+
 private:
-	std::array<AreaId, 5> mAreas;
+	void assertValidAreas() const;
+	std::vector<AreaId> mAreas;
 };
 
 class Territory : public PartialTerritory
