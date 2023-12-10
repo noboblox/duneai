@@ -8,7 +8,7 @@ Conflicts::Conflicts()
 }
 
 Conflicts::Conflicts(std::vector<ForcesInArea>&& contestedAreas, Faction attacker)
-: mConflicts(expand(contestedAreas, attacker)),
+: mConflicts(createConflicts(contestedAreas, attacker)),
   mAttacker(attacker)
 {
 }
