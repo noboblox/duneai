@@ -1,16 +1,28 @@
 #include "conflicts.h"
 #include "conflict.h"
 
+#include "factionposition.h"
+
 Conflicts::Conflicts()
 : mConflicts(),
   mAttacker(Faction::none())
 {
 }
 
-Conflicts::Conflicts(std::vector<ForcesInArea>&& contestedAreas, Faction attacker)
-: mConflicts(createConflicts(contestedAreas, attacker)),
-  mAttacker(attacker)
+Conflicts::Conflicts(std::vector<ForcesInArea>&& contestedAreas, const std::vector<FactionPosition>& stormOrder)
+: mConflicts(),
+  mAttacker(Faction::none())
 {
+	for (const auto& attacker: stormOrder)
+	{
+		mAttacker = attacker.faction;
+		mConflicts = createConflicts(contestedAreas, mAttacker);
+
+		if (!mConflicts.empty())
+			return;
+	}
+
+	mAttacker = Faction::none();
 }
 
 bool Conflicts::empty() const noexcept
@@ -55,23 +67,25 @@ const std::vector<Conflict>& Conflicts::list() const noexcept
 	return mConflicts;
 }
 
-std::vector<Conflict> Conflicts::createConflicts(std::vector<ForcesInArea>& contestedAreas, Faction attacker)
+std::vector<Conflict> Conflicts::createConflicts(const std::vector<ForcesInArea>& contestedAreas, Faction attacker)
 {
-	filterAttackerPresent(contestedAreas, attacker);
-	filterConflicted(contestedAreas);
-	return expand(contestedAreas, attacker);
+	auto filteredAreas = contestedAreas;
+
+	filterAttackerPresent(filteredAreas, attacker);
+	filterConflicted(filteredAreas);
+	return expand(filteredAreas, attacker);
 }
 
 void Conflicts::filterAttackerPresent(std::vector<ForcesInArea>& forces, Faction attacker)
 {
-	std::remove_if(forces.begin(), forces.end(), [&](const ForcesInArea& f) {
+	std::erase_if(forces, [&](const ForcesInArea& f) {
 		return !f.hasHostileForces(attacker);
 	});
 }
 
 void Conflicts::filterConflicted(std::vector<ForcesInArea>& forces)
 {
-	std::remove_if(forces.begin(), forces.end(), [](const ForcesInArea& f) {
+	std::erase_if(forces, [](const ForcesInArea& f) {
 		return f.countHostileFactions() < 2;
 	});
 }
@@ -83,7 +97,7 @@ std::vector<Conflict> Conflicts::expand(const std::vector<ForcesInArea>& filtere
 	for (const auto& allForces : filtered)
 	{
 		allForces.forEach([&](const PlacedForces& f) {
-			if (f.faction != attacker)
+			if (f.faction != attacker && f.hostile)
 				result.emplace_back(allForces, attacker, f.faction);
 		});
 	}

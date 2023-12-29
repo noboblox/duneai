@@ -7,11 +7,13 @@
 #include "conflict.h"
 #include "forces.h"
 
+class FactionPosition;
+
 class Conflicts
 {
 public:
 	explicit Conflicts();
-	explicit Conflicts(std::vector<ForcesInArea>&& contestedAreas, Faction attacker);
+	explicit Conflicts(std::vector<ForcesInArea>&& contestedAreas, const std::vector<FactionPosition>& stormOrder);
 
 	bool empty() const noexcept;
 
@@ -24,7 +26,7 @@ public:
 	const std::vector<Conflict>& list() const noexcept;
 
 private:
-	static std::vector<Conflict> createConflicts(std::vector<ForcesInArea>& contestedAreas, Faction attacker);
+	static std::vector<Conflict> createConflicts(const std::vector<ForcesInArea>& contestedAreas, Faction attacker);
 
 	static void filterAttackerPresent(std::vector<ForcesInArea>& forces, Faction attacker);
 	static void filterConflicted(std::vector<ForcesInArea>& forces);

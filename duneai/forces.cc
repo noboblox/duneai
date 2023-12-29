@@ -77,6 +77,9 @@ void ForcesInArea::addForces(const PlacedForces& value)
 {
 	auto& f = getForcesMutable(value.faction);
 
+	if (f.empty())
+		f.hostile = value.hostile;
+
 	f.normal += value.normal;
 	f.special += value.special;
 }

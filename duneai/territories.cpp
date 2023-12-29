@@ -314,7 +314,7 @@ EnumAreaId::Definition EnumAreaId::entries = {
 		{ PlasticBasin_14        , "PlasticBasin.14"        },
 		{ HaggaBasin_12          , "HaggaBasin.12"          },
 		{ HaggaBasin_13          , "HaggaBasin.13"          },
-		{ RockOutcroppings_13    , "RockOutcroppingsarea.13"},
+		{ RockOutcroppings_13    , "RockOutcroppings.13"    },
 		{ RockOutcroppings_14    , "RockOutcroppings.14"    },
 		{ WindPass_14            , "WindPass.14"            },
 		{ WindPass_15            , "WindPass.15"            },

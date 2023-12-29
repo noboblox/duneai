@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include "logger.h"
 
 #include "territories.h"
 #include "conflicts.h"
@@ -255,7 +256,7 @@ Conflicts Arrakis::createConflicts() const
 {
 	auto areas = dividedTerritories();
 	auto conflicted = contestedTerritories(areas);
-	return Conflicts(std::move(conflicted), firstByStormOrder().faction);
+	return Conflicts(std::move(conflicted), mStormOrder);
 }
 
 std::vector<FactionPosition> Arrakis::stormOrder() const
@@ -356,8 +357,10 @@ std::vector<PartialTerritory> Arrakis::dividedTerritories() const
 		auto pair = t.divideBy(StormPosition(storm));
 		result.push_back(pair.first);
 
-		if (!pair.second.empty())
+		if (!pair.second.empty()) {
+			gLog->debug("divided territory %s,%s", pair.first.print().c_str(), pair.second.print().c_str());
 			result.push_back(pair.second);
+		}
 	});
 
 	return result;

@@ -18,7 +18,7 @@ public:
 
 	int advanceBy(int value) noexcept
 	{
-		int newPosition = mPosition + value >= 0 ? value : 0;
+		int newPosition = mPosition + value;
 		mPosition = guardRange(newPosition);
 		return mPosition;
 	}
