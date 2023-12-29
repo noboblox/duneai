@@ -62,7 +62,7 @@ public:
 
 private:
 	static const std::vector<Territory> msTerritories;
-	static const std::vector<int> msSectors;
+	static const std::vector<std::pair<AreaId, int>> msSectors;
 };
 
 #endif /* TERRITORIES_H_ */

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include "logger.h"
+
 
 const std::vector<Territory> Territories::msTerritories = {
 
@@ -179,93 +181,93 @@ const std::vector<Territory> Territories::msTerritories = {
 };
 
 
-const std::vector<int> Territories::msSectors = {
-		/*  PolarSink              */  0 ,
-		/*  FalseWallEast_5        */  5 ,
-		/*  FalseWallEast_6        */  6 ,
-		/*  FalseWallEast_7        */  7 ,
-		/*  FalseWallEast_8        */  8 ,
-		/*  FalseWallEast_9        */  9 ,
-		/*  TheMinorErg_5          */  5 ,
-		/*  TheMinorErg_6          */  6 ,
-		/*  TheMinorErg_7          */  7 ,
-		/*  TheMinorErg_8          */  8 ,
-		/*  PastyMesa_5            */  5 ,
-		/*  PastyMesa_6            */  6 ,
-		/*  PastyMesa_7            */  7 ,
-		/*  PastyMesa_8            */  8 ,
-		/*  RedChasm               */  7 ,
-		/*  ShieldWall_8           */  8 ,
-		/*  ShieldWall_9           */  9 ,
-		/*  SihayaRidge            */  9 ,
-		/*  HoleInTheRock          */  9 ,
-		/*  Basin                  */  9 ,
-		/*  RimWallWest            */  9 ,
-		/*  ImperialBasin_9        */  9 ,
-		/*  ImperialBasin_10       */  10,
-		/*  ImperialBasin_11       */  11,
-		/*  GaraKulon              */  8 ,
-		/*  Arrakeen               */  10,
-		/*  OldGap_9               */  9 ,
-		/*  OldGap_10              */  10,
-		/*  OldGap_11              */  11,
-		/*  Carthag                */  11,
-		/*  Tsimpo_11              */  11,
-		/*  Tsimpo_12              */  12,
-		/*  Tsimpo_13              */  13,
-		/*  BrokenLand_11          */  11,
-		/*  BrokenLand_12          */  12,
-		/*  Arsunt_11              */  11,
-		/*  Arsunt_12              */  12,
-		/*  PlasticBasin_12        */  12,
-		/*  PlasticBasin_13        */  13,
-		/*  PlasticBasin_14        */  14,
-		/*  HaggaBasin_12          */  12,
-		/*  HaggaBasin_13          */  13,
-		/*  RockOutcroppings_13    */  13,
-		/*  RockOutcroppings_14    */  14,
-		/*  WindPass_14            */  14,
-		/*  WindPass_15            */  15,
-		/*  WindPass_16            */  16,
-		/*  WindPass_17            */  17,
-		/*  SietchTabr             */  14,
-		/*  BightOfTheCliff_14     */  14,
-		/*  BightOfTheCliff_15     */  15,
-		/*  FuneralPlain           */  15,
-		/*  TheGreatFlat           */  15,
-		/*  TheGreaterFlat         */  16,
-		/*  HabbanyaErg_16         */  16,
-		/*  HabbanyaErg_17         */  17,
-		/*  FalseWallWest_16       */  16,
-		/*  FalseWallWest_17       */  17,
-		/*  FalseWallWest_18       */  18,
-		/*  HabbanyaRidgeFlat_17   */  17,
-		/*  HabbanyaRidgeFlat_18   */  18,
-		/*  CielagoWest_18         */  18,
-		/*  CielagoWest_1          */  1 ,
-		/*  WindPassNorth_17       */  17,
-		/*  WindPassNorth_18       */  18,
-		/*  CielagoNorth_1         */  1 ,
-		/*  CielagoNorth_2         */  2 ,
-		/*  CielagoNorth_3         */  3 ,
-		/*  HargPass_4             */  4 ,
-		/*  HargPass_5             */  5 ,
-		/*  HabbanyaSietch         */  17,
-		/*  FalseWallSouth_4       */  4 ,
-		/*  FalseWallSouth_5       */  5 ,
-		/*  Meridian_1             */  1 ,
-		/*  Meridian_2             */  2 ,
-		/*  CielagoDepression_1    */  1 ,
-		/*  CielagoDepression_2    */  2 ,
-		/*  CielagoDepression_3    */  3 ,
-		/*  CielagoSouth_2         */  2 ,
-		/*  CielagoSouth_3         */  3 ,
-		/*  CielagoEast_3          */  3 ,
-		/*  CielagoEast_4          */  4 ,
-		/*  SouthMesa_4            */  4 ,
-		/*  SouthMesa_5            */  5 ,
-		/*  SouthMesa_6            */  6 ,
-		/*  TueksSietch            */  5
+const std::vector<std::pair<AreaId, int>> Territories::msSectors = {
+		{  PolarSink              ,   0 },
+		{  FalseWallEast_5        ,   5 },
+		{  FalseWallEast_6        ,   6 },
+		{  FalseWallEast_7        ,   7 },
+		{  FalseWallEast_8        ,   8 },
+		{  FalseWallEast_9        ,   9 },
+		{  TheMinorErg_5          ,   5 },
+		{  TheMinorErg_6          ,   6 },
+		{  TheMinorErg_7          ,   7 },
+		{  TheMinorErg_8          ,   8 },
+		{  PastyMesa_5            ,   5 },
+		{  PastyMesa_6            ,   6 },
+		{  PastyMesa_7            ,   7 },
+		{  PastyMesa_8            ,   8 },
+		{  RedChasm               ,   7 },
+		{  ShieldWall_8           ,   8 },
+		{  ShieldWall_9           ,   9 },
+		{  SihayaRidge            ,   9 },
+		{  HoleInTheRock          ,   9 },
+		{  Basin                  ,   9 },
+		{  RimWallWest            ,   9 },
+		{  ImperialBasin_9        ,   9 },
+		{  ImperialBasin_10       ,   10},
+		{  ImperialBasin_11       ,   11},
+		{  GaraKulon              ,   8 },
+		{  Arrakeen               ,   10},
+		{  OldGap_9               ,   9 },
+		{  OldGap_10              ,   10},
+		{  OldGap_11              ,   11},
+		{  Carthag                ,   11},
+		{  Tsimpo_11              ,   11},
+		{  Tsimpo_12              ,   12},
+		{  Tsimpo_13              ,   13},
+		{  BrokenLand_11          ,   11},
+		{  BrokenLand_12          ,   12},
+		{  Arsunt_11              ,   11},
+		{  Arsunt_12              ,   12},
+		{  PlasticBasin_12        ,   12},
+		{  PlasticBasin_13        ,   13},
+		{  PlasticBasin_14        ,   14},
+		{  HaggaBasin_12          ,   12},
+		{  HaggaBasin_13          ,   13},
+		{  RockOutcroppings_13    ,   13},
+		{  RockOutcroppings_14    ,   14},
+		{  WindPass_14            ,   14},
+		{  WindPass_15            ,   15},
+		{  WindPass_16            ,   16},
+		{  WindPass_17            ,   17},
+		{  SietchTabr             ,   14},
+		{  BightOfTheCliff_14     ,   14},
+		{  BightOfTheCliff_15     ,   15},
+		{  FuneralPlain           ,   15},
+		{  TheGreatFlat           ,   15},
+		{  TheGreaterFlat         ,   16},
+		{  HabbanyaErg_16         ,   16},
+		{  HabbanyaErg_17         ,   17},
+		{  FalseWallWest_16       ,   16},
+		{  FalseWallWest_17       ,   17},
+		{  FalseWallWest_18       ,   18},
+		{  HabbanyaRidgeFlat_17   ,   17},
+		{  HabbanyaRidgeFlat_18   ,   18},
+		{  CielagoWest_18         ,   18},
+		{  CielagoWest_1          ,   1 },
+		{  WindPassNorth_17       ,   17},
+		{  WindPassNorth_18       ,   18},
+		{  CielagoNorth_1         ,   1 },
+		{  CielagoNorth_2         ,   2 },
+		{  CielagoNorth_3         ,   3 },
+		{  HargPass_4             ,   4 },
+		{  HargPass_5             ,   5 },
+		{  HabbanyaSietch         ,   17},
+		{  FalseWallSouth_4       ,   4 },
+		{  FalseWallSouth_5       ,   5 },
+		{  Meridian_1             ,   1 },
+		{  Meridian_2             ,   2 },
+		{  CielagoDepression_1    ,   1 },
+		{  CielagoDepression_2    ,   2 },
+		{  CielagoDepression_3    ,   3 },
+		{  CielagoSouth_2         ,   2 },
+		{  CielagoSouth_3         ,   3 },
+		{  CielagoEast_3          ,   3 },
+		{  CielagoEast_4          ,   4 },
+		{  SouthMesa_4            ,   4 },
+		{  SouthMesa_5            ,   5 },
+		{  SouthMesa_6            ,   6 },
+		{  TueksSietch            ,   5 }
 };
 
 template<>
@@ -422,13 +424,16 @@ const int Territories::sectorOf(AreaId area) noexcept
 {
 	static constexpr int NO_SECTOR = 0;
 
-	auto it = std::find_if(msTerritories.cbegin(), msTerritories.cend(), [&](const Territory& t) {
-		return t.contains(area);
+	auto it = std::find_if(msSectors.cbegin(), msSectors.cend(), [&](const auto& pair) {
+		return pair.first == area;
 	});
 
-	if (it == msTerritories.cend())
-		return NO_SECTOR;
+	int result = NO_SECTOR;
 
-	return msSectors[std::distance(msTerritories.cbegin(), it)];
+	if (it != msSectors.cend())
+		result = it->second;
+
+	gLog->debug("sector of area %s is %u", EnumAreaId::label(area), result);
+	return result;
 }
 
