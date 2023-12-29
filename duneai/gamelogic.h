@@ -100,7 +100,8 @@ public:
 	};
 
 private:
-	void init(GameState& game, Faction factionsInGame, unsigned aSeed, bool aNoDraw = false);
+	void setup(unsigned seed, StartActions initTasks);
+	void init(GameState& game, Faction factionsInGame, unsigned aSeed, StartActions initTasks);
 	void initCards(GameState& game);
 
 	bool executeAction(GameState& game, const Action& action);
@@ -151,7 +152,7 @@ private:
     template <typename A> const A* expectedAction(GameState& game, const Action& action, ActionType type);
 
 
-    bool devActionSetupWithoutDraw(GameState& game, const Action& action);
+    bool devActionSetupCustom(GameState& game, const Action& action);
     bool devActionSetStorm(GameState& game, const Action& action);
     bool devActionSetPhase(GameState& game, const Action& action);
     bool devActionPlaceTroops(GameState& game, const Action& action);
@@ -161,7 +162,7 @@ private:
     static std::vector<PhaseExecutionFunction> initPhaseFunctions(GameLogic& self);
 
 private:
-	bool mUseDevActions, mSetupWithoutDraw;
+	bool mUseDevActions;
     bool initialized = false;
     const std::vector<PhaseExecutionFunction> mPhaseFunc;
     std::unique_ptr<const Logger> log;

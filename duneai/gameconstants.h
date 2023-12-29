@@ -37,6 +37,24 @@ enum GamePhase
 };
 using GamePhaseLabels = Enum<GamePhase, PHASE_invalid>;
 
+enum class StartActions
+{
+	NONE                  = 0,
+
+	DRAW_STARTING_CARDS   = 0x0001,
+	PLACE_STARTING_FORCES = 0x0002,
+	SHUFFLE_SEATS         = 0x0004,
+
+	DEFAULT = DRAW_STARTING_CARDS | PLACE_STARTING_FORCES | SHUFFLE_SEATS
+};
+
+static bool actionActive(StartActions l, StartActions r) noexcept
+{
+	return static_cast<int> (l) & static_cast<int> (r);
+}
+
+
+
 enum BiddingAction
 {
 	BID_ACTION_invalid = -1,

@@ -38,7 +38,6 @@ std::vector<GameLogic::PhaseExecutionFunction> GameLogic::initPhaseFunctions(Gam
 
 GameLogic::GameLogic(bool developerActions)
 : mUseDevActions(developerActions),
-  mSetupWithoutDraw(false),
   mPhaseFunc(initPhaseFunctions(*this)),
   log(new StdoutLogger())
 {
@@ -81,9 +80,14 @@ void GameLogic::setup()
 
 void GameLogic::setup(unsigned aSeed)
 {
+	setup(aSeed, StartActions::DEFAULT);
+}
+
+void GameLogic::setup(unsigned seed, StartActions initTasks)
+{
 	if (!initialized)
 	{
-		init(mGame, inGame, aSeed, mSetupWithoutDraw);
+		init(mGame, inGame, seed, initTasks);
 		initialized = true;
 	}
 }
@@ -158,8 +162,8 @@ bool GameLogic::devAction(GameState& game, const Action& action)
 {
 	switch (action.type())
 	{
-	case DEV_ACTION_START_WITHOUT_DRAW:
-		return devActionSetupWithoutDraw(game, action);
+	case DEV_ACTION_START_CUSTOM:
+		return devActionSetupCustom(game, action);
 	case DEV_ACTION_DIAL_TREACHERY_CARD:
 		return true; // TODO
 	case DEV_ACTION_PLACE_TROOPS:
@@ -303,14 +307,8 @@ bool GameLogic::phaseInitTraitorSelect(GameState& game, const Action& action)
 	if (game.expectingInputFrom == Faction::none())
 	{
 		if (factionAvailable(game, Faction::fremen()))
-		{
 			advance(game, PHASE_INIT_FREMEN_PLACEMENT);
-			return true;
-		}
-
-		placeStaticStartForces(game);
-
-		if (factionAvailable(game, Faction::beneGesserit()))
+		else if (factionAvailable(game, Faction::beneGesserit()))
 			advance(game, PHASE_INIT_BG_PLACEMENT);
 		else
 			advance(game, PHASE_STORM_INITAL_DIAL, initialStormDialFactions(game));
@@ -362,8 +360,6 @@ bool GameLogic::phaseInitFremenPlacement(GameState& game, const Action& action)
 		log->info("add %u normals and %u fedaykin to area %s", p.normal, p.special, EnumAreaId::label(p.where));
 		log->info("fremen now has %u normals and %u fedaykin in reserve", player->reserve, player->specialForcesReserve);
 	}
-
-	placeStaticStartForces(game);
 
 	if (factionAvailable(game, Faction::beneGesserit()))
 		advance(game, PHASE_INIT_BG_PLACEMENT);
@@ -712,7 +708,7 @@ bool GameLogic::expected(GameState& game, Faction faction)
 	return game.expectingInputFrom.contains(faction);
 }
 
-void GameLogic::init(GameState& game, Faction factionsInGame, unsigned aSeed, bool aNoDraw)
+void GameLogic::init(GameState& game, Faction factionsInGame, unsigned aSeed, StartActions initTasks)
 {
 	const auto factions = Faction::expand(factionsInGame);
 
@@ -732,7 +728,9 @@ void GameLogic::init(GameState& game, Faction factionsInGame, unsigned aSeed, bo
 	log->info("set up game with seed %u", mGame.seed);
 
 	std::vector<int> seats = SeatConfig::getConfig((int) factions.size());
-	std::shuffle(seats.begin(), seats.end(), mGame.random);
+
+	if (actionActive(initTasks, StartActions::SHUFFLE_SEATS))
+		std::shuffle(seats.begin(), seats.end(), mGame.random);
 
 	for (size_t i = 0; i < factions.size(); ++i)
 	{
@@ -745,8 +743,12 @@ void GameLogic::init(GameState& game, Faction factionsInGame, unsigned aSeed, bo
 	mGame.spiceDeck = SpiceDeck(mGame.random);
 	mGame.treacheryDeck = TreacheryDeck(mGame.random);
 
-	if (!aNoDraw)
+	if (actionActive(initTasks, StartActions::DRAW_STARTING_CARDS))
 		initCards(mGame);
+
+	if (actionActive(initTasks, StartActions::PLACE_STARTING_FORCES))
+		placeStaticStartForces(mGame);
+
 
 	if (factionAvailable(mGame, Faction::beneGesserit()))
 		advance(mGame, PHASE_INIT_PREDICTION);
@@ -1110,11 +1112,19 @@ Faction GameLogic::initialStormDialFactions(GameState& game)
 	return result;
 }
 
-bool GameLogic::devActionSetupWithoutDraw(GameState& game, const Action& action)
+bool GameLogic::devActionSetupCustom(GameState& game, const Action& action)
 {
-	log->info("received dev action setup");
-	mSetupWithoutDraw = true;
-	setup();
+	auto ac = *static_cast<const DevActionStartCustom*> (&action);
+	log->info("received dev action custom setup { actions = %u, seed = %u }", static_cast<int>(ac.actions), ac.seed);
+
+	int seed = ac.seed;
+
+	if (!seed) {
+		std::random_device rd;
+		seed = rd();
+	}
+
+	setup(seed, ac.actions);
 	return true;
 }
 

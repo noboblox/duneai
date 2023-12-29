@@ -24,7 +24,7 @@ EnumActionType::Definition EnumActionType::entries =
 		{ACTION_MOVE,                       "move"},
 		{ACTION_BATTLE_SELECTION,           "battleSelection"},
 		{ACTION_COMMIT_BATTLE_PLAN,         "commitBattlePlan"},
-		{DEV_ACTION_START_WITHOUT_DRAW,     "Dev.startWithoutDraw"},
+		{DEV_ACTION_START_CUSTOM,           "Dev.startCustom"},
 		{DEV_ACTION_DIAL_TREACHERY_CARD,    "Dev.dialTreacheryCard"},
 		{DEV_ACTION_PLACE_TROOPS,           "Dev.placeTroops"},
 		{DEV_ACTION_SET_STORM,              "Dev.setStorm"},

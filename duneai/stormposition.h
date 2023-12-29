@@ -6,12 +6,12 @@
 class StormPosition
 {
 public:
-	explicit StormPosition() noexcept
+	StormPosition() noexcept
 	: StormPosition(1)
 	{
 	}
 
-	explicit StormPosition(int position)
+	StormPosition(int position)
 	: mPosition(position >= 0 ? guardRange(position) : 0)
 	{
 	}

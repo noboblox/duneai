@@ -40,7 +40,7 @@ enum ActionType
 	ACTION_BATTLE_SELECTION,
 	ACTION_COMMIT_BATTLE_PLAN,
 
-	DEV_ACTION_START_WITHOUT_DRAW,
+	DEV_ACTION_START_CUSTOM,
 	DEV_ACTION_DIAL_TREACHERY_CARD,
 	DEV_ACTION_PLACE_TROOPS,
 	DEV_ACTION_SET_STORM,
@@ -128,13 +128,18 @@ public:
 	}
 };
 
-class DevActionStartWithoutDraw : public DevAction
+class DevActionStartCustom : public DevAction
 {
 public:
-	explicit DevActionStartWithoutDraw()
-	: DevAction(DEV_ACTION_START_WITHOUT_DRAW)
+	explicit DevActionStartCustom(StartActions aActions, int aSeed = 0)
+	: DevAction(DEV_ACTION_START_CUSTOM),
+	  actions(aActions),
+	  seed(aSeed)
 	{
 	}
+
+	const StartActions actions;
+	const int seed;
 };
 
 class DevActionSetStorm : public DevAction

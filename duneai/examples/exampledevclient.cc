@@ -33,9 +33,9 @@ public:
 		return *mClients.begin()->second;
 	}
 
-	std::future<ResultCode> startWithoutDraw() override
+	std::future<ResultCode> startCustom(StartActions actions, int seed) override
 	{
-		return mBroker.sendConfirmed(mGame, std::make_unique<DevActionStartWithoutDraw>());
+		return mBroker.sendConfirmed(mGame, std::make_unique<DevActionStartCustom>(actions, seed));
 	}
 
 	std::future<ResultCode> setStorm(int position) override
@@ -67,7 +67,6 @@ static void await(std::future<ResultCode>&& task)
 		throw std::runtime_error("awaited task failed");
 }
 
-
 int main()
 {
 	Broker broker;
@@ -75,19 +74,19 @@ int main()
 	Game game(broker, true);
 	DevClient client(Faction::any(), broker, game);
 
-	await(client.startWithoutDraw());
-	// TODO do not shuffle seats in test scenarios
+	await(client.startCustom(StartActions::NONE, 27346181));
 	await(client.setStorm(6));
 
-	await(client.setForces(Faction::atreides(), Placement{AreaId::FalseWallEast_5, 4, 0}));
-	await(client.setForces(Faction::atreides(), Placement{AreaId::FalseWallEast_7, 2, 0}));
-	await(client.setForces(Faction::atreides(), Placement{AreaId::FalseWallEast_9, 2, 0}));
+	await(client.setForces(Faction::fremen(), Placement{AreaId::FalseWallEast_5, 4, 0}));
+	await(client.setForces(Faction::fremen(), Placement{AreaId::FalseWallEast_7, 2, 1}));
+	await(client.setForces(Faction::fremen(), Placement{AreaId::FalseWallEast_9, 2, 0}));
 
 	await(client.setForces(Faction::beneGesserit(), Placement{AreaId::FalseWallEast_5, 2, 0}, false));
 	await(client.setForces(Faction::harkonnen(), Placement{AreaId::FalseWallEast_5, 2, 0}));
-	await(client.setForces(Faction::fremen(), Placement{AreaId::FalseWallEast_8, 2, 1}));
+	await(client.setForces(Faction::atreides(), Placement{AreaId::FalseWallEast_8, 2, 0}));
 	await(client.setForces(Faction::emperor(), Placement{AreaId::FalseWallEast_8, 2, 1}));
 	await(client.setGamePhase(GamePhase::PHASE_BATTLE_COLLECT_BATTLES));
+	await(client.as(Faction::fremen()).selectBattle(0));
 
 	return 0;
 }
