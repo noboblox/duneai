@@ -13,8 +13,8 @@ class Territories
 public:
 	static const Territory& of(AreaId area);
 	static const Territory& of(const PartialTerritory& area);
-	static const std::vector<Territory>& all() noexcept { return msTerritories; }
 
+	static const std::vector<Territory>& all() noexcept { return msTerritories; }
 	static const int sectorOf(AreaId area) noexcept;
 
 	static const Territory& polarSink;

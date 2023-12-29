@@ -152,6 +152,7 @@ private:
 
 
     bool devActionSetupWithoutDraw(GameState& game, const Action& action);
+    bool devActionSetStorm(GameState& game, const Action& action);
     bool devActionSetPhase(GameState& game, const Action& action);
 
 private:

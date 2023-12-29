@@ -38,6 +38,12 @@ public:
 		return mBroker.sendConfirmed(mGame, std::make_unique<DevActionStartWithoutDraw>());
 	}
 
+	std::future<ResultCode> setStorm(int position) override
+	{
+		return mBroker.sendConfirmed(mGame, std::make_unique<DevActionSetStorm>(position));
+	}
+
+
 	std::future<ResultCode> setGamePhase(GamePhase phase) override
 	{
 		return mBroker.sendConfirmed(mGame, std::make_unique<DevActionSetPhase>(phase));
@@ -65,8 +71,9 @@ int main()
 	DevClient client(Faction::any(), broker, game);
 
 	await(client.startWithoutDraw());
+	// TODO do not shuffle seats in test scenarios
+	await(client.setStorm(6));
 	await(client.setGamePhase(GamePhase::PHASE_BATTLE_COLLECT_BATTLES));
-
 
 	return 0;
 }

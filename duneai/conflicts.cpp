@@ -64,14 +64,14 @@ std::vector<Conflict> Conflicts::createConflicts(std::vector<ForcesInArea>& cont
 
 void Conflicts::filterAttackerPresent(std::vector<ForcesInArea>& forces, Faction attacker)
 {
-	std::remove_if(forces.begin(), forces.end(), [&](const ForcesInArea& f){
+	std::remove_if(forces.begin(), forces.end(), [&](const ForcesInArea& f) {
 		return !f.hasHostileForces(attacker);
 	});
 }
 
 void Conflicts::filterConflicted(std::vector<ForcesInArea>& forces)
 {
-	std::remove_if(forces.begin(), forces.end(), [](const ForcesInArea& f){
+	std::remove_if(forces.begin(), forces.end(), [](const ForcesInArea& f) {
 		return f.countHostileFactions() < 2;
 	});
 }

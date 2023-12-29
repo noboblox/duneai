@@ -165,7 +165,7 @@ bool GameLogic::devAction(GameState& game, const Action& action)
 	case DEV_ACTION_PLACE_TROOPS:
 		return true; // TODO
 	case DEV_ACTION_SET_STORM:
-		return true; // TODO
+		return devActionSetStorm(game, action);
 	case DEV_ACTION_SET_GAME_PHASE:
 		return devActionSetPhase(game, action);
 	default:
@@ -1118,12 +1118,20 @@ bool GameLogic::devActionSetupWithoutDraw(GameState& game, const Action& action)
 	return true;
 }
 
+bool GameLogic::devActionSetStorm(GameState& game, const Action& action)
+{
+	auto ac = *static_cast<const DevActionSetStorm*> (&action);
+	log->info("received dev action set storm = %u", ac.storm);
+	mGame.board.setStorm(ac.storm);
+	return true;
+}
+
+
 bool GameLogic::devActionSetPhase(GameState& game, const Action& action)
 {
 	auto ac = *static_cast<const DevActionSetPhase*> (&action);
 	log->info("received dev action set phase = %s", GamePhaseLabels::label(ac.phase));
 	advance(game, ac.phase);
 	return true;
-
 }
 

@@ -268,6 +268,12 @@ void Arrakis::updateStormOrder()
 	std::rotate(mStormOrder.begin(), firstPlayer(mStormOrder, storm), mStormOrder.end());
 }
 
+int Arrakis::setStorm(int position)
+{
+	storm = position >= 1 ? position : 1;
+	return advanceStorm(0);
+}
+
 int Arrakis::advanceStorm(int count)
 {
 	storm += count;

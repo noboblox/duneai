@@ -12,7 +12,7 @@ public:
 	}
 
 	explicit StormPosition(int position)
-	: mPosition(guardRange(position))
+	: mPosition(position >= 0 ? guardRange(position) : 0)
 	{
 	}
 

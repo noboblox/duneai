@@ -54,6 +54,7 @@ public:
 	Conflicts createConflicts() const;
 
 	std::vector<FactionPosition> stormOrder() const;
+	int setStorm(int position);
 	int advanceStorm(int count);
 	int addSpice(AreaId area, int amount);
 	int removeSpice(AreaId area, int amount) noexcept;

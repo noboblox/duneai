@@ -38,7 +38,6 @@ std::future<ResultCode> StandardPlayerClient::selectTraitor(Leader::Id selection
 
 std::future<ResultCode> StandardPlayerClient::setupFremen(std::vector<Placement>&& placements)
 {
-	//throw std::invalid_argument("not implemented");
 	return sendAction(std::make_unique<ActionFremenPlacement>(mFaction, std::move(placements)));
 }
 

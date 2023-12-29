@@ -137,6 +137,19 @@ public:
 	}
 };
 
+class DevActionSetStorm : public DevAction
+{
+public:
+	explicit DevActionSetStorm(int aStorm)
+	: DevAction(DEV_ACTION_SET_STORM),
+	  storm(aStorm)
+	{
+	}
+
+	const int storm;
+};
+
+
 class DevActionSetPhase : public DevAction
 {
 public:
