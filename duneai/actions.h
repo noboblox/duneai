@@ -162,6 +162,22 @@ public:
 	const GamePhase phase;
 };
 
+class DevActionPlaceTroops : public DevAction
+{
+public:
+	explicit DevActionPlaceTroops(Faction f, Placement p, bool isHostile)
+	: DevAction(DEV_ACTION_PLACE_TROOPS),
+	  who(f),
+	  what(p),
+	  hostile(isHostile)
+	{
+	}
+
+	const Faction who;
+	const Placement what;
+	const bool hostile;
+};
+
 class ActionConnect : public Action
 {
 public:

@@ -49,6 +49,11 @@ public:
 		return mBroker.sendConfirmed(mGame, std::make_unique<DevActionSetPhase>(phase));
 	}
 
+	std::future<ResultCode> setForces(Faction who, Placement what, bool isHostile = true) override
+	{
+		return mBroker.sendConfirmed(mGame, std::make_unique<DevActionPlaceTroops>(who, what, isHostile));
+	}
+
 private:
 	std::map<Faction, std::unique_ptr<GameMasterClient>> mClients;
 	Broker& mBroker;
@@ -73,6 +78,15 @@ int main()
 	await(client.startWithoutDraw());
 	// TODO do not shuffle seats in test scenarios
 	await(client.setStorm(6));
+
+	await(client.setForces(Faction::atreides(), Placement{AreaId::FalseWallEast_5, 4, 0}));
+	await(client.setForces(Faction::atreides(), Placement{AreaId::FalseWallEast_7, 2, 0}));
+	await(client.setForces(Faction::atreides(), Placement{AreaId::FalseWallEast_9, 2, 0}));
+
+	await(client.setForces(Faction::beneGesserit(), Placement{AreaId::FalseWallEast_5, 2, 0}, false));
+	await(client.setForces(Faction::harkonnen(), Placement{AreaId::FalseWallEast_5, 2, 0}));
+	await(client.setForces(Faction::fremen(), Placement{AreaId::FalseWallEast_8, 2, 1}));
+	await(client.setForces(Faction::emperor(), Placement{AreaId::FalseWallEast_8, 2, 1}));
 	await(client.setGamePhase(GamePhase::PHASE_BATTLE_COLLECT_BATTLES));
 
 	return 0;

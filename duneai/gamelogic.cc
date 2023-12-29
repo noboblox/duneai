@@ -163,7 +163,7 @@ bool GameLogic::devAction(GameState& game, const Action& action)
 	case DEV_ACTION_DIAL_TREACHERY_CARD:
 		return true; // TODO
 	case DEV_ACTION_PLACE_TROOPS:
-		return true; // TODO
+		return devActionPlaceTroops(game, action);
 	case DEV_ACTION_SET_STORM:
 		return devActionSetStorm(game, action);
 	case DEV_ACTION_SET_GAME_PHASE:
@@ -1133,5 +1133,29 @@ bool GameLogic::devActionSetPhase(GameState& game, const Action& action)
 	log->info("received dev action set phase = %s", GamePhaseLabels::label(ac.phase));
 	advance(game, ac.phase);
 	return true;
+}
+
+bool GameLogic::devActionPlaceTroops(GameState& game, const Action& action)
+{
+	auto ac = *static_cast<const DevActionPlaceTroops*> (&action);
+	log->info("received dev action place %s troops of %s {%u/%u} in %s",
+			ac.hostile ? "hostile" : "non hostile", ac.who.label().c_str(), ac.what.normal, ac.what.special, EnumAreaId::label(ac.what.where));
+
+	auto player = getPlayerState(game, ac.who);
+
+	if (!player)
+		return false;
+
+	if (ac.what.normal <= player->reserve && ac.what.special <= player->specialForcesReserve)
+	{
+		player->reserve -= ac.what.normal;
+		player->specialForcesReserve -= ac.what.special;
+		game.board.place(ac.who, ac.what, ac.hostile);
+
+		return true;
+	}
+
+	return false;
+
 }
 
